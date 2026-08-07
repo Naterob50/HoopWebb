@@ -1,0 +1,2531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NBA Connections</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --border: #2a2a3a;
+    --text: #f0f0f5;
+    --muted: #888;
+    --accent: #f7a800;
+    --accent2: #ff6a3d;
+    --c0: #c0392b;
+    --c1: #8e44ad;
+    --c2: #2980b9;
+    --c3: #27ae60;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 16px 40px;
+    background-image:
+      radial-gradient(ellipse at 20% 10%, rgba(247,168,0,0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 90%, rgba(41,128,185,0.06) 0%, transparent 50%);
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 28px;
+    width: 100%;
+    max-width: 640px;
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(36px, 8vw, 56px);
+    letter-spacing: 4px;
+    line-height: 1;
+    background: linear-gradient(135deg, #f7a800 0%, #fff 60%, #f7a800 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .logo span {
+    background: linear-gradient(135deg, var(--accent2) 0%, #ffffff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* ── HOME SCREEN ── */
+  #homeScreen {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    animation: fadeUp 0.4s ease;
+  }
+
+  .home-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .mode-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 24px;
+    cursor: pointer;
+    transition: all 0.18s;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .mode-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .mode-card.daily::before  { background: linear-gradient(135deg, rgba(247,168,0,0.08), transparent); }
+  .mode-card.endless::before { background: linear-gradient(135deg, rgba(255,106,61,0.08), transparent); }
+  .mode-card.archive::before { background: linear-gradient(135deg, rgba(255,255,255,0.06), transparent); }
+
+  .mode-card:hover { transform: translateY(-3px); border-color: var(--accent); }
+  .mode-card:hover::before { opacity: 1; }
+  .mode-card.daily:hover   { box-shadow: 0 8px 30px rgba(247,168,0,0.18); }
+  .mode-card.endless:hover { box-shadow: 0 8px 30px rgba(255,106,61,0.18); border-color: var(--accent2); }
+
+  .mode-icon {
+    font-size: 36px;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .mode-info { flex: 1; }
+
+  .mode-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    letter-spacing: 3px;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .mode-card.daily   .mode-title { color: var(--accent); }
+  .mode-card.endless .mode-title { color: var(--accent2); }
+
+  .mode-desc {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+  }
+
+  .mode-badge {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 20px;
+    flex-shrink: 0;
+  }
+
+  .mode-card.daily   .mode-badge { background: rgba(247,168,0,0.15); color: var(--accent); }
+  .mode-card.endless .mode-badge { background: rgba(255,106,61,0.15); color: var(--accent2); }
+
+  .daily-completed-badge {
+    background: rgba(39,174,96,0.2) !important;
+    color: #27ae60 !important;
+  }
+
+  .home-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--border);
+  }
+
+  .home-divider::before, .home-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .home-divider span {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--muted);
+  }
+
+  /* ── GAME SCREEN ── */
+  #gameScreen {
+    width: 100%;
+    max-width: 640px;
+    display: none;
+    animation: fadeUp 0.3s ease;
+  }
+
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    padding: 10px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+
+  .back-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 4px 0;
+    transition: color 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .back-btn:hover { color: var(--text); }
+
+  .mode-indicator {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 2px;
+  }
+
+  .mode-indicator.daily   { color: var(--accent); }
+  .mode-indicator.endless { color: var(--accent2); }
+  .mode-indicator.practice { color: #7c8cff; }
+
+  .puzzle-info {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+    text-align: right;
+  }
+
+  /* Endless nav */
+  .endless-nav {
+    display: none;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .endless-nav.show { display: flex; }
+
+  .endless-nav button {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 3px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    transition: all 0.15s;
+  }
+
+  .endless-nav button:hover { border-color: var(--accent2); color: var(--accent2); }
+  .endless-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    color: var(--accent2);
+    min-width: 28px;
+    text-align: center;
+  }
+
+  /* Streak */
+  .streak-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    letter-spacing: 1px;
+    color: var(--muted);
+  }
+
+  .streak-count {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    color: var(--accent2);
+  }
+
+  /* Categories legend */
+  .categories-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    border-left-width: 4px;
+    transition: opacity 0.3s, background 0.3s;
+  }
+
+  .legend-item.solved-out {
+    opacity: 0.35;
+  }
+
+  .legend-text {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text);
+    flex: 1;
+  }
+
+  .legend-difficulty {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    opacity: 0.55;
+    flex-shrink: 0;
+  }
+
+  /* Solved cards */
+  .solved-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 6px; }
+
+  .solved-card {
+    padding: 14px 18px;
+    border-radius: 10px;
+    animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .solved-card .cat-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0.7;
+    margin-bottom: 2px;
+  }
+
+  .solved-card .cat-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 2px;
+  }
+
+  .solved-card .cat-players {
+    font-size: 13px;
+    opacity: 0.85;
+    margin-top: 2px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  /* Grid */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-bottom: 18px;
+  }
+
+  .tile {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    padding: 6px 4px;
+    user-select: none;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .tile::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .tile:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(247,168,0,0.15); }
+
+  .tile.selected {
+    background: #1e1e30;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(247,168,0,0.3), 0 6px 20px rgba(247,168,0,0.2);
+    transform: translateY(-2px) scale(1.03);
+  }
+
+  .tile.wrong-shake { animation: shake 0.5s; }
+
+  .tile.hinted {
+    border-color: var(--hint-color, var(--accent));
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--hint-color, var(--accent)) 35%, transparent);
+  }
+
+  .game-timer {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+  }
+
+  .mode-card.practice::before { background: linear-gradient(135deg, rgba(120,140,255,0.08), transparent); }
+  .mode-card.practice:hover { box-shadow: 0 8px 30px rgba(120,140,255,0.15); border-color: #7c8cff; }
+
+  .tile .player-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: clamp(11px, 2.2vw, 14px);
+    text-align: center;
+    letter-spacing: 0.3px;
+    line-height: 1.2;
+    text-transform: uppercase;
+  }
+
+  .tile .player-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(18px, 3.5vw, 26px);
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 2px;
+  }
+
+  /* Mistakes */
+  .mistakes-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    height: 20px;
+  }
+
+  .mistakes-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .mistake-dots { display: flex; gap: 6px; }
+
+  .dot { width: 12px; height: 12px; border-radius: 50%; background: #333; transition: all 0.3s; }
+  .dot.used { background: #e74c3c; box-shadow: 0 0 6px rgba(231,76,60,0.5); }
+
+  .one-away {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #f7a800;
+    text-align: center;
+    height: 18px;
+    margin-bottom: 4px;
+  }
+
+  /* Buttons */
+  .btn-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+  .btn {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 11px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: none;
+  }
+
+  .btn-ghost { background: none; border: 1.5px solid var(--border); color: var(--muted); }
+  .btn-ghost:hover { border-color: var(--text); color: var(--text); }
+
+  .btn-primary { background: var(--accent); color: #000; }
+  .btn-primary:hover { background: #ffbe2e; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(247,168,0,0.4); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  /* End screen */
+  .end-screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 0;
+    animation: fadeUp 0.5s;
+  }
+
+  .end-screen.show { display: flex; }
+
+  .end-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 38px;
+    letter-spacing: 4px;
+    text-align: center;
+  }
+
+  .end-meta {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    letter-spacing: 1px;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  /* Daily countdown */
+  .daily-countdown {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  .countdown-time {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    color: var(--accent);
+    letter-spacing: 3px;
+    display: block;
+    margin-top: 2px;
+  }
+
+  /* Endless score in end screen */
+  .endless-score-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 28px;
+    text-align: center;
+    width: 100%;
+  }
+
+  .score-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .score-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    color: var(--accent2);
+    line-height: 1;
+  }
+
+  .score-sub {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .share-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    text-align: center;
+    width: 100%;
+  }
+
+  .share-text {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .share-emojis { font-size: 22px; line-height: 1.6; letter-spacing: 2px; }
+
+  .btn-share {
+    margin-top: 12px;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 10px 28px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn-share:hover { background: #ffbe2e; }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-80px);
+    background: #fff;
+    color: #000;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 1px;
+    padding: 12px 28px;
+    border-radius: 30px;
+    z-index: 1000;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    white-space: nowrap;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  @keyframes popIn {
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Top action buttons */
+  .top-actions {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    display: flex;
+    gap: 8px;
+    z-index: 500;
+  }
+
+  /* How to Play */
+  .htp-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s, transform 0.15s;
+  }
+  .htp-btn:hover { border-color: var(--accent); color: var(--accent); transform: scale(1.06); }
+
+  .htp-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 900;
+    padding: 20px;
+    backdrop-filter: blur(2px);
+  }
+  .htp-overlay.show { display: flex; }
+
+  .htp-modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    max-width: 460px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 24px 24px 20px;
+    animation: popIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .htp-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .htp-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    letter-spacing: 2px;
+    color: var(--accent);
+  }
+
+  .htp-close {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px 8px;
+  }
+  .htp-close:hover { color: var(--text); }
+
+  .htp-step {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .htp-num {
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(247,168,0,0.12);
+    color: var(--accent);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .htp-step p {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text);
+  }
+
+  .htp-step p b { color: var(--text); }
+
+  .htp-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 18px 0;
+  }
+
+  .htp-subtitle {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .htp-difficulty {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .htp-diff-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13.5px;
+  }
+
+  .htp-swatch {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+
+  .htp-modes {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+
+  .htp-mode-row {
+    font-size: 13.5px;
+    line-height: 1.5;
+  }
+
+  .htp-mode-row b { color: var(--accent); }
+  .htp-mode-row.endless b { color: var(--accent2); }
+
+  .htp-got-it {
+    width: 100%;
+    margin-top: 18px;
+    padding: 13px;
+    border-radius: 10px;
+    border: none;
+    background: var(--accent);
+    color: #0a0a0f;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .htp-got-it:hover { filter: brightness(1.08); }
+
+  /* Stats modal */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
+    gap: 10px;
+    margin: 16px 0 20px;
+  }
+  .stat-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 4px;
+    text-align: center;
+  }
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .stat-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .stats-subtitle {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .dist-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+  }
+  .dist-label { width: 78px; flex-shrink: 0; color: var(--muted); }
+  .dist-bar-track { flex: 1; background: var(--border); border-radius: 4px; overflow: hidden; height: 18px; }
+  .dist-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 6px;
+    color: #000;
+    font-weight: 700;
+    font-size: 11px;
+    min-width: 4px;
+    transition: width 0.4s ease;
+  }
+
+  /* Archive */
+  .mode-card.archive:hover { box-shadow: 0 8px 30px rgba(255,255,255,0.08); border-color: var(--muted); }
+  .archive-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 65vh;
+    overflow-y: auto;
+    margin-top: 14px;
+    padding-bottom: 20px;
+  }
+  .archive-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: border-color 0.15s, transform 0.15s;
+  }
+  .archive-row:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .archive-date {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+  }
+  .archive-status {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.06);
+    color: var(--muted);
+  }
+  .archive-status.won { background: rgba(39,174,96,0.2); color: #27ae60; }
+  .archive-status.lost { background: rgba(231,76,60,0.2); color: #e74c3c; }
+
+  .btn-danger-ghost { background: none; border: 1.5px solid rgba(231,76,60,0.4); color: #e74c3c; }
+  .btn-danger-ghost:hover { border-color: #e74c3c; background: rgba(231,76,60,0.1); }
+</style>
+</head>
+<body>
+
+<div class="top-actions">
+  <button class="htp-btn" onclick="toggleSound()" id="soundBtn" aria-label="Toggle Sound">🔊</button>
+  <button class="htp-btn" onclick="openStats()" aria-label="Stats">📊</button>
+  <button class="htp-btn" onclick="openHowToPlay()" aria-label="How to Play">?</button>
+</div>
+
+<div class="htp-overlay" id="statsOverlay" onclick="if(event.target===this) closeStats()">
+  <div class="htp-modal">
+    <div class="htp-header">
+      <div class="htp-title">Stats</div>
+      <button class="htp-close" onclick="closeStats()" aria-label="Close">&times;</button>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-box"><div class="stat-num" id="statPlayed">0</div><div class="stat-label">Played</div></div>
+      <div class="stat-box"><div class="stat-num" id="statWinPct">0%</div><div class="stat-label">Win %</div></div>
+      <div class="stat-box"><div class="stat-num" id="statCurStreak">0</div><div class="stat-label">Streak</div></div>
+      <div class="stat-box"><div class="stat-num" id="statMaxStreak">0</div><div class="stat-label">Max Streak</div></div>
+      <div class="stat-box"><div class="stat-num" id="statPerfect">0</div><div class="stat-label">Perfect</div></div>
+      <div class="stat-box"><div class="stat-num" id="statBestTime">--:--</div><div class="stat-label">Best Time</div></div>
+    </div>
+
+    <hr class="htp-divider">
+    <div class="stats-subtitle">Guess Distribution (mistakes made on wins)</div>
+    <div id="distRows"></div>
+  </div>
+</div>
+
+<div class="htp-overlay" id="htpOverlay" onclick="if(event.target===this) closeHowToPlay()">
+  <div class="htp-modal">
+    <div class="htp-header">
+      <div class="htp-title">How to Play</div>
+      <button class="htp-close" onclick="closeHowToPlay()" aria-label="Close">&times;</button>
+    </div>
+
+    <div class="htp-step">
+      <div class="htp-num">1</div>
+      <p>You'll see <b>16 NBA players</b> in a grid. They secretly belong to <b>4 groups of 4</b>, each sharing a hidden connection — a team, an era, a stat, a nickname, anything.</p>
+    </div>
+    <div class="htp-step">
+      <div class="htp-num">2</div>
+      <p><b>Tap 4 players</b> you think belong together, then hit <b>Submit</b>. Guess wrong and one of your mistakes is used up.</p>
+    </div>
+    <div class="htp-step">
+      <div class="htp-num">3</div>
+      <p>You get <b>4 mistakes</b> total before the puzzle ends. Solve all 4 groups before you run out to win.</p>
+    </div>
+    <div class="htp-step">
+      <div class="htp-num">4</div>
+      <p>Each player card shows their <b>jersey number</b> — sometimes a clue, sometimes just a fun fact.</p>
+    </div>
+
+    <hr class="htp-divider">
+
+    <div class="htp-subtitle">Difficulty Colors</div>
+    <div class="htp-difficulty">
+      <div class="htp-diff-row"><span class="htp-swatch" style="background:var(--c3)"></span> Green — most straightforward</div>
+      <div class="htp-diff-row"><span class="htp-swatch" style="background:var(--c2)"></span> Blue — a bit trickier</div>
+      <div class="htp-diff-row"><span class="htp-swatch" style="background:var(--c1)"></span> Purple — tricky</div>
+      <div class="htp-diff-row"><span class="htp-swatch" style="background:var(--c0)"></span> Red — hardest, watch for overlaps</div>
+    </div>
+
+    <hr class="htp-divider">
+
+    <div class="htp-subtitle">Game Modes</div>
+    <div class="htp-modes">
+      <div class="htp-mode-row"><b>Daily</b> — one puzzle, shared by everyone, resets every day.</div>
+      <div class="htp-mode-row endless"><b>Endless</b> — play puzzle after puzzle and build a win streak.</div>
+    </div>
+
+    <button class="htp-got-it" onclick="closeHowToPlay()">Got it</button>
+  </div>
+</div>
+
+<header>
+  <div class="logo">NBA <span>Connections</span></div>
+  <div class="subtitle">Group 16 players into 4 hidden categories</div>
+</header>
+
+<!-- HOME SCREEN -->
+<div id="homeScreen">
+  <div class="mode-card daily" onclick="startDaily()">
+    <div class="mode-icon">📅</div>
+    <div class="mode-info">
+      <div class="mode-title">Daily</div>
+      <div class="mode-desc">One new puzzle every day — come back tomorrow for the next one</div>
+    </div>
+    <div class="mode-badge" id="dailyBadge">Today</div>
+  </div>
+
+  <div class="home-divider"><span>or</span></div>
+
+  <div class="mode-card endless" onclick="startEndless()">
+    <div class="mode-icon">♾️</div>
+    <div class="mode-info">
+      <div class="mode-title">Endless</div>
+      <div class="mode-desc">Keep going — unlimited puzzles, build your streak</div>
+    </div>
+    <div class="mode-badge endless" id="streakBadge">🔥 0</div>
+  </div>
+
+  <div class="home-divider"><span>or</span></div>
+
+  <div class="mode-card archive" onclick="openArchive()">
+    <div class="mode-icon">🗂️</div>
+    <div class="mode-info">
+      <div class="mode-title">Archive</div>
+      <div class="mode-desc">Replay any past daily puzzle</div>
+    </div>
+    <div class="mode-badge" style="background:rgba(255,255,255,0.08); color:var(--muted)">Browse</div>
+  </div>
+
+  <div class="mode-card practice" onclick="startPractice()">
+    <div class="mode-icon">🎓</div>
+    <div class="mode-info">
+      <div class="mode-title">Practice</div>
+      <div class="mode-desc">Unlimited guesses — learn without pressure</div>
+    </div>
+    <div class="mode-badge" style="background:rgba(120,140,255,0.15); color:#7c8cff">Zen</div>
+  </div>
+</div>
+
+<!-- ARCHIVE SCREEN -->
+<div id="archiveScreen" style="display:none; width:100%; max-width:480px;">
+  <div class="top-bar">
+    <button class="back-btn" onclick="goHome()">← Back</button>
+    <div class="mode-indicator" style="color:var(--muted)">🗂️ Archive</div>
+    <div></div>
+  </div>
+  <div class="archive-list" id="archiveList"></div>
+</div>
+
+<!-- GAME SCREEN -->
+<div id="gameScreen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="goHome()">← Back</button>
+    <div class="mode-indicator" id="modeIndicator"></div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+      <div class="puzzle-info" id="puzzleInfo"></div>
+      <div class="game-timer" id="gameTimer"></div>
+      <div class="endless-nav" id="endlessNav">
+        <button onclick="prevEndless()">◀</button>
+        <span class="endless-num" id="endlessNum">1</span>
+        <button onclick="nextEndlessIfDone()">▶</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="streak-bar" id="streakDisplay" style="display:none">
+    <span>Streak</span>
+    <span class="streak-count" id="streakCount">0</span>
+    <span>🔥</span>
+  </div>
+
+  <div class="categories-legend" id="categoriesLegend"></div>
+  <div class="solved-list" id="solvedList"></div>
+  <div class="one-away" id="oneAway"></div>
+  <div class="grid" id="grid"></div>
+
+  <div class="mistakes-row">
+    <span class="mistakes-label">Mistakes remaining</span>
+    <div class="mistake-dots" id="dots"></div>
+  </div>
+
+  <div class="btn-row" id="btnRow">
+    <button class="btn btn-ghost" onclick="shuffleTiles()">Shuffle</button>
+    <button class="btn btn-ghost" onclick="deselectAll()">Deselect All</button>
+    <button class="btn btn-ghost" onclick="useHint()">💡 Hint</button>
+    <button class="btn btn-danger-ghost" onclick="confirmGiveUp()">Give Up</button>
+    <button class="btn btn-primary" id="submitBtn" onclick="submitGuess()" disabled>Submit</button>
+  </div>
+
+  <div class="end-screen" id="endScreen">
+    <div class="end-title" id="endTitle"></div>
+    <div class="end-meta" id="endMeta"></div>
+    <div class="end-meta" id="timeResult"></div>
+
+    <!-- Daily countdown -->
+    <div class="daily-countdown" id="dailyCountdown" style="display:none">
+      Next puzzle in<span class="countdown-time" id="countdownTime"></span>
+    </div>
+
+    <!-- Endless score -->
+    <div class="endless-score-box" id="endlessScoreBox" style="display:none">
+      <div class="score-label">Puzzles Solved</div>
+      <div class="score-val" id="endlessSolvedCount">0</div>
+      <div class="score-sub" id="endlessScoreSub"></div>
+    </div>
+
+    <div class="share-box">
+      <div class="share-text" id="shareLabel">Share your result</div>
+      <div class="share-emojis" id="shareEmojis"></div>
+      <button class="btn-share" onclick="copyResult()">📋 Copy Result</button>
+    </div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+      <button class="btn btn-ghost" onclick="goHome()">← Home</button>
+      <button class="btn btn-primary" id="nextBtn" style="display:none" onclick="handleNextBtn()">Next Puzzle →</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════
+//  PUZZLE DATA  (40 puzzles)
+// ════════════════════════════════════════════
+const ALL_PUZZLES = [
+  {
+    categories: [
+      { id:0, label:"Won Finals MVP",              color:"--c3", emoji:"🟩", players:["LeBron James","Shaquille O'Neal","Dwyane Wade","Dirk Nowitzki"] },
+      { id:1, label:"Played for the Knicks",        color:"--c2", emoji:"🟦", players:["Patrick Ewing","Latrell Sprewell","Carmelo Anthony","Charles Oakley"] },
+      { id:2, label:"Born Outside the USA",         color:"--c1", emoji:"🟪", players:["Steve Nash","Tony Parker","Manu Ginobili","Pau Gasol"] },
+      { id:3, label:"Scored 70+ Pts in a Game",     color:"--c0", emoji:"🟥", players:["Wilt Chamberlain","Kobe Bryant","David Thompson","Elgin Baylor"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Chicago Bulls All-Time",       color:"--c3", emoji:"🟩", players:["Michael Jordan","Scottie Pippen","Dennis Rodman","Bob Love"] },
+      { id:1, label:"#1 Overall — 2000s Draft",     color:"--c2", emoji:"🟦", players:["LeBron James","Andrew Bogut","Kwame Brown","Yao Ming"] },
+      { id:2, label:"Point Guards Under 6 Feet",    color:"--c1", emoji:"🟪", players:["Mugsy Bogues","Isaiah Thomas","Nate Robinson","Calvin Murphy"] },
+      { id:3, label:"3-Point Contest Winners",      color:"--c0", emoji:"🟥", players:["Larry Bird","Craig Hodges","Glen Rice","Jason Kapono"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"HOF — Never Won a Ring",       color:"--c3", emoji:"🟩", players:["Charles Barkley","Patrick Ewing","Karl Malone","John Stockton"] },
+      { id:1, label:"Wore #23 in the NBA",          color:"--c2", emoji:"🟦", players:["Michael Jordan","LeBron James","Draymond Green","Anthony Davis"] },
+      { id:2, label:"Warriors Dynasty Core",        color:"--c1", emoji:"🟪", players:["Stephen Curry","Klay Thompson","Andre Iguodala","Kevin Durant"] },
+      { id:3, label:"Won Rookie of Year & MVP",     color:"--c0", emoji:"🟥", players:["Wilt Chamberlain","Wes Unseld","Dave Cowens","Kareem Abdul-Jabbar"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Spurs Big Three + One",        color:"--c3", emoji:"🟩", players:["Tim Duncan","Tony Parker","Manu Ginobili","David Robinson"] },
+      { id:1, label:"Drafted by Orlando Magic",     color:"--c2", emoji:"🟦", players:["Shaquille O'Neal","Dennis Scott","Nick Anderson","Dwight Howard"] },
+      { id:2, label:"Scored 60+ Pts — 2010s+",      color:"--c1", emoji:"🟪", players:["Kobe Bryant","Klay Thompson","Devin Booker","James Harden"] },
+      { id:3, label:"Lakers Retired Numbers",        color:"--c0", emoji:"🟥", players:["Kareem Abdul-Jabbar","James Worthy","Pau Gasol","Elgin Baylor"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Multiple-Time MVP Winners",    color:"--c3", emoji:"🟩", players:["Kareem Abdul-Jabbar","Bill Russell","LeBron James","Moses Malone"] },
+      { id:1, label:"Played in the ABA",            color:"--c2", emoji:"🟦", players:["Julius Erving","Artis Gilmore","Dan Issel","Rick Barry"] },
+      { id:2, label:"Dream Team 1992",              color:"--c1", emoji:"🟪", players:["Magic Johnson","Larry Bird","Charles Barkley","Patrick Ewing"] },
+      { id:3, label:"Slam Dunk Contest Legends",    color:"--c0", emoji:"🟥", players:["Dominique Wilkins","Vince Carter","Dee Brown","Nate Robinson"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Heat Big Three Era",           color:"--c3", emoji:"🟩", players:["LeBron James","Dwyane Wade","Chris Bosh","Ray Allen"] },
+      { id:1, label:"All-Time Celtics",             color:"--c2", emoji:"🟦", players:["Larry Bird","Bill Russell","Paul Pierce","John Havlicek"] },
+      { id:2, label:"Wore #3 in the NBA",           color:"--c1", emoji:"🟪", players:["Caron Butler","Chris Paul","Allen Iverson","Stephon Marbury"] },
+      { id:3, label:"European Stars (Pre-NBA)",   color:"--c0", emoji:"🟥", players:["Dirk Nowitzki","Pau Gasol","Tony Parker","Manu Ginobili"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Won MVP Before Age 25",     color:"--c3", emoji:"🟩", players:["LeBron James","Derrick Rose","Bob Pettit","Dave Cowens"] },
+      { id:1, label:"Thunder Core (OKC)",           color:"--c2", emoji:"🟦", players:["Kevin Durant","Russell Westbrook","James Harden","Serge Ibaka"] },
+      { id:2, label:"Played for 8+ NBA Teams",      color:"--c1", emoji:"🟪", players:["Chucky Brown","Joe Smith","Vince Carter","Jamal Crawford"] },
+      { id:3, label:"Back-to-Back Scoring Champs",  color:"--c0", emoji:"🟥", players:["Michael Jordan","Wilt Chamberlain","George Gervin","Kobe Bryant"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"NBA Sixth Man of the Year",       color:"--c3", emoji:"🟩", players:["Bobby Jackson","Manu Ginobili","Lou Williams","Jamal Crawford"] },
+      { id:1, label:"Raptors All-Time Greats",      color:"--c2", emoji:"🟦", players:["Vince Carter","Chris Bosh","DeMar DeRozan","Kyle Lowry"] },
+      { id:2, label:"7-foot Centers — HOF",         color:"--c1", emoji:"🟪", players:["Kareem Abdul-Jabbar","Hakeem Olajuwon","Shaquille O'Neal","Patrick Ewing"] },
+      { id:3, label:"30 PPG Seasons — 21st Century",color:"--c0", emoji:"🟥", players:["Kobe Bryant","LeBron James","Kevin Durant","James Harden"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Selected to 15+ All-Star Games",color:"--c3",emoji:"🟩", players:["LeBron James","Kareem Abdul-Jabbar","Kobe Bryant","Kevin Garnett"] },
+      { id:1, label:"Pistons Bad Boys",             color:"--c2", emoji:"🟦", players:["Isiah Thomas","Bill Laimbeer","Dennis Rodman","Joe Dumars"] },
+      { id:2, label:"Mexican-born NBA Players",     color:"--c1", emoji:"🟪", players:["Gustavo Ayon","Eduardo Najera","Jorge Gutierrez","Horacio Llamas"] },
+      { id:3, label:"50+ Career Triple-Doubles", color:"--c0", emoji:"🟥", players:["Oscar Robertson","Russell Westbrook","Magic Johnson","Nikola Jokic"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Won Title with 3 Diff Teams",  color:"--c3", emoji:"🟩", players:["LeBron James","John Salley","Robert Horry","Danny Green"] },
+      { id:1, label:"Celtics–Lakers Rivals (80s)",  color:"--c2", emoji:"🟦", players:["Larry Bird","Kevin McHale","Magic Johnson","James Worthy"] },
+      { id:2, label:"All-Defense 10+ Times",        color:"--c1", emoji:"🟪", players:["Tim Duncan","Scottie Pippen","Kevin Garnett","Kareem Abdul-Jabbar"] },
+      { id:3, label:"Led League in Assists 5x+",    color:"--c0", emoji:"🟥", players:["John Stockton","Steve Nash","Chris Paul","Bob Cousy"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Won NBA Rookie of the Year", color:"--c3", emoji:"🟩", players:["Tim Duncan","Allen Iverson","LeBron James","Blake Griffin"] },
+      { id:1, label:"Portland Trail Blazers Legends", color:"--c2", emoji:"🟦", players:["Clyde Drexler","Bill Walton","Damian Lillard","Terry Porter"] },
+      { id:2, label:"Won NBA Defensive Player of the Year", color:"--c1", emoji:"🟪", players:["Dikembe Mutombo","Ben Wallace","Rudy Gobert","Kawhi Leonard"] },
+      { id:3, label:"First Overall NBA Draft Picks", color:"--c0", emoji:"🟥", players:["Anthony Davis","Kyrie Irving","John Wall","Derrick Rose"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"New York Knicks Legends", color:"--c3", emoji:"🟩", players:["Patrick Ewing","Walt Frazier","Willis Reed","Carmelo Anthony"] },
+      { id:1, label:"Denver Nuggets Core (2020s)", color:"--c2", emoji:"🟦", players:["Nikola Jokic","Jamal Murray","Michael Porter Jr.","Aaron Gordon"] },
+      { id:2, label:"Won Finals MVP with the Lakers", color:"--c1", emoji:"🟪", players:["Magic Johnson","Kobe Bryant","Shaquille O'Neal","LeBron James"] },
+      { id:3, label:"Led the NBA in Rebounding", color:"--c0", emoji:"🟥", players:["Wilt Chamberlain","Dennis Rodman","Moses Malone","Dwight Howard"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Phoenix Suns Legends", color:"--c3", emoji:"🟩", players:["Charles Barkley","Steve Nash","Amar'e Stoudemire","Devin Booker"] },
+      { id:1, label:"Won Olympic Gold with Team USA", color:"--c2", emoji:"🟦", players:["Michael Jordan","Kevin Durant","Carmelo Anthony","Chris Paul"] },
+      { id:2, label:"Boston Celtics Big Three (2008)", color:"--c1", emoji:"🟪", players:["Kevin Garnett","Ray Allen","Paul Pierce","Rajon Rondo"] },
+      { id:3, label:"Traded to the Lakers Mid-Career", color:"--c0", emoji:"🟥", players:["Wilt Chamberlain","Kareem Abdul-Jabbar","Anthony Davis","Pau Gasol"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Golden State Warriors Draft Picks", color:"--c3", emoji:"🟩", players:["Stephen Curry","Klay Thompson","Draymond Green","Jordan Poole"] },
+      { id:1, label:"Won NBA Scoring Title", color:"--c2", emoji:"🟦", players:["Kevin Durant","James Harden","Tracy McGrady","Allen Iverson"] },
+      { id:2, label:"Toronto Raptors All-Stars", color:"--c1", emoji:"🟪", players:["Vince Carter","Chris Bosh","Kyle Lowry","Pascal Siakam"] },
+      { id:3, label:"Wore #0 in the NBA", color:"--c0", emoji:"🟥", players:["Russell Westbrook","Gilbert Arenas","Damian Lillard","Andre Drummond"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Milwaukee Bucks Legends", color:"--c3", emoji:"🟩", players:["Kareem Abdul-Jabbar","Oscar Robertson","Giannis Antetokounmpo","Ray Allen"] },
+      { id:1, label:"Won NBA Most Improved Player", color:"--c2", emoji:"🟦", players:["Jimmy Butler","C.J. McCollum","Victor Oladipo","Pascal Siakam"] },
+      { id:2, label:"Drafted 2nd Overall", color:"--c1", emoji:"🟪", players:["Kevin Durant","LaMarcus Aldridge","Alonzo Mourning","Michael Beasley"] },
+      { id:3, label:"Won NBA Sixth Man of the Year", color:"--c0", emoji:"🟥", players:["Detlef Schrempf","Ricky Pierce","Kevin McHale","Dell Curry"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Dallas Mavericks Legends", color:"--c3", emoji:"🟩", players:["Dirk Nowitzki","Jason Kidd","Luka Doncic","Rolando Blackman"] },
+      { id:1, label:"Played College Basketball at Duke", color:"--c2", emoji:"🟦", players:["Grant Hill","Kyrie Irving","Jayson Tatum","Zion Williamson"] },
+      { id:2, label:"Won an NBA Championship with the Pistons", color:"--c1", emoji:"🟪", players:["Chauncey Billups","Richard Hamilton","Ben Wallace","Rasheed Wallace"] },
+      { id:3, label:"Won an NCAA Title Before Turning Pro", color:"--c0", emoji:"🟥", players:["Magic Johnson","Michael Jordan","Anthony Davis","Carmelo Anthony"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Philadelphia 76ers Legends", color:"--c3", emoji:"🟩", players:["Julius Erving","Allen Iverson","Charles Barkley","Moses Malone"] },
+      { id:1, label:"Won NBA MVP in the 2020s", color:"--c2", emoji:"🟦", players:["Giannis Antetokounmpo","Nikola Jokic","Joel Embiid","Shai Gilgeous-Alexander"] },
+      { id:2, label:"Played for the Oklahoma City Thunder", color:"--c1", emoji:"🟪", players:["Kevin Durant","Russell Westbrook","James Harden","Paul George"] },
+      { id:3, label:"Won a Title with the Golden State Warriors", color:"--c0", emoji:"🟥", players:["Stephen Curry","Klay Thompson","Draymond Green","Andre Iguodala"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Cleveland Cavaliers Legends", color:"--c3", emoji:"🟩", players:["LeBron James","Kyrie Irving","Mark Price","Zydrunas Ilgauskas"] },
+      { id:1, label:"Won an NBA Championship with the Heat", color:"--c2", emoji:"🟦", players:["Dwyane Wade","Chris Bosh","Ray Allen","Udonis Haslem"] },
+      { id:2, label:"Won an NBA Championship with the Spurs", color:"--c1", emoji:"🟪", players:["Tim Duncan","Tony Parker","Kawhi Leonard","David Robinson"] },
+      { id:3, label:"Won NBA Finals MVP More Than Once", color:"--c0", emoji:"🟥", players:["Michael Jordan","Magic Johnson","Shaquille O'Neal","Kobe Bryant"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Indiana Pacers Legends", color:"--c3", emoji:"🟩", players:["Reggie Miller","Rik Smits","Jermaine O'Neal","Paul George"] },
+      { id:1, label:"Won the NBA Slam Dunk Contest", color:"--c2", emoji:"🟦", players:["Spud Webb","Blake Griffin","Zach LaVine","Jason Richardson"] },
+      { id:2, label:"Utah Jazz Legends", color:"--c1", emoji:"🟪", players:["Karl Malone","John Stockton","Donovan Mitchell","Rudy Gobert"] },
+      { id:3, label:"Made First-Team All-NBA 10+ Times", color:"--c0", emoji:"🟥", players:["LeBron James","Kobe Bryant","Tim Duncan","Michael Jordan"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Sacramento Kings Legends", color:"--c3", emoji:"🟩", players:["Chris Webber","Mitch Richmond","De'Aaron Fox","Vlade Divac"] },
+      { id:1, label:"Won an NBA Championship with the Bulls", color:"--c2", emoji:"🟦", players:["Michael Jordan","Scottie Pippen","Dennis Rodman","Steve Kerr"] },
+      { id:2, label:"Charlotte Hornets Draft Picks", color:"--c1", emoji:"🟪", players:["Kemba Walker","LaMelo Ball","Alonzo Mourning","Larry Johnson"] },
+      { id:3, label:"Won an NBA Championship with the Celtics", color:"--c0", emoji:"🟥", players:["Larry Bird","Bill Russell","Jayson Tatum","Jaylen Brown"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Atlanta Hawks Legends", color:"--c3", emoji:"🟩", players:["Dominique Wilkins","Bob Pettit","Trae Young","Dikembe Mutombo"] },
+      { id:1, label:"Houston Rockets Legends", color:"--c2", emoji:"🟦", players:["Hakeem Olajuwon","Yao Ming","James Harden","Ralph Sampson"] },
+      { id:2, label:"Led the NBA in Steals", color:"--c1", emoji:"🟪", players:["Alvin Robertson","Chris Paul","Allen Iverson","John Stockton"] },
+      { id:3, label:"Led the NBA in Blocked Shots", color:"--c0", emoji:"🟥", players:["Mark Eaton","Manute Bol","David Robinson","Marcus Camby"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Minnesota Timberwolves Legends", color:"--c3", emoji:"🟩", players:["Kevin Garnett","Karl-Anthony Towns","Anthony Edwards","Kevin Love"] },
+      { id:1, label:"Memphis/Vancouver Grizzlies Legends", color:"--c2", emoji:"🟦", players:["Mike Bibby","Marc Gasol","Ja Morant","Pau Gasol"] },
+      { id:2, label:"New Orleans Pelicans/Hornets Legends", color:"--c1", emoji:"🟪", players:["Chris Paul","Anthony Davis","Zion Williamson","David West"] },
+      { id:3, label:"Brooklyn/New Jersey Nets Legends", color:"--c0", emoji:"🟥", players:["Jason Kidd","Vince Carter","Kevin Durant","Kyrie Irving"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"LA Clippers Notable Players", color:"--c3", emoji:"🟩", players:["Blake Griffin","Chris Paul","Kawhi Leonard","Paul George"] },
+      { id:1, label:"Orlando Magic Legends", color:"--c2", emoji:"🟦", players:["Shaquille O'Neal","Dwight Howard","Tracy McGrady","Nick Anderson"] },
+      { id:2, label:"Washington Wizards/Bullets Legends", color:"--c1", emoji:"🟪", players:["Wes Unseld","John Wall","Gilbert Arenas","Bradley Beal"] },
+      { id:3, label:"Wore #1 in the NBA", color:"--c0", emoji:"🟥", players:["Oscar Robertson","Derrick Rose","Amar'e Stoudemire","Zion Williamson"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Won Rookie of the Year (1990s)", color:"--c3", emoji:"🟩", players:["David Robinson","Derrick Coleman","Larry Johnson","Shaquille O'Neal"] },
+      { id:1, label:"Won Rookie of the Year (2010s)", color:"--c2", emoji:"🟦", players:["Damian Lillard","Karl-Anthony Towns","Ben Simmons","Luka Doncic"] },
+      { id:2, label:"Won Rookie of the Year (2000s)", color:"--c1", emoji:"🟪", players:["LeBron James","Chris Paul","Kevin Durant","Derrick Rose"] },
+      { id:3, label:"Won Rookie of the Year (1980s)", color:"--c0", emoji:"🟥", players:["Larry Bird","Michael Jordan","Patrick Ewing","Mitch Richmond"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Won a Title with the Toronto Raptors", color:"--c3", emoji:"🟩", players:["Kawhi Leonard","Kyle Lowry","Pascal Siakam","Fred VanVleet"] },
+      { id:1, label:"Won a Title with the Denver Nuggets", color:"--c2", emoji:"🟦", players:["Nikola Jokic","Jamal Murray","Kentavious Caldwell-Pope","Michael Porter Jr."] },
+      { id:2, label:"Won a Title with the Milwaukee Bucks", color:"--c1", emoji:"🟪", players:["Giannis Antetokounmpo","Khris Middleton","Jrue Holiday","Brook Lopez"] },
+      { id:3, label:"Won a Title with the Dallas Mavericks", color:"--c0", emoji:"🟥", players:["Dirk Nowitzki","Jason Kidd","Jason Terry","Tyson Chandler"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Won NBA Assist Title", color:"--c3", emoji:"🟩", players:["John Stockton","Magic Johnson","Chris Paul","Tiny Archibald"] },
+      { id:1, label:"Played 20+ Seasons in the NBA", color:"--c2", emoji:"🟦", players:["Vince Carter","Dirk Nowitzki","Kevin Garnett","Kobe Bryant"] },
+      { id:2, label:"Won a Title with the 1980s Showtime Lakers", color:"--c1", emoji:"🟪", players:["Kareem Abdul-Jabbar","James Worthy","Byron Scott","Michael Cooper"] },
+      { id:3, label:"Led the NBA in Rebounding", color:"--c0", emoji:"🟥", players:["Wilt Chamberlain","Dennis Rodman","Bill Russell","Andre Drummond"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Won a Title with the Chicago Bulls", color:"--c3", emoji:"🟩", players:["Michael Jordan","Scottie Pippen","Toni Kukoc","Ron Harper"] },
+      { id:1, label:"Won a Title with the 2020 Lakers (Bubble)", color:"--c2", emoji:"🟦", players:["LeBron James","Anthony Davis","Rajon Rondo","Dwight Howard"] },
+      { id:2, label:"Won a Title with the 2006 Miami Heat", color:"--c1", emoji:"🟪", players:["Dwyane Wade","Shaquille O'Neal","Gary Payton","Alonzo Mourning"] },
+      { id:3, label:"Won a Title with the 1990s Houston Rockets", color:"--c0", emoji:"🟥", players:["Hakeem Olajuwon","Clyde Drexler","Robert Horry","Kenny Smith"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Won a Title with the 1975 Golden State Warriors", color:"--c3", emoji:"🟩", players:["Rick Barry","Jamaal Wilkes","Butch Beard","Clifford Ray"] },
+      { id:1, label:"Won a Title with the 1986 Boston Celtics", color:"--c2", emoji:"🟦", players:["Larry Bird","Kevin McHale","Robert Parish","Dennis Johnson"] },
+      { id:2, label:"Won a Title with the 1983 Philadelphia 76ers", color:"--c1", emoji:"🟪", players:["Moses Malone","Julius Erving","Andrew Toney","Bobby Jones"] },
+      { id:3, label:"Won a Title with the 1979 Seattle SuperSonics", color:"--c0", emoji:"🟥", players:["Gus Williams","Jack Sikma","Fred Brown","Paul Silas"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Among the Tallest Players in NBA History", color:"--c3", emoji:"🟩", players:["Manute Bol","Gheorghe Muresan","Yao Ming","Shawn Bradley"] },
+      { id:1, label:"Among the Shortest Players in NBA History", color:"--c2", emoji:"🟦", players:["Mugsy Bogues","Isaiah Thomas","Nate Robinson","Earl Boykins"] },
+      { id:2, label:"Born in Africa", color:"--c1", emoji:"🟪", players:["Dikembe Mutombo","Hakeem Olajuwon","Joel Embiid","Luol Deng"] },
+      { id:3, label:"Born in Europe", color:"--c0", emoji:"🟥", players:["Dirk Nowitzki","Tony Parker","Pau Gasol","Luka Doncic"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Played College Basketball at UCLA", color:"--c3", emoji:"🟩", players:["Kareem Abdul-Jabbar","Bill Walton","Reggie Miller","Russell Westbrook"] },
+      { id:1, label:"Played College Basketball at Kentucky", color:"--c2", emoji:"🟦", players:["Anthony Davis","Rajon Rondo","DeMarcus Cousins","John Wall"] },
+      { id:2, label:"Played College Basketball at Kansas", color:"--c1", emoji:"🟪", players:["Wilt Chamberlain","Paul Pierce","Joel Embiid","Danny Manning"] },
+      { id:3, label:"Played College Basketball at Arizona", color:"--c0", emoji:"🟥", players:["Steve Kerr","Mike Bibby","Sean Elliott","Damon Stoudamire"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"LA Lakers Legends", color:"--c3", emoji:"🟩", players:["Jerry West","Elgin Baylor","Wilt Chamberlain","Kobe Bryant"] },
+      { id:1, label:"Won an NBA Championship with the Warriors (2017-19)", color:"--c2", emoji:"🟦", players:["Stephen Curry","Kevin Durant","Klay Thompson","Draymond Green"] },
+      { id:2, label:"Led the NBA in Free Throw Percentage", color:"--c1", emoji:"🟪", players:["Rick Barry","Calvin Murphy","Mark Price","Steve Nash"] },
+      { id:3, label:"Won NBA Finals MVP Without Winning League MVP That Year", color:"--c0", emoji:"🟥", players:["Chauncey Billups","Tony Parker","Andre Iguodala","Kawhi Leonard"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Chicago Bulls Draftees", color:"--c3", emoji:"🟩", players:["Michael Jordan","Scottie Pippen","Derrick Rose","Zach LaVine"] },
+      { id:1, label:"New York Knicks Draftees", color:"--c2", emoji:"🟦", players:["Patrick Ewing","Kristaps Porzingis","Charlie Ward","Allan Houston"] },
+      { id:2, label:"Won an NBA Championship with the 2004 Detroit Pistons", color:"--c1", emoji:"🟪", players:["Chauncey Billups","Rasheed Wallace","Ben Wallace","Rip Hamilton"] },
+      { id:3, label:"Played College Basketball at Georgetown", color:"--c0", emoji:"🟥", players:["Allen Iverson","Alonzo Mourning","Dikembe Mutombo","Roy Hibbert"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Golden State Warriors Legends", color:"--c3", emoji:"🟩", players:["Rick Barry","Wilt Chamberlain","Stephen Curry","Nate Thurmond"] },
+      { id:1, label:"Won an NBA Championship with the Lakers (2000s)", color:"--c2", emoji:"🟦", players:["Kobe Bryant","Shaquille O'Neal","Derek Fisher","Robert Horry"] },
+      { id:2, label:"Number Retired by the Boston Celtics", color:"--c1", emoji:"🟪", players:["Bill Russell","Larry Bird","Bob Cousy","Kevin McHale"] },
+      { id:3, label:"Won Both College and NBA Championships", color:"--c0", emoji:"🟥", players:["Magic Johnson","Anthony Davis","Michael Jordan","Kareem Abdul-Jabbar"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"San Antonio Spurs Legends", color:"--c3", emoji:"🟩", players:["Tim Duncan","David Robinson","Tony Parker","George Gervin"] },
+      { id:1, label:"Won an NBA Championship with the 90s Bulls", color:"--c2", emoji:"🟦", players:["Michael Jordan","Scottie Pippen","Dennis Rodman","Horace Grant"] },
+      { id:2, label:"Milwaukee Bucks Draftees", color:"--c1", emoji:"🟪", players:["Giannis Antetokounmpo","Kareem Abdul-Jabbar","Ray Allen","Sidney Moncrief"] },
+      { id:3, label:"Averaged 30+ Points Per Game for a Season", color:"--c0", emoji:"🟥", players:["Wilt Chamberlain","Allen Iverson","James Harden","Kevin Durant"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Portland Trail Blazers Draftees", color:"--c3", emoji:"🟩", players:["Clyde Drexler","Damian Lillard","Bill Walton","LaMarcus Aldridge"] },
+      { id:1, label:"Won an NBA Championship with the Celtics (2008)", color:"--c2", emoji:"🟦", players:["Kevin Garnett","Paul Pierce","Ray Allen","James Posey"] },
+      { id:2, label:"Denver Nuggets Legends", color:"--c1", emoji:"🟪", players:["Alex English","David Thompson","Dikembe Mutombo","Nikola Jokic"] },
+      { id:3, label:"Won NBA Championships With Two Different Franchises", color:"--c0", emoji:"🟥", players:["Kareem Abdul-Jabbar","Shaquille O'Neal","Robert Horry","LeBron James"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Utah Jazz Draftees", color:"--c3", emoji:"🟩", players:["John Stockton","Karl Malone","Donovan Mitchell","Deron Williams"] },
+      { id:1, label:"Won an NBA Championship with the 2019 Raptors", color:"--c2", emoji:"🟦", players:["Kawhi Leonard","Kyle Lowry","Marc Gasol","Serge Ibaka"] },
+      { id:2, label:"Indiana Pacers Draftees", color:"--c1", emoji:"🟪", players:["Reggie Miller","Jermaine O'Neal","Paul George","Tyrese Haliburton"] },
+      { id:3, label:"Won an NBA Scoring Title Multiple Times", color:"--c0", emoji:"🟥", players:["Wilt Chamberlain","Michael Jordan","Kevin Durant","George Gervin"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Detroit Pistons Legends", color:"--c3", emoji:"🟩", players:["Isiah Thomas","Joe Dumars","Dave Bing","Bob Lanier"] },
+      { id:1, label:"Won an NBA Championship with the Spurs (2014)", color:"--c2", emoji:"🟦", players:["Tim Duncan","Kawhi Leonard","Tony Parker","Manu Ginobili"] },
+      { id:2, label:"Cleveland Cavaliers Draftees", color:"--c1", emoji:"🟪", players:["LeBron James","Kyrie Irving","Brad Daugherty","Mark Price"] },
+      { id:3, label:"Won an NBA Title as Both Player and Coach", color:"--c0", emoji:"🟥", players:["Bill Russell","K.C. Jones","Pat Riley","Tom Heinsohn"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Boston Celtics Draftees", color:"--c3", emoji:"🟩", players:["Larry Bird","Paul Pierce","Jayson Tatum","Kevin McHale"] },
+      { id:1, label:"Won an NBA Championship with the Sixers (1983)", color:"--c2", emoji:"🟦", players:["Julius Erving","Moses Malone","Andrew Toney","Maurice Cheeks"] },
+      { id:2, label:"Phoenix Suns Draftees", color:"--c1", emoji:"🟪", players:["Devin Booker","Alvan Adams","Walter Davis","Amar'e Stoudemire"] },
+      { id:3, label:"Played in the NBA Past Age 40", color:"--c0", emoji:"🟥", players:["Kareem Abdul-Jabbar","Karl Malone","Robert Parish","Vince Carter"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Miami Heat Legends", color:"--c3", emoji:"🟩", players:["Dwyane Wade","Alonzo Mourning","Tim Hardaway","Udonis Haslem"] },
+      { id:1, label:"Won an NBA Championship with the Nuggets (2023)", color:"--c2", emoji:"🟦", players:["Nikola Jokic","Jamal Murray","Aaron Gordon","Kentavious Caldwell-Pope"] },
+      { id:2, label:"Orlando Magic Draftees", color:"--c1", emoji:"🟪", players:["Shaquille O'Neal","Dwight Howard","Penny Hardaway","Paolo Banchero"] },
+      { id:3, label:"Won Gold at the 1992 Olympics (Dream Team)", color:"--c0", emoji:"🟥", players:["Michael Jordan","Magic Johnson","Larry Bird","Charles Barkley"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Houston Rockets Draftees", color:"--c3", emoji:"🟩", players:["Hakeem Olajuwon","Yao Ming","Ralph Sampson","Calvin Murphy"] },
+      { id:1, label:"Won an NBA Championship with the Heat (2012-13)", color:"--c2", emoji:"🟦", players:["LeBron James","Dwyane Wade","Chris Bosh","Shane Battier"] },
+      { id:2, label:"Sacramento/Rochester/KC Kings Legends", color:"--c1", emoji:"🟪", players:["Oscar Robertson","Chris Webber","Mitch Richmond","De'Aaron Fox"] },
+      { id:3, label:"Won NBA MVP at Least Twice", color:"--c0", emoji:"🟥", players:["Michael Jordan","Bill Russell","Kareem Abdul-Jabbar","Wilt Chamberlain"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Scored 60+ Points in a Single NBA Game", color:"--c3", emoji:"🟩", players:["Wilt Chamberlain","Kobe Bryant","David Thompson","Devin Booker"] },
+      { id:1, label:"Won 4 or More NBA Championships as a Player", color:"--c2", emoji:"🟦", players:["Michael Jordan","Bill Russell","Kareem Abdul-Jabbar","LeBron James"] },
+      { id:2, label:"Won NBA All-Star Game MVP", color:"--c1", emoji:"🟪", players:["Shaquille O'Neal","Magic Johnson","Julius Erving","Giannis Antetokounmpo"] },
+      { id:3, label:"Named to the NBA 75th Anniversary Team", color:"--c0", emoji:"🟥", players:["George Mikan","Dolph Schayes","Elvin Hayes","Gail Goodrich"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Born in Canada", color:"--c3", emoji:"🟩", players:["Steve Nash","Jamal Murray","Andrew Wiggins","Shai Gilgeous-Alexander"] },
+      { id:1, label:"Born in South America", color:"--c2", emoji:"🟦", players:["Manu Ginobili","Nene","Anderson Varejao","Leandro Barbosa"] },
+      { id:2, label:"NBA 75th Anniversary Team: 70s/80s Stars", color:"--c1", emoji:"🟪", players:["Pete Maravich","Bernard King","Adrian Dantley","Artis Gilmore"] },
+      { id:3, label:"Played in the ABA Before the 1976 Merger", color:"--c0", emoji:"🟥", players:["Julius Erving","George Gervin","Moses Malone","Dan Issel"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Played for the Golden State Warriors in the Early 1990s", color:"--c3", emoji:"🟩", players:["Chris Mullin","Tim Hardaway","Mitch Richmond","Sarunas Marciulionis"] },
+      { id:1, label:"Number Retired by the Los Angeles Lakers", color:"--c2", emoji:"🟦", players:["Jerry West","Magic Johnson","Kareem Abdul-Jabbar","Kobe Bryant"] },
+      { id:2, label:"Number Retired by the New York Knicks", color:"--c1", emoji:"🟪", players:["Walt Frazier","Willis Reed","Patrick Ewing","Earl Monroe"] },
+      { id:3, label:"Number Retired by the Philadelphia 76ers", color:"--c0", emoji:"🟥", players:["Julius Erving","Wilt Chamberlain","Moses Malone","Allen Iverson"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Wore #34 in the NBA", color:"--c3", emoji:"🟩", players:["Hakeem Olajuwon","Charles Barkley","Giannis Antetokounmpo","Ray Allen"] },
+      { id:1, label:"Wore #32 in the NBA", color:"--c2", emoji:"🟦", players:["Magic Johnson","Karl Malone","Blake Griffin","Kevin McHale"] },
+      { id:2, label:"Wore #21 in the NBA", color:"--c1", emoji:"🟪", players:["Tim Duncan","Dominique Wilkins","Kevin Garnett","Joel Embiid"] },
+      { id:3, label:"Wore #15 in the NBA", color:"--c0", emoji:"🟥", players:["Vince Carter","Nikola Jokic","DeMarcus Cousins","Kemba Walker"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Won NBA Rookie of the Year (1970s)", color:"--c3", emoji:"🟩", players:["Dave Cowens","Bob McAdoo","Alvan Adams","Walter Davis"] },
+      { id:1, label:"Won NBA Rookie of the Year (1960s)", color:"--c2", emoji:"🟦", players:["Oscar Robertson","Walt Bellamy","Willis Reed","Wilt Chamberlain"] },
+      { id:2, label:"Won NBA Rookie of the Year (1950s)", color:"--c1", emoji:"🟪", players:["Bob Pettit","Tom Heinsohn","Elgin Baylor","Maurice Stokes"] },
+      { id:3, label:"Won NBA Rookie of the Year (2020s)", color:"--c0", emoji:"🟥", players:["Ja Morant","LaMelo Ball","Scottie Barnes","Paolo Banchero"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Cleveland Cavaliers All-Stars", color:"--c3", emoji:"🟩", players:["Mark Price","Brad Daugherty","Zydrunas Ilgauskas","World B. Free"] },
+      { id:1, label:"Wore #33 in the NBA", color:"--c2", emoji:"🟦", players:["Larry Bird","Patrick Ewing","Scottie Pippen","Kareem Abdul-Jabbar"] },
+      { id:2, label:"Houston Rockets All-Stars", color:"--c1", emoji:"🟪", players:["Hakeem Olajuwon","Yao Ming","Ralph Sampson","Clyde Drexler"] },
+      { id:3, label:"Won a Title with the 1991-93 Chicago Bulls", color:"--c0", emoji:"🟥", players:["Michael Jordan","Horace Grant","John Paxson","Bill Cartwright"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Won a Title with the Historic 1972 LA Lakers (33-Game Win Streak)", color:"--c3", emoji:"🟩", players:["Wilt Chamberlain","Jerry West","Gail Goodrich","Happy Hairston"] },
+      { id:1, label:"Won a Title with the New York Knicks (1970 or 1973)", color:"--c2", emoji:"🟦", players:["Willis Reed","Walt Frazier","Earl Monroe","Dave DeBusschere"] },
+      { id:2, label:"Won a Title with the 1971 Milwaukee Bucks", color:"--c1", emoji:"🟪", players:["Kareem Abdul-Jabbar","Oscar Robertson","Bob Dandridge","Jon McGlocklin"] },
+      { id:3, label:"Won a Title with the 1977 Portland Trail Blazers", color:"--c0", emoji:"🟥", players:["Bill Walton","Maurice Lucas","Lionel Hollins","Dave Twardzik"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Won Back-to-Back NBA Championships as a Player", color:"--c3", emoji:"🟩", players:["Michael Jordan","Shaquille O'Neal","Stephen Curry","Kobe Bryant"] },
+      { id:1, label:"Won a Title with the Second Bulls Threepeat (1996-98)", color:"--c2", emoji:"🟦", players:["Scottie Pippen","Dennis Rodman","Toni Kukoc","Steve Kerr"] },
+      { id:2, label:"Won a Title with the 1999 San Antonio Spurs", color:"--c1", emoji:"🟪", players:["Tim Duncan","David Robinson","Avery Johnson","Sean Elliott"] },
+      { id:3, label:"Won a Title with the 2024 Boston Celtics", color:"--c0", emoji:"🟥", players:["Jayson Tatum","Jaylen Brown","Jrue Holiday","Derrick White"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Sacramento Kings 'Greatest Show on Court' Era", color:"--c3", emoji:"🟩", players:["Chris Webber","Mike Bibby","Peja Stojakovic","Vlade Divac"] },
+      { id:1, label:"Phoenix Suns 'Seven Seconds or Less' Era", color:"--c2", emoji:"🟦", players:["Steve Nash","Amar'e Stoudemire","Shawn Marion","Boris Diaw"] },
+      { id:2, label:"Utah Jazz 'Stockton-to-Malone' Era", color:"--c1", emoji:"🟪", players:["John Stockton","Karl Malone","Jeff Hornacek","Bryon Russell"] },
+      { id:3, label:"Indiana Pacers 'Reggie Miller Era' Teammates", color:"--c0", emoji:"🟥", players:["Reggie Miller","Rik Smits","Jalen Rose","Mark Jackson"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Golden State Warriors Championship Role Players (2015-2022)", color:"--c3", emoji:"🟩", players:["Stephen Curry","Klay Thompson","Shaun Livingston","Kevon Looney"] },
+      { id:1, label:"LA Clippers 'Lob City' Era", color:"--c2", emoji:"🟦", players:["Blake Griffin","Chris Paul","DeAndre Jordan","JJ Redick"] },
+      { id:2, label:"Memphis Grizzlies 'Grit and Grind' Era", color:"--c1", emoji:"🟪", players:["Marc Gasol","Mike Conley","Zach Randolph","Tony Allen"] },
+      { id:3, label:"Milwaukee Bucks 2021 Championship Role Players", color:"--c0", emoji:"🟥", players:["Giannis Antetokounmpo","Pat Connaughton","Bobby Portis","Grayson Allen"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Los Angeles Clippers/San Diego Clippers Draftees", color:"--c3", emoji:"🟩", players:["Bill Walton","Danny Manning","Kawhi Leonard","Paul George"] },
+      { id:1, label:"Won a Title with the 1996 Chicago Bulls (72-10 Season)", color:"--c2", emoji:"🟦", players:["Michael Jordan","Scottie Pippen","Dennis Rodman","Luc Longley"] },
+      { id:2, label:"Wore #7 in the NBA", color:"--c1", emoji:"🟪", players:["Pete Maravich","Kyle Lowry","Jermaine O'Neal","Jaylen Brown"] },
+      { id:3, label:"Averaged Over 10 Assists Per Game for a Season", color:"--c0", emoji:"🟥", players:["John Stockton","Magic Johnson","Isiah Thomas","Chris Paul"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Denver Nuggets Draftees", color:"--c3", emoji:"🟩", players:["Nikola Jokic","Jamal Murray","Michael Porter Jr.","Carmelo Anthony"] },
+      { id:1, label:"Won a Title with the Lakers (1987 or 1988)", color:"--c2", emoji:"🟦", players:["Magic Johnson","Kareem Abdul-Jabbar","James Worthy","Byron Scott"] },
+      { id:2, label:"Wore #6 in the NBA", color:"--c1", emoji:"🟪", players:["Bill Russell","Julius Erving","Kristaps Porzingis","Tyson Chandler"] },
+      { id:3, label:"Named NBA Defensive Player of the Year", color:"--c0", emoji:"🟥", players:["Alonzo Mourning","Ron Artest","Marc Gasol","Draymond Green"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Brooklyn/New Jersey Nets Draftees", color:"--c3", emoji:"🟩", players:["Jason Kidd","Derrick Coleman","Kenny Anderson","Kyrie Irving"] },
+      { id:1, label:"Won a Title with the Bulls (First Threepeat 1991-93)", color:"--c2", emoji:"🟦", players:["Michael Jordan","Scottie Pippen","Horace Grant","Bill Cartwright"] },
+      { id:2, label:"Wore #11 in the NBA", color:"--c1", emoji:"🟪", players:["Yao Ming","Klay Thompson","Isiah Thomas","Trae Young"] },
+      { id:3, label:"Coached and Later Played in the Same NBA Career (Player-Coaches)", color:"--c0", emoji:"🟥", players:["Bill Russell","Lenny Wilkens","Dave Cowens","K.C. Jones"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Charlotte Hornets Legends (Original Franchise)", color:"--c3", emoji:"🟩", players:["Larry Johnson","Alonzo Mourning","Mugsy Bogues","Dell Curry"] },
+      { id:1, label:"Won a Title with the Rockets (1994)", color:"--c2", emoji:"🟦", players:["Hakeem Olajuwon","Otis Thorpe","Kenny Smith","Vernon Maxwell"] },
+      { id:2, label:"Wore #9 in the NBA", color:"--c1", emoji:"🟪", players:["Tony Parker","Andre Iguodala","Ron Harper","Serge Ibaka"] },
+      { id:3, label:"Averaged 25+ Points Per Game for Their Career", color:"--c0", emoji:"🟥", players:["Michael Jordan","Wilt Chamberlain","Kevin Durant","Elgin Baylor"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Golden State Warriors Draft Lottery Picks (2010s)", color:"--c3", emoji:"🟩", players:["Stephen Curry","Klay Thompson","Draymond Green","Harrison Barnes"] },
+      { id:1, label:"Won a Title with the 76ers (1967)", color:"--c2", emoji:"🟦", players:["Wilt Chamberlain","Hal Greer","Billy Cunningham","Chet Walker"] },
+      { id:2, label:"Wore #13 in the NBA", color:"--c1", emoji:"🟪", players:["Steve Nash","James Harden","Paul George","Mark Jackson"] },
+      { id:3, label:"Named to the All-NBA Defensive First Team 5+ Times", color:"--c0", emoji:"🟥", players:["Michael Jordan","Kobe Bryant","Kevin Garnett","Gary Payton"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Toronto Raptors Draftees", color:"--c3", emoji:"🟩", players:["Vince Carter","Chris Bosh","Pascal Siakam","Fred VanVleet"] },
+      { id:1, label:"Won a Title with the Celtics (1981)", color:"--c2", emoji:"🟦", players:["Larry Bird","Robert Parish","Kevin McHale","Cedric Maxwell"] },
+      { id:2, label:"Wore #4 in the NBA", color:"--c1", emoji:"🟪", players:["Chris Webber","Joe Dumars","Isaiah Thomas","Byron Scott"] },
+      { id:3, label:"Scored 50+ Points in a Playoff Game", color:"--c0", emoji:"🟥", players:["Michael Jordan","Wilt Chamberlain","Kobe Bryant","Donovan Mitchell"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"San Antonio Spurs All-Stars", color:"--c3", emoji:"🟩", players:["George Gervin","Kawhi Leonard","Sean Elliott","David Robinson"] },
+      { id:1, label:"Wore #17 in the NBA", color:"--c2", emoji:"🟦", players:["John Havlicek","Anderson Varejao","Chris Mullin","Horacio Llamas"] },
+      { id:2, label:"Wore #12 in the NBA", color:"--c1", emoji:"🟪", players:["John Stockton","Ja Morant","Dwight Howard","LaMarcus Aldridge"] },
+      { id:3, label:"Led the NBA in Win Shares for a Season", color:"--c0", emoji:"🟥", players:["Wilt Chamberlain","Michael Jordan","LeBron James","Nikola Jokic"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Boston Celtics Draft Picks (2000s-2010s)", color:"--c3", emoji:"🟩", players:["Paul Pierce","Rajon Rondo","Jayson Tatum","Jaylen Brown"] },
+      { id:1, label:"Detroit Pistons Legends Across Eras", color:"--c2", emoji:"🟦", players:["Bob Lanier","Dave Bing","Grant Hill","Isiah Thomas"] },
+      { id:2, label:"Wore #24 in the NBA", color:"--c1", emoji:"🟪", players:["Kobe Bryant","Rick Barry","Moses Malone","Bill Cartwright"] },
+      { id:3, label:"Recorded a Triple-Double in Their NBA Debut or Rookie Season", color:"--c0", emoji:"🟥", players:["LaMelo Ball","Luka Doncic","Ben Simmons","Magic Johnson"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"Milwaukee Bucks All-Stars Across Eras", color:"--c3", emoji:"🟩", players:["Bob Dandridge","Jon McGlocklin","Oscar Robertson","Khris Middleton"] },
+      { id:1, label:"Won a Title with the Heat (2006)", color:"--c2", emoji:"🟦", players:["Dwyane Wade","Shaquille O'Neal","Udonis Haslem","Gary Payton"] },
+      { id:2, label:"Wore #14 in the NBA", color:"--c1", emoji:"🟪", players:["Bob Cousy","Danny Green","Craig Hodges","Eduardo Najera"] },
+      { id:3, label:"Among the NBA's All-Time Leading Scorers", color:"--c0", emoji:"🟥", players:["LeBron James","Kareem Abdul-Jabbar","Karl Malone","Kobe Bryant"] }
+    ]
+  },
+  {
+    categories: [
+      { id:0, label:"New Orleans Pelicans/Hornets All-Stars", color:"--c3", emoji:"🟩", players:["Jrue Holiday","Brandon Ingram","C.J. McCollum","Baron Davis"] },
+      { id:1, label:"Philadelphia 76ers All-Stars Across Eras", color:"--c2", emoji:"🟦", players:["Wilt Chamberlain","Charles Barkley","Julius Erving","Hal Greer"] },
+      { id:2, label:"Wore #25 in the NBA", color:"--c1", emoji:"🟪", players:["Nick Anderson","Ben Simmons","Mark Price","Gail Goodrich"] },
+      { id:3, label:"Won a Title with the 2022 Golden State Warriors", color:"--c0", emoji:"🟥", players:["Stephen Curry","Klay Thompson","Draymond Green","Andrew Wiggins"] }
+    ]
+  }
+];
+
+// ════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════
+const JERSEY_NUMS = {"Allen Iverson":"3","Andre Iguodala":"9","Andrew Bogut":"6","Anthony Davis":"23","Artis Gilmore":"53","Bill Laimbeer":"40","Bill Russell":"6","Bob Cousy":"14","Bob Love":"10","Bob Pettit":"9","Bobby Jackson":"23","Calvin Murphy":"23","Carmelo Anthony":"7","Caron Butler":"3","Charles Barkley":"34","Charles Oakley":"34","Chris Bosh":"1","Chris Paul":"3","Chucky Brown":"52","Craig Hodges":"14","Dan Issel":"44","Danny Green":"14","Dave Cowens":"18","David Robinson":"50","David Thompson":"33","DeMar DeRozan":"10","Dee Brown":"7","Dennis Rodman":"91","Dennis Scott":"3","Derrick Rose":"1","Devin Booker":"1","Dirk Nowitzki":"41","Dominique Wilkins":"21","Draymond Green":"23","Dwight Howard":"12","Dwyane Wade":"3","Eduardo Najera":"14","Elgin Baylor":"22","George Gervin":"44","Glen Rice":"41","Gustavo Ayon":"0","Hakeem Olajuwon":"34","Horacio Llamas":"17","Isaiah Thomas":"4","Isiah Thomas":"11","Jamal Crawford":"11","James Harden":"13","James Worthy":"42","Jason Kapono":"24","Joe Dumars":"4","Joe Smith":"30","John Havlicek":"17","John Salley":"22","John Stockton":"12","Jorge Gutierrez":"13","Julius Erving":"6","Kareem Abdul-Jabbar":"33","Karl Malone":"32","Kevin Durant":"35","Kevin Garnett":"21","Kevin McHale":"32","Klay Thompson":"11","Kobe Bryant":"24","Kwame Brown":"12","Kyle Lowry":"7","Larry Bird":"33","Latrell Sprewell":"15","LeBron James":"23","Lou Williams":"23","Magic Johnson":"32","Manu Ginobili":"20","Michael Jordan":"23","Moses Malone":"24","Mugsy Bogues":"1","Nate Robinson":"4","Nick Anderson":"25","Nikola Jokic":"15","Oscar Robertson":"1","Patrick Ewing":"33","Pau Gasol":"16","Paul Pierce":"34","Ray Allen":"34","Rick Barry":"24","Robert Horry":"25","Russell Westbrook":"0","Scottie Pippen":"33","Serge Ibaka":"9","Shaquille O'Neal":"32","Stephen Curry":"30","Stephon Marbury":"3","Steve Nash":"13","Tim Duncan":"21","Tony Parker":"9","Vince Carter":"15","Wes Unseld":"41","Wilt Chamberlain":"13","Yao Ming":"11","Blake Griffin":"32","Clyde Drexler":"22","Bill Walton":"5","Terry Porter":"30","Dikembe Mutombo":"55","Rudy Gobert":"27","Kawhi Leonard":"2","Kyrie Irving":"2","John Wall":"2","Walt Frazier":"10","Willis Reed":"19","Jamal Murray":"27","Michael Porter Jr.":"1","Aaron Gordon":"50","Amar'e Stoudemire":"1","Rajon Rondo":"9","Jordan Poole":"3","Tracy McGrady":"1","Pascal Siakam":"43","Gilbert Arenas":"0","Andre Drummond":"0","Giannis Antetokounmpo":"34","Jimmy Butler":"22","C.J. McCollum":"3","Victor Oladipo":"4","LaMarcus Aldridge":"12","Alonzo Mourning":"33","Michael Beasley":"8","Detlef Schrempf":"35","Ricky Pierce":"22","Dell Curry":"30","Jason Kidd":"5","Luka Doncic":"77","Rolando Blackman":"22","Grant Hill":"33","Jayson Tatum":"0","Zion Williamson":"1","Chauncey Billups":"1","Richard Hamilton":"32","Rasheed Wallace":"36","Joel Embiid":"21","Shai Gilgeous-Alexander":"2","Paul George":"13","Mark Price":"25","Zydrunas Ilgauskas":"11","Udonis Haslem":"40","Reggie Miller":"31","Rik Smits":"45","Jermaine O'Neal":"7","Spud Webb":"5","Zach LaVine":"8","Jason Richardson":"23","Donovan Mitchell":"45","Chris Webber":"4","Mitch Richmond":"2","De'Aaron Fox":"5","Vlade Divac":"21","Steve Kerr":"25","Kemba Walker":"15","LaMelo Ball":"1","Larry Johnson":"2","Jaylen Brown":"7","Ben Wallace":"3","Damian Lillard":"0","Trae Young":"11","Ralph Sampson":"50","Alvin Robertson":"7","Mark Eaton":"53","Manute Bol":"10","Marcus Camby":"23","Karl-Anthony Towns":"32","Anthony Edwards":"5","Kevin Love":"42","Mike Bibby":"10","Marc Gasol":"33","Ja Morant":"12","David West":"30","Bradley Beal":"3","Derrick Coleman":"44","Ben Simmons":"25","Fred VanVleet":"23","Khris Middleton":"22","Jrue Holiday":"21","Brook Lopez":"11","Jason Terry":"31","Tyson Chandler":"6","Tiny Archibald":"7","Byron Scott":"4","Michael Cooper":"21","Toni Kukoc":"7","Ron Harper":"9","Gary Payton":"20","Kenny Smith":"30","Jamaal Wilkes":"52","Butch Beard":"22","Clifford Ray":"40","Robert Parish":"00","Dennis Johnson":"3","Andrew Toney":"22","Bobby Jones":"34","Gus Williams":"1","Jack Sikma":"43","Fred Brown":"32","Paul Silas":"35","Gheorghe Muresan":"77","Shawn Bradley":"76","Earl Boykins":"11","Luol Deng":"9","DeMarcus Cousins":"15","Danny Manning":"34","Sean Elliott":"32","Damon Stoudamire":"20","Jerry West":"44","Kristaps Porzingis":"6","Charlie Ward":"7","Allan Houston":"20","Rip Hamilton":"32","Nate Thurmond":"42","Derek Fisher":"2","Horace Grant":"33","Sidney Moncrief":"4","Alex English":"2","Deron Williams":"8","Tyrese Haliburton":"0","Dave Bing":"21","Bob Lanier":"16","Brad Daugherty":"43","K.C. Jones":"6","Maurice Cheeks":"10","Alvan Adams":"33","Walter Davis":"6","Tim Hardaway":"10","Kentavious Caldwell-Pope":"5","Penny Hardaway":"1","Paolo Banchero":"5","Shane Battier":"31","Roy Hibbert":"55","Pat Riley":"22","Tom Heinsohn":"15","George Mikan":"99","Dolph Schayes":"4","Elvin Hayes":"11","Gail Goodrich":"25","Andrew Wiggins":"22","Nene":"42","Anderson Varejao":"17","Leandro Barbosa":"12","Pete Maravich":"7","Bernard King":"30","Adrian Dantley":"4","Sarunas Marciulionis":"13","Earl Monroe":"15","Bob McAdoo":"11","Walt Bellamy":"8","Maurice Stokes":"12","Scottie Barnes":"4","World B. Free":"21","John Paxson":"5","Bill Cartwright":"24","Happy Hairston":"52","Dave DeBusschere":"22","Bob Dandridge":"4","Jon McGlocklin":"14","Maurice Lucas":"20","Lionel Hollins":"14","Dave Twardzik":"13","Avery Johnson":"6","Derrick White":"9","Peja Stojakovic":"16","Shawn Marion":"31","Boris Diaw":"3","Jeff Hornacek":"14","Bryon Russell":"3","Jalen Rose":"5","Mark Jackson":"13","Shaun Livingston":"34","Kevon Looney":"5","DeAndre Jordan":"6","JJ Redick":"4","Mike Conley":"11","Zach Randolph":"50","Tony Allen":"9","Pat Connaughton":"24","Bobby Portis":"9","Grayson Allen":"12","Chris Mullin":"17","James Posey":"41","Harrison Barnes":"40","Hal Greer":"15","Billy Cunningham":"32","Chet Walker":"25","Cedric Maxwell":"31","Otis Thorpe":"33","Vernon Maxwell":"11","Kenny Anderson":"1","Lenny Wilkens":"19","Luc Longley":"13","Brandon Ingram":"14","Baron Davis":"1","Ron Artest":"15"};
+const DIFFICULTY_LABELS = ['Easy','Medium','Hard','Hardest'];
+
+let currentMode = null; // 'daily' | 'endless' | 'archive'
+let endlessPuzzleIndex = 0;   // which puzzle in endless list
+let endlessWins = 0;
+let endlessStreak = 0;
+let endlessOrder = [];         // shuffled order for endless
+let gameState = {};
+let currentArchiveKey = null; // date key when playing an archived puzzle
+
+// Overall stats (across all modes)
+let gameStats = { played: 0, won: 0, currentStreak: 0, maxStreak: 0, perfectWins: 0, distribution: [0, 0, 0, 0] };
+let soundOn = true;
+let audioCtx = null;
+
+// ════════════════════════════════════════════
+//  DAILY / ARCHIVE HELPERS (keyed by date)
+// ════════════════════════════════════════════
+function dateKeyFromDate(d) {
+  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+}
+
+function todayKey() {
+  return dateKeyFromDate(new Date());
+}
+
+function getPuzzleIndexForDate(d) {
+  // Deterministic: days since epoch mod puzzle count
+  const epoch = new Date('2024-01-01').getTime();
+  const days = Math.floor((d.getTime() - epoch) / 86400000);
+  return ((days % ALL_PUZZLES.length) + ALL_PUZZLES.length) % ALL_PUZZLES.length;
+}
+
+function getDailyPuzzleIndex() {
+  return getPuzzleIndexForDate(new Date());
+}
+
+function loadStateForKey(key) {
+  try { return JSON.parse(localStorage.getItem('nba_daily_' + key)); } catch { return null; }
+}
+
+function saveStateForKey(key) {
+  const saved = {
+    solved: gameState.solved,
+    mistakes: gameState.mistakes,
+    guessHistory: gameState.guessHistory,
+    finished: gameState.finished,
+    gaveUp: gameState.gaveUp || false,
+    hints: gameState.hints || [],
+    playerOrder: gameState.players
+  };
+  localStorage.setItem('nba_daily_' + key, JSON.stringify(saved));
+}
+
+function loadDailyState() {
+  return loadStateForKey(todayKey());
+}
+
+function saveDailyState() {
+  if (currentMode !== 'daily') return;
+  saveStateForKey(todayKey());
+}
+
+function saveArchiveState() {
+  if (currentMode !== 'archive' || !currentArchiveKey) return;
+  saveStateForKey(currentArchiveKey);
+}
+
+function loadEndlessStats() {
+  try {
+    const s = JSON.parse(localStorage.getItem('nba_endless'));
+    if (s) { endlessWins = s.wins || 0; endlessStreak = s.streak || 0; }
+  } catch {}
+}
+
+function saveEndlessStats() {
+  localStorage.setItem('nba_endless', JSON.stringify({ wins: endlessWins, streak: endlessStreak }));
+}
+
+// ════════════════════════════════════════════
+//  OVERALL STATS
+// ════════════════════════════════════════════
+function loadStats() {
+  try {
+    const s = JSON.parse(localStorage.getItem('nba_stats'));
+    if (s) gameStats = Object.assign(gameStats, s);
+  } catch {}
+}
+
+function saveStats() {
+  try { localStorage.setItem('nba_stats', JSON.stringify(gameStats)); } catch {}
+}
+
+function finalizeGame(won) {
+  if (currentMode === 'practice') return; // practice is pressure-free, never counted
+  gameStats.played++;
+  if (won) {
+    gameStats.won++;
+    gameStats.currentStreak++;
+    gameStats.maxStreak = Math.max(gameStats.maxStreak, gameStats.currentStreak);
+    const idx = Math.min(gameState.mistakes, gameStats.distribution.length - 1);
+    gameStats.distribution[idx]++;
+    if (gameState.mistakes === 0 && !(gameState.hints && gameState.hints.length)) {
+      gameStats.perfectWins = (gameStats.perfectWins || 0) + 1;
+    }
+  } else {
+    gameStats.currentStreak = 0;
+  }
+  saveStats();
+}
+
+function formatTime(ms) {
+  const totalSecs = Math.max(0, Math.floor(ms / 1000));
+  const m = Math.floor(totalSecs / 60);
+  const s = totalSecs % 60;
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+// Checks a completed win's time against the stored personal best.
+// Returns {best, isNew} or null if this shouldn't count (practice mode, or not a win).
+function checkBestTime(elapsedMs, won) {
+  if (!won || currentMode === 'practice') return null;
+  let best = null;
+  try { best = JSON.parse(localStorage.getItem('nba_best_time')); } catch {}
+  let isNew = false;
+  if (best === null || elapsedMs < best) {
+    isNew = true;
+    best = elapsedMs;
+    try { localStorage.setItem('nba_best_time', JSON.stringify(best)); } catch {}
+  }
+  return { best, isNew };
+}
+
+function openStats() {
+  renderStatsModal();
+  document.getElementById('statsOverlay').classList.add('show');
+}
+
+function closeStats() {
+  document.getElementById('statsOverlay').classList.remove('show');
+}
+
+function renderStatsModal() {
+  document.getElementById('statPlayed').textContent = gameStats.played;
+  const pct = gameStats.played ? Math.round((gameStats.won / gameStats.played) * 100) : 0;
+  document.getElementById('statWinPct').textContent = pct + '%';
+  document.getElementById('statCurStreak').textContent = gameStats.currentStreak;
+  document.getElementById('statMaxStreak').textContent = gameStats.maxStreak;
+  document.getElementById('statPerfect').textContent = gameStats.perfectWins || 0;
+
+  let best = null;
+  try { best = JSON.parse(localStorage.getItem('nba_best_time')); } catch {}
+  document.getElementById('statBestTime').textContent = best !== null ? formatTime(best) : '--:--';
+
+  const rows = document.getElementById('distRows');
+  rows.innerHTML = '';
+  const maxCount = Math.max(1, ...gameStats.distribution);
+  gameStats.distribution.forEach((count, mistakes) => {
+    const pctWidth = count ? Math.max(8, Math.round((count / maxCount) * 100)) : 0;
+    const row = document.createElement('div');
+    row.className = 'dist-row';
+    row.innerHTML = `<div class="dist-label">${mistakes} ${mistakes === 1 ? 'mistake' : 'mistakes'}</div>
+      <div class="dist-bar-track"><div class="dist-bar-fill" style="width:${pctWidth}%">${count || ''}</div></div>`;
+    rows.appendChild(row);
+  });
+}
+
+// ════════════════════════════════════════════
+//  SOUND & HAPTICS
+// ════════════════════════════════════════════
+function loadSoundPref() {
+  try {
+    const v = localStorage.getItem('nba_sound');
+    soundOn = v === null ? true : v === '1';
+  } catch { soundOn = true; }
+  updateSoundBtn();
+}
+
+function updateSoundBtn() {
+  const btn = document.getElementById('soundBtn');
+  if (btn) btn.textContent = soundOn ? '🔊' : '🔇';
+}
+
+function toggleSound() {
+  soundOn = !soundOn;
+  try { localStorage.setItem('nba_sound', soundOn ? '1' : '0'); } catch {}
+  updateSoundBtn();
+  if (soundOn) playTone('correct');
+}
+
+function playTone(type) {
+  if (!soundOn) return;
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const now = audioCtx.currentTime;
+    if (type === 'correct') {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.frequency.setValueAtTime(523.25, now);
+      osc.frequency.setValueAtTime(783.99, now + 0.1);
+      gain.gain.setValueAtTime(0.15, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+      osc.start(now); osc.stop(now + 0.3);
+    } else if (type === 'wrong') {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(200, now);
+      gain.gain.setValueAtTime(0.12, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+      osc.start(now); osc.stop(now + 0.25);
+    } else if (type === 'win') {
+      [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
+        const t = now + i * 0.12;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.frequency.setValueAtTime(freq, t);
+        gain.gain.setValueAtTime(0.12, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+        osc.start(t); osc.stop(t + 0.35);
+      });
+    }
+  } catch {}
+}
+
+function vibrate(pattern) {
+  try { if (navigator.vibrate) navigator.vibrate(pattern); } catch {}
+}
+
+// ════════════════════════════════════════════
+//  HOME SCREEN
+// ════════════════════════════════════════════
+function initHome() {
+  loadEndlessStats();
+  document.getElementById('streakBadge').textContent = `🔥 ${endlessStreak}`;
+
+  const saved = loadDailyState();
+  if (saved && saved.finished) {
+    const badge = document.getElementById('dailyBadge');
+    const won = saved.solved.length === 4 && !saved.gaveUp;
+    badge.textContent = won ? '✅ Done' : '❌ Done';
+    badge.classList.add('daily-completed-badge');
+  }
+
+  document.getElementById('homeScreen').style.display = 'flex';
+  document.getElementById('gameScreen').style.display = 'none';
+}
+
+function goHome() {
+  currentMode = null;
+  stopCountdown();
+  stopGameTimer();
+  document.getElementById('homeScreen').style.display = 'flex';
+  document.getElementById('gameScreen').style.display = 'none';
+  document.getElementById('archiveScreen').style.display = 'none';
+  initHome();
+}
+
+// ════════════════════════════════════════════
+//  ARCHIVE MODE
+// ════════════════════════════════════════════
+function openArchive() {
+  document.getElementById('homeScreen').style.display = 'none';
+  document.getElementById('gameScreen').style.display = 'none';
+  document.getElementById('archiveScreen').style.display = 'block';
+  renderArchiveList();
+}
+
+function renderArchiveList() {
+  const list = document.getElementById('archiveList');
+  list.innerHTML = '';
+  const today = new Date();
+  const epoch = new Date('2024-01-01');
+  const daysSinceEpoch = Math.floor((today - epoch) / 86400000);
+  const numDays = Math.max(1, Math.min(daysSinceEpoch + 1, 60)); // last up to 60 days
+
+  for (let i = 0; i < numDays; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const key = dateKeyFromDate(d);
+    const saved = loadStateForKey(key);
+
+    const row = document.createElement('div');
+    row.className = 'archive-row';
+    const label = i === 0 ? 'Today' : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+    let statusHtml = '<span class="archive-status">Unplayed</span>';
+    if (saved && saved.finished) {
+      const won = saved.solved && saved.solved.length === 4 && !saved.gaveUp;
+      const text = won ? 'Solved' : (saved.gaveUp ? 'Gave up' : 'Failed');
+      statusHtml = `<span class="archive-status ${won ? 'won' : 'lost'}">${text}</span>`;
+    }
+
+    row.innerHTML = `<div class="archive-date">${label}</div>${statusHtml}`;
+    row.onclick = () => startArchivePuzzle(d);
+    list.appendChild(row);
+  }
+}
+
+function startArchivePuzzle(date) {
+  currentMode = 'archive';
+  currentArchiveKey = dateKeyFromDate(date);
+  const idx = getPuzzleIndexForDate(date);
+  const saved = loadStateForKey(currentArchiveKey);
+
+  document.getElementById('archiveScreen').style.display = 'none';
+  document.getElementById('gameScreen').style.display = 'block';
+  document.getElementById('modeIndicator').textContent = '🗂️ Archive';
+  document.getElementById('modeIndicator').className = 'mode-indicator daily';
+  document.getElementById('endlessNav').classList.remove('show');
+  document.getElementById('streakDisplay').style.display = 'none';
+  document.getElementById('puzzleInfo').textContent = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+  buildGameState(ALL_PUZZLES[idx], saved);
+  renderAll();
+}
+
+// ════════════════════════════════════════════
+//  DAILY MODE
+// ════════════════════════════════════════════
+function startDaily() {
+  currentMode = 'daily';
+  const idx = getDailyPuzzleIndex();
+  const saved = loadDailyState();
+
+  document.getElementById('homeScreen').style.display = 'none';
+  document.getElementById('gameScreen').style.display = 'block';
+  document.getElementById('modeIndicator').textContent = '📅 Daily';
+  document.getElementById('modeIndicator').className = 'mode-indicator daily';
+  document.getElementById('endlessNav').classList.remove('show');
+  document.getElementById('streakDisplay').style.display = 'none';
+
+  const d = new Date();
+  document.getElementById('puzzleInfo').textContent = `${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
+
+  buildGameState(ALL_PUZZLES[idx], saved);
+  renderAll();
+}
+
+// ════════════════════════════════════════════
+//  ENDLESS MODE
+// ════════════════════════════════════════════
+function startEndless() {
+  currentMode = 'endless';
+  endlessOrder = shuffle([...Array(ALL_PUZZLES.length).keys()]);
+  endlessPuzzleIndex = 0;
+
+  document.getElementById('homeScreen').style.display = 'none';
+  document.getElementById('gameScreen').style.display = 'block';
+  document.getElementById('modeIndicator').textContent = '♾️ Endless';
+  document.getElementById('modeIndicator').className = 'mode-indicator endless';
+  document.getElementById('endlessNav').classList.add('show');
+  document.getElementById('streakDisplay').style.display = 'flex';
+
+  loadEndless();
+}
+
+function loadEndless() {
+  const idx = endlessOrder[endlessPuzzleIndex];
+  document.getElementById('endlessNum').textContent = endlessPuzzleIndex + 1;
+  document.getElementById('streakCount').textContent = endlessStreak;
+  document.getElementById('streakBadge').textContent = `🔥 ${endlessStreak}`;
+  document.getElementById('puzzleInfo').textContent = `Puzzle ${endlessPuzzleIndex + 1} of ${ALL_PUZZLES.length}`;
+
+  buildGameState(ALL_PUZZLES[idx], null);
+  renderAll();
+}
+
+function prevEndless() {
+  if (endlessPuzzleIndex > 0) { endlessPuzzleIndex--; loadEndless(); }
+}
+
+function nextEndlessIfDone() {
+  if (gameState.finished) nextEndlessPuzzle();
+  else showToast('Finish the puzzle first!');
+}
+
+function nextEndlessPuzzle() {
+  endlessPuzzleIndex = (endlessPuzzleIndex + 1) % ALL_PUZZLES.length;
+  loadEndless();
+}
+
+function handleNextBtn() {
+  if (currentMode === 'practice') startPractice();
+  else nextEndlessPuzzle();
+}
+
+// ════════════════════════════════════════════
+//  PRACTICE / ZEN MODE
+// ════════════════════════════════════════════
+function startPractice() {
+  currentMode = 'practice';
+  const idx = Math.floor(Math.random() * ALL_PUZZLES.length);
+
+  document.getElementById('homeScreen').style.display = 'none';
+  document.getElementById('gameScreen').style.display = 'block';
+  document.getElementById('modeIndicator').textContent = '🎓 Practice';
+  document.getElementById('modeIndicator').className = 'mode-indicator practice';
+
+  buildGameState(ALL_PUZZLES[idx], null);
+  gameState.maxMistakes = Infinity;
+  renderAll();
+}
+
+// ════════════════════════════════════════════
+//  CORE GAME
+// ════════════════════════════════════════════
+// ════════════════════════════════════════════
+//  GAME TIMER
+// ════════════════════════════════════════════
+let gameTimerInterval = null;
+
+function startGameTimer() {
+  stopGameTimer();
+  updateGameTimerDisplay();
+  gameTimerInterval = setInterval(updateGameTimerDisplay, 1000);
+}
+
+function stopGameTimer() {
+  if (gameTimerInterval) { clearInterval(gameTimerInterval); gameTimerInterval = null; }
+}
+
+function updateGameTimerDisplay() {
+  const el = document.getElementById('gameTimer');
+  if (!el || !gameState.startedAt) return;
+  el.textContent = `⏱ ${formatTime(Date.now() - gameState.startedAt)}`;
+}
+
+function buildGameState(puzzle, saved) {
+  const playerMap = {};
+  puzzle.categories.forEach(cat => {
+    cat.players.slice(0,4).forEach(p => { playerMap[p] = cat.id; });
+  });
+  const allPlayers = Object.keys(playerMap);
+
+  if (saved) {
+    gameState = {
+      puzzle,
+      playerMap,
+      players: saved.playerOrder.filter(p => p in playerMap),
+      selected: [],
+      solved: saved.solved || [],
+      mistakes: saved.mistakes || 0,
+      maxMistakes: 4,
+      guessHistory: saved.guessHistory || [],
+      finished: saved.finished || false,
+      gaveUp: saved.gaveUp || false,
+      hints: saved.hints || [],
+      startedAt: Date.now()
+    };
+    // Remove solved players from the grid
+    const solvedPlayers = puzzle.categories
+      .filter(c => gameState.solved.includes(c.id))
+      .flatMap(c => c.players);
+    gameState.players = gameState.players.filter(p => !solvedPlayers.includes(p));
+  } else {
+    gameState = {
+      puzzle,
+      playerMap,
+      players: shuffle(allPlayers),
+      selected: [],
+      solved: [],
+      mistakes: 0,
+      maxMistakes: 4,
+      guessHistory: [],
+      finished: false,
+      gaveUp: false,
+      hints: [],
+      startedAt: Date.now()
+    };
+  }
+}
+
+function renderAll() {
+  document.getElementById('solvedList').innerHTML = '';
+  document.getElementById('endScreen').classList.remove('show');
+  document.getElementById('oneAway').textContent = '';
+  document.getElementById('grid').style.display = 'grid';
+  document.getElementById('btnRow').style.display = 'flex';
+
+  // Re-render solved cards
+  gameState.puzzle.categories
+    .filter(c => gameState.solved.includes(c.id))
+    .forEach(cat => addSolvedCard(cat));
+
+  renderDots();
+  renderLegend();
+  renderGrid();
+
+  if (gameState.finished) {
+    setTimeout(showEndScreen, 100);
+  } else {
+    startGameTimer();
+  }
+}
+
+function renderLegend() {
+  const el = document.getElementById('categoriesLegend');
+  el.innerHTML = '';
+  const ordered = [...gameState.puzzle.categories].sort((a,b) => {
+    return ['--c3','--c2','--c1','--c0'].indexOf(a.color) - ['--c3','--c2','--c1','--c0'].indexOf(b.color);
+  });
+  ordered.forEach((cat, i) => {
+    const isSolved = gameState.solved.includes(cat.id);
+    const item = document.createElement('div');
+    item.className = 'legend-item' + (isSolved ? ' solved-out' : '');
+    item.style.borderLeftColor = `var(${cat.color})`;
+    item.style.background = isSolved
+      ? `color-mix(in srgb, var(${cat.color}) 15%, var(--surface))`
+      : 'var(--surface)';
+    item.innerHTML = `
+      <div class="legend-text">${cat.label}</div>
+      <div class="legend-difficulty" style="color:var(${cat.color})">${DIFFICULTY_LABELS[i]}</div>
+    `;
+    el.appendChild(item);
+  });
+}
+
+function renderDots() {
+  const el = document.getElementById('dots');
+  el.innerHTML = '';
+  if (!isFinite(gameState.maxMistakes)) {
+    el.textContent = `${gameState.mistakes} mistake${gameState.mistakes === 1 ? '' : 's'} (unlimited)`;
+    return;
+  }
+  for (let i = 0; i < gameState.maxMistakes; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i < gameState.mistakes ? ' used' : '');
+    el.appendChild(d);
+  }
+}
+
+function renderGrid() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  gameState.players.forEach(name => {
+    const tile = document.createElement('div');
+    const isHinted = (gameState.hints || []).includes(name);
+    tile.className = 'tile' + (gameState.selected.includes(name) ? ' selected' : '') + (isHinted ? ' hinted' : '');
+    tile.dataset.name = name;
+    if (isHinted) {
+      const catId = gameState.playerMap[name];
+      const cat = gameState.puzzle.categories.find(c => c.id === catId);
+      if (cat) tile.style.setProperty('--hint-color', `var(${cat.color})`);
+    }
+    const num = JERSEY_NUMS[name] || '';
+    tile.innerHTML = `${num ? `<div class="player-num">#${num}</div>` : ''}<div class="player-name">${name}</div>`;
+    tile.onclick = () => toggleSelect(name);
+    grid.appendChild(tile);
+  });
+  document.getElementById('submitBtn').disabled = gameState.selected.length !== 4;
+}
+
+function toggleSelect(name) {
+  if (gameState.finished) return;
+  const idx = gameState.selected.indexOf(name);
+  if (idx >= 0) gameState.selected.splice(idx, 1);
+  else { if (gameState.selected.length >= 4) return; gameState.selected.push(name); }
+  document.getElementById('oneAway').textContent = '';
+  renderGrid();
+}
+
+function deselectAll() {
+  gameState.selected = [];
+  document.getElementById('oneAway').textContent = '';
+  renderGrid();
+}
+
+function shuffleTiles() {
+  gameState.players = shuffle(gameState.players);
+  renderGrid();
+}
+
+function submitGuess() {
+  if (gameState.selected.length !== 4 || gameState.finished) return;
+
+  const sel = [...gameState.selected];
+  const catIds = sel.map(p => gameState.playerMap[p]);
+  const allSame = catIds.every(id => id === catIds[0]);
+
+  if (allSame) {
+    const cat = gameState.puzzle.categories.find(c => c.id === catIds[0]);
+    gameState.solved.push(cat.id);
+    gameState.players = gameState.players.filter(p => !sel.includes(p));
+    gameState.selected = [];
+    gameState.guessHistory.push({ correct: true, catId: cat.id });
+
+    addSolvedCard(cat);
+    renderLegend();
+    document.getElementById('oneAway').textContent = '';
+
+    if (currentMode === 'daily') saveDailyState();
+    if (currentMode === 'archive') saveArchiveState();
+
+    if (gameState.solved.length === gameState.puzzle.categories.length) {
+      finalizeGame(true);
+      playTone('win');
+      vibrate([30, 30, 30]);
+      setTimeout(showEndScreen, 600);
+    } else {
+      playTone('correct');
+      vibrate(30);
+      showToast('Correct! 🏀');
+      renderGrid();
+    }
+  } else {
+    gameState.mistakes++;
+    gameState.guessHistory.push({ correct: false, sel: [...sel] });
+    renderDots();
+    playTone('wrong');
+    vibrate([60, 40, 60]);
+
+    const counts = {};
+    catIds.forEach(id => counts[id] = (counts[id]||0)+1);
+    if (Math.max(...Object.values(counts)) === 3)
+      document.getElementById('oneAway').textContent = '⚡ One away!';
+
+    // Cosmetic only — isolated so a DOM/selector quirk here can never block
+    // the save/finalize logic below it.
+    try {
+      sel.forEach(name => {
+        const safeName = (window.CSS && CSS.escape) ? CSS.escape(name) : name.replace(/["\\]/g, '\\$&');
+        const tile = document.querySelector(`.tile[data-name="${safeName}"]`);
+        if (tile) { tile.classList.add('wrong-shake'); setTimeout(()=>tile.classList.remove('wrong-shake'),500); }
+      });
+    } catch (e) { /* purely cosmetic — never let this break game state */ }
+
+    if (currentMode === 'daily') saveDailyState();
+    if (currentMode === 'archive') saveArchiveState();
+
+    if (gameState.mistakes >= gameState.maxMistakes) {
+      finalizeGame(false);
+      setTimeout(showEndScreen, 600);
+    }
+    else if (isFinite(gameState.maxMistakes) && gameState.mistakes === gameState.maxMistakes - 1) {
+      showToast('Last chance! 😬');
+    }
+    else showToast('Not quite...');
+  }
+}
+
+function useHint() {
+  if (gameState.finished) return;
+
+  const unsolvedCats = gameState.puzzle.categories.filter(c => !gameState.solved.includes(c.id));
+  if (!unsolvedCats.length) return;
+
+  // Prefer spreading hints across categories that don't have one yet
+  const catsWithNoHint = unsolvedCats.filter(c => !c.players.some(p => (gameState.hints || []).includes(p)));
+  const pool = catsWithNoHint.length ? catsWithNoHint : unsolvedCats;
+
+  const candidates = [];
+  pool.forEach(c => {
+    c.players.forEach(p => {
+      if (gameState.players.includes(p) && !(gameState.hints || []).includes(p)) candidates.push(p);
+    });
+  });
+  if (!candidates.length) { showToast('No more hints available'); return; }
+
+  if (!confirm('Use a hint? This will cost you one mistake.')) return;
+
+  const pick = candidates[Math.floor(Math.random() * candidates.length)];
+  if (!gameState.hints) gameState.hints = [];
+  gameState.hints.push(pick);
+  gameState.mistakes++;
+  renderDots();
+  renderGrid();
+  playTone('wrong');
+  showToast('💡 Hint revealed');
+
+  if (currentMode === 'daily') saveDailyState();
+  if (currentMode === 'archive') saveArchiveState();
+
+  if (gameState.mistakes >= gameState.maxMistakes) {
+    finalizeGame(false);
+    setTimeout(showEndScreen, 600);
+  }
+}
+
+function confirmGiveUp() {
+  if (gameState.finished) return;
+  if (confirm('Give up on this puzzle? This will end the game and reveal all answers.')) {
+    giveUp();
+  }
+}
+
+function giveUp() {
+  if (gameState.finished) return;
+  gameState.puzzle.categories
+    .filter(cat => !gameState.solved.includes(cat.id))
+    .forEach(cat => {
+      gameState.solved.push(cat.id);
+      addSolvedCard(cat);
+    });
+  gameState.players = [];
+  gameState.selected = [];
+  gameState.gaveUp = true;
+  renderLegend();
+  renderGrid();
+
+  if (currentMode === 'daily') saveDailyState();
+  if (currentMode === 'archive') saveArchiveState();
+
+  finalizeGame(false);
+  setTimeout(showEndScreen, 300);
+}
+
+function addSolvedCard(cat) {
+  const list = document.getElementById('solvedList');
+  const card = document.createElement('div');
+  card.className = 'solved-card';
+  card.style.background = `var(${cat.color})`;
+  card.innerHTML = `
+    <div class="cat-label">Category</div>
+    <div class="cat-title">${cat.label}</div>
+    <div class="cat-players">${cat.players.join(' · ')}</div>
+  `;
+  list.appendChild(card);
+}
+
+// ════════════════════════════════════════════
+//  END SCREEN
+// ════════════════════════════════════════════
+let countdownInterval = null;
+
+function stopCountdown() {
+  if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+}
+
+function showEndScreen() {
+  gameState.finished = true;
+  const won = gameState.solved.length === gameState.puzzle.categories.length && !gameState.gaveUp;
+  const usedHint = !!(gameState.hints && gameState.hints.length);
+  const isPerfect = won && gameState.mistakes === 0 && !usedHint;
+
+  stopGameTimer();
+  const elapsedMs = gameState.startedAt ? Date.now() - gameState.startedAt : 0;
+  const timeCheck = checkBestTime(elapsedMs, won);
+
+  if (currentMode === 'daily') saveDailyState();
+  if (currentMode === 'archive') saveArchiveState();
+
+  document.getElementById('grid').style.display = 'none';
+  document.getElementById('btnRow').style.display = 'none';
+
+  document.getElementById('endTitle').textContent = isPerfect
+    ? 'Perfect Solve! 🌟'
+    : won
+      ? 'Nailed It! 🏆'
+      : (gameState.gaveUp ? 'Gave Up 🏳️' : 'Better Luck Next Time');
+
+  const timeResultEl = document.getElementById('timeResult');
+  if (currentMode === 'practice') {
+    timeResultEl.textContent = '';
+  } else if (timeCheck && timeCheck.isNew) {
+    timeResultEl.textContent = `⏱ ${formatTime(elapsedMs)} — New best time!`;
+  } else if (won) {
+    timeResultEl.textContent = `⏱ ${formatTime(elapsedMs)}` + (timeCheck ? ` (Best: ${formatTime(timeCheck.best)})` : '');
+  } else {
+    timeResultEl.textContent = `⏱ ${formatTime(elapsedMs)}`;
+  }
+
+  // Build emoji grid
+  const emojiMap = {};
+  gameState.puzzle.categories.forEach(c => emojiMap[c.id] = c.emoji);
+  const emojiLines = gameState.guessHistory.map(g => {
+    if (g.correct) return emojiMap[g.catId];
+    return g.sel.map(p => gameState.playerMap[p]).map(id => emojiMap[id]).join('');
+  });
+  document.getElementById('shareEmojis').innerHTML = emojiLines.map(l=>`<div>${l}</div>`).join('');
+
+  // Mode-specific UI
+  if (currentMode === 'daily') {
+    document.getElementById('endMeta').textContent = gameState.gaveUp
+      ? 'You gave up on today\'s puzzle'
+      : `Mistakes: ${gameState.mistakes} / ${gameState.maxMistakes}`;
+    document.getElementById('dailyCountdown').style.display = 'block';
+    document.getElementById('endlessScoreBox').style.display = 'none';
+    document.getElementById('nextBtn').style.display = 'none';
+    document.getElementById('shareLabel').textContent = `NBA Connections — Daily`;
+    startCountdown();
+    initHome(); // update badge
+  } else if (currentMode === 'archive') {
+    document.getElementById('endMeta').textContent = gameState.gaveUp
+      ? 'You gave up on this puzzle'
+      : `Mistakes: ${gameState.mistakes} / ${gameState.maxMistakes}`;
+    document.getElementById('dailyCountdown').style.display = 'none';
+    document.getElementById('endlessScoreBox').style.display = 'none';
+    document.getElementById('nextBtn').style.display = 'none';
+    document.getElementById('shareLabel').textContent = `NBA Connections — Archive (${document.getElementById('puzzleInfo').textContent})`;
+  } else if (currentMode === 'practice') {
+    document.getElementById('endMeta').textContent = gameState.gaveUp
+      ? 'No worries — practice mode!'
+      : `Mistakes: ${gameState.mistakes} (unlimited)`;
+    document.getElementById('dailyCountdown').style.display = 'none';
+    document.getElementById('endlessScoreBox').style.display = 'none';
+    document.getElementById('nextBtn').style.display = 'inline-block';
+    document.getElementById('nextBtn').textContent = 'New Practice Puzzle →';
+    document.getElementById('shareLabel').textContent = `NBA Connections — Practice`;
+  } else {
+    // Endless
+    if (won) { endlessWins++; endlessStreak++; }
+    else { endlessStreak = 0; }
+    saveEndlessStats();
+    document.getElementById('streakCount').textContent = endlessStreak;
+
+    document.getElementById('endMeta').textContent = won
+      ? `Solved! Streak: ${endlessStreak} 🔥`
+      : `Streak reset. Total solved: ${endlessWins}`;
+    document.getElementById('dailyCountdown').style.display = 'none';
+    document.getElementById('endlessScoreBox').style.display = 'block';
+    document.getElementById('endlessSolvedCount').textContent = endlessWins;
+    document.getElementById('endlessScoreSub').textContent = `Current streak: ${endlessStreak} 🔥`;
+    document.getElementById('shareLabel').textContent = `NBA Connections — Endless #${endlessPuzzleIndex+1}`;
+    document.getElementById('nextBtn').textContent = 'Next Puzzle →';
+
+    const isLast = endlessPuzzleIndex >= ALL_PUZZLES.length - 1;
+    document.getElementById('nextBtn').style.display = isLast ? 'none' : 'inline-block';
+  }
+
+  const endScreen = document.getElementById('endScreen');
+  endScreen.classList.add('show');
+  if (typeof endScreen.scrollIntoView === 'function') {
+    endScreen.scrollIntoView({ behavior:'smooth', block:'center' });
+  }
+}
+
+function startCountdown() {
+  function update() {
+    const now = new Date();
+    const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate()+1);
+    const diff = tomorrow - now;
+    const h = String(Math.floor(diff/3600000)).padStart(2,'0');
+    const m = String(Math.floor((diff%3600000)/60000)).padStart(2,'0');
+    const s = String(Math.floor((diff%60000)/1000)).padStart(2,'0');
+    const el = document.getElementById('countdownTime');
+    if (el) el.textContent = `${h}:${m}:${s}`;
+  }
+  update();
+  countdownInterval = setInterval(update, 1000);
+}
+
+function copyResult() {
+  const emojiMap = {};
+  gameState.puzzle.categories.forEach(c => emojiMap[c.id] = c.emoji);
+  const lines = gameState.guessHistory.map(g => {
+    if (g.correct) return emojiMap[g.catId];
+    return g.sel.map(p => gameState.playerMap[p]).map(id => emojiMap[id]).join('');
+  });
+  const label = currentMode === 'daily'
+    ? `NBA Connections — Daily (${new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'})})`
+    : `NBA Connections — Endless #${endlessPuzzleIndex+1}`;
+  navigator.clipboard.writeText(`${label}\n${lines.join('\n')}`).then(()=>showToast('Copied! 📋'));
+}
+
+// ════════════════════════════════════════════
+//  UTILS
+// ════════════════════════════════════════════
+function shuffle(arr) {
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2000);
+}
+
+function openHowToPlay() {
+  document.getElementById('htpOverlay').classList.add('show');
+}
+
+function closeHowToPlay() {
+  document.getElementById('htpOverlay').classList.remove('show');
+  try { localStorage.setItem('nba_htp_seen', '1'); } catch(e) {}
+}
+
+// ════════════════════════════════════════════
+//  BOOT
+// ════════════════════════════════════════════
+loadStats();
+loadSoundPref();
+initHome();
+
+try {
+  if (!localStorage.getItem('nba_htp_seen')) openHowToPlay();
+} catch(e) {}
+</script>
+</body>
+</html>
