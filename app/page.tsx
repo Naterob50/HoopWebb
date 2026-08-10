@@ -26,15 +26,14 @@ export default function Home() {
       status: 'Live',
       link: '/games/nba-scramble/index.html',
     },
-    {
-      id: 'the-tape',
-      title: 'The Tape',
-      category: 'Video / Film',
-      description: 'Analyze film clips and test your eye for basketball film, play-calling, and player traits.',
-      status: 'Live',
-      link: '/games/the-tape/index.html',
-    },
-  ];
+   {
+  id: "the-tape",
+  title: "The Tape",
+  category: "TRIVIA / CLUES", // or "SCOUTING REPORT"
+  description: "Analyze step-by-step scouting clues and stats to identify the mystery player.",
+  href: "/all-games/the-tape",
+  isLive: true,
+}
 
   return (
     <main className="min-h-screen bg-black text-white flex flex-col items-center justify-between p-6 sm:p-12 relative overflow-hidden bg-[radial-gradient(#1f1f1f_1px,transparent_1px)] [background-size:24px_24px]">
