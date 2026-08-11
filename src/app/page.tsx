@@ -177,6 +177,15 @@ export default function Home() {
             badge="FEATURED"
             status="ONLINE"
           />
+
+ <GameCard 
+            href="/all-games/swish-match" 
+            title="Swish Match" 
+            category="Puzzle"
+            description="Swap Basketball gear to create 3 in a row combo." 
+            badge="FEATURED"
+            status="ONLINE"
+        />
         </section>
 
         {/* Footer */}

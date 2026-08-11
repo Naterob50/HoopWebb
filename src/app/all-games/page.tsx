@@ -34,17 +34,15 @@ const ALL_GAMES = [
     badge: "FEATURED",
     status: "ONLINE",
   },
-  /* 
-  To add a new game in the future, just uncomment and edit this block:
   {
-    slug: "my-new-game",
-    title: "NEW GAME TITLE",
-    category: "SIMULATOR",
-    description: "Short summary of your new basketball game.",
+    slug: "swish-match",
+    title: "Swish Match",
+    category: "Puzzle",
+    description: "Swap basketball gear  to line up 3 in a row combo",
     badge: "NEW",
     status: "ONLINE",
   },
-  */
+  
 ];
 
 export default function AllGamesPage() {
