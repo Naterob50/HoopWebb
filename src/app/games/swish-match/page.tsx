@@ -7,15 +7,15 @@ export default function SwishMatchPage() {
     <main className="min-h-screen bg-black text-white relative court-grid flex flex-col items-center p-4 md:p-6 space-y-6">
       <div className="w-full max-w-5xl flex justify-between items-center py-4 mb-4 border-b border-neutral-800">
         <Link
-          href="/"
+          href="/games"
           className="text-neutral-400 hover:text-orange-500 font-bold text-sm transition flex items-center gap-2 group"
         >
           <span className="group-hover:-translate-x-1 transition-transform">←</span>
-          <span>ARCADE HOME</span>
+          <span>BACK TO GAMES</span>
         </Link>
 
         <div className="flex items-center gap-3">
-          <span className="text-xs font-mono text-neutral-500">// PUZZLE & MATCH-3</span>
+          <span className="text-xs font-mono text-neutral-500">// PUZZLE</span>
           <h1 className="text-xl font-arcade text-orange-500">SWISH MATCH</h1>
         </div>
       </div>
