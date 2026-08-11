@@ -1,0 +1,1759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="description" content="Swish Match — a basketball-themed match-3 puzzle game with 150 levels, power-ups, and a personal leaderboard.">
+<meta name="theme-color" content="#1c1006">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%80%3C/text%3E%3C/svg%3E">
+<title>Swish Match — Basketball Puzzle</title>
+<style>
+  :root{
+    --court-floor:#c9884f;
+    --court-floor-dark:#a8683a;
+    --paint-orange:#e8590c;
+    --paint-orange-dark:#b8430a;
+    --net-white:#f7f3ec;
+    --gold:#f0b429;
+    --ink:#2a1a0f;
+    --shadow: rgba(20,10,0,0.45);
+    --row-blue:#3fb2ff;
+    --box-red:#ff4d4d;
+    --win-green:#4fd67a;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0; padding:0; height:100%;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: radial-gradient(circle at 50% -10%, #3a2413 0%, #1c1006 55%, #0e0703 100%);
+    color:var(--net-white);
+    overflow-x:hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body{
+    animation: pageFadeIn .5s ease both;
+  }
+  @keyframes pageFadeIn{ from{ opacity:0; } to{ opacity:1; } }
+  button{ touch-action: manipulation; }
+  .stage{ min-height:100vh; display:flex; flex-direction:column; align-items:center; padding: 22px 14px 40px; touch-action: manipulation; }
+
+  .scoreboard{
+    width:100%; max-width:560px;
+    background: linear-gradient(180deg, #241608, #150c04);
+    border: 3px solid var(--paint-orange-dark);
+    border-radius: 14px;
+    padding: 14px 18px;
+    display:flex; justify-content:space-between; align-items:center;
+    box-shadow: 0 10px 30px var(--shadow), inset 0 0 0 2px rgba(240,180,41,0.15);
+    margin-bottom: 10px;
+  }
+  .brand{ display:flex; flex-direction:column; line-height:1.05; }
+  .brand .title{
+    font-family: Georgia, 'Times New Roman', serif;
+    font-weight:900; font-size: 26px; letter-spacing: 1px;
+    color: var(--gold); text-shadow: 0 2px 0 #6b3e00;
+  }
+  .brand .sub{ font-size: 11px; letter-spacing: 2px; color: #d99a4e; text-transform: uppercase; margin-top:2px; }
+  .stat-block{ text-align:right; }
+  .stat-block .label{ font-size: 10px; letter-spacing:2px; text-transform:uppercase; color:#c9a877; }
+  .stat-block .value{ font-family: 'Courier New', monospace; font-weight:800; font-size: 26px; color:var(--net-white); }
+  .stats-row{ display:flex; gap:16px; }
+
+  .level-bar{
+    width:100%; max-width:560px;
+    display:flex; flex-direction:column; gap:6px;
+    margin-bottom:12px;
+  }
+  .level-bar .row{ display:flex; justify-content:space-between; font-size:11px; letter-spacing:1px; color:#d9c3a0; text-transform:uppercase; }
+
+  /* ---- How to Play dropdown ---- */
+  .howto-toggle{
+    width:100%; max-width:560px;
+    margin-bottom:8px;
+    display:flex; align-items:center; justify-content:center; gap:6px;
+  }
+  .howto-panel{
+    width:100%; max-width:560px;
+    overflow:hidden;
+    max-height:0; opacity:0;
+    transition: max-height .35s ease, opacity .3s ease, padding .35s ease, margin .35s ease;
+    background: rgba(0,0,0,0.28);
+    border: 1px solid rgba(240,180,41,0.3);
+    border-radius: 12px;
+    padding: 0 18px;
+    margin-bottom: 0;
+    box-sizing: border-box;
+  }
+  .howto-panel.open{
+    max-height: 700px; opacity:1;
+    padding: 16px 18px;
+    margin-bottom: 14px;
+  }
+  .howto-panel h3{ margin:0 0 8px; color:var(--gold); font-family: Georgia, serif; font-size:18px; }
+  .howto-panel h4{ margin:14px 0 6px; color:var(--gold); font-size:12px; letter-spacing:1px; text-transform:uppercase; }
+  .howto-panel p{ font-size:13px; line-height:1.6; color:#d9c3a0; margin:6px 0; }
+  .howto-panel ul{ margin:4px 0; padding-left:20px; }
+  .howto-panel li{ font-size:13px; line-height:1.75; color:#d9c3a0; }
+  .howto-panel li strong{ color: var(--net-white); }
+  .progress-track{
+    width:100%; height:12px; border-radius:999px;
+    background: rgba(0,0,0,0.35);
+    border:1px solid rgba(240,180,41,0.3);
+    overflow:hidden;
+  }
+  .progress-fill{
+    height:100%; width:0%;
+    background: linear-gradient(90deg, var(--gold), var(--win-green));
+    transition: width .35s ease;
+  }
+
+  .legend{
+    width:100%; max-width:560px;
+    display:flex; justify-content:center; gap:14px; flex-wrap:wrap;
+    margin-bottom:14px; font-size:11px; color:#cbb08a;
+  }
+  .legend span{
+    display:flex; align-items:center; gap:5px;
+    background: rgba(0,0,0,0.25); padding:4px 9px; border-radius: 999px;
+    border:1px solid rgba(240,180,41,0.25);
+  }
+  .legend .swatch{ width:14px;height:14px;border-radius:50%; display:inline-flex;align-items:center;justify-content:center; font-size:9px; }
+  .legend .sw-row{ background: radial-gradient(circle, #6fd0ff, var(--row-blue)); }
+  .legend .sw-box{ background: radial-gradient(circle, #ff9d9d, var(--box-red)); }
+  .legend .sw-wild{ background: radial-gradient(circle, #fff2b0, var(--gold)); }
+
+  .court-wrap{
+    position:relative; padding: 16px; border-radius: 18px;
+    background: linear-gradient(180deg, var(--paint-orange), var(--paint-orange-dark));
+    box-shadow: 0 18px 40px var(--shadow), inset 0 0 0 4px rgba(255,255,255,0.08);
+  }
+  .court-wrap::before{ content:""; position:absolute; inset:8px; border: 2px solid rgba(255,255,255,0.35); border-radius: 12px; pointer-events:none; }
+  .court-wrap::after{ content:""; position:absolute; left:50%; top:8px; bottom:8px; width:2px; background: rgba(255,255,255,0.35); pointer-events:none; }
+
+  #board{
+    position:relative; display:grid;
+    grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(8, 1fr);
+    gap: 6px;
+    width: min(88vw, 460px); height: min(88vw, 460px);
+    background: repeating-linear-gradient(90deg, var(--court-floor), var(--court-floor) 34px, var(--court-floor-dark) 34px, var(--court-floor-dark) 36px);
+    border-radius: 8px; padding: 8px;
+  }
+  .cell{
+    position:relative; display:flex; align-items:center; justify-content:center;
+    border-radius: 10px; background: rgba(20,10,0,0.18);
+    cursor:pointer; user-select:none; -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    transition: background .15s ease;
+  }
+  @media (hover:hover){
+    .cell:hover{ background: rgba(255,255,255,0.08); }
+  }
+  .gem{
+    width:82%; height:82%; display:flex; align-items:center; justify-content:center;
+    font-size: clamp(20px, 4.6vw, 30px);
+    border-radius: 50%;
+    background: radial-gradient(circle at 32% 28%, rgba(255,255,255,0.55), rgba(255,255,255,0.05) 40%, rgba(0,0,0,0.25) 100%);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.45), inset 0 0 0 2px rgba(255,255,255,0.15);
+    transition: transform .16s ease;
+    animation: drop .28s ease;
+    filter: drop-shadow(0 1px 1px rgba(0,0,0,0.4));
+  }
+  .gem.selected{ transform: scale(1.14); box-shadow: 0 0 0 3px var(--gold), 0 4px 10px rgba(0,0,0,0.5); }
+  .gem.hint-glow{ animation: hintPulse 0.7s ease-in-out 2; z-index: 4; }
+  @keyframes hintPulse{
+    0%,100%{ box-shadow: 0 0 0 3px rgba(240,180,41,0.9), 0 0 16px 4px rgba(240,180,41,0.6); transform: scale(1); }
+    50%{ box-shadow: 0 0 0 5px rgba(255,255,255,0.95), 0 0 26px 10px rgba(240,180,41,0.85); transform: scale(1.12); }
+  }
+  .gem.matched{ animation: pop .32s ease forwards; }
+  .gem.sp-row{ box-shadow: 0 0 0 3px var(--row-blue), 0 0 14px 2px rgba(63,178,255,0.7), inset 0 0 0 2px rgba(255,255,255,0.2); }
+  .gem.sp-col{ box-shadow: 0 0 0 3px #6fffb0, 0 0 14px 2px rgba(111,255,176,0.7), inset 0 0 0 2px rgba(255,255,255,0.2); }
+  .gem.sp-box{ box-shadow: 0 0 0 3px var(--box-red), 0 0 16px 3px rgba(255,77,77,0.75), inset 0 0 0 2px rgba(255,255,255,0.2); animation: drop .28s ease, boxPulse 1.1s ease-in-out infinite; }
+  .gem.sp-press{ box-shadow: 0 0 0 3px #b06fff, 0 0 16px 3px rgba(176,111,255,0.75), inset 0 0 0 2px rgba(255,255,255,0.2); animation: drop .28s ease, boxPulse 0.9s ease-in-out infinite; }
+  .gem.sp-alley{ box-shadow: 0 0 0 3px #ff8a3d, 0 0 18px 4px rgba(255,138,61,0.8), inset 0 0 0 2px rgba(255,255,255,0.2); animation: drop .28s ease, wildSpin 1.6s linear infinite; }
+  .gem.sp-wild{
+    background: radial-gradient(circle at 35% 30%, #fff7d6, var(--gold) 60%, #a86e00 100%);
+    box-shadow: 0 0 0 3px var(--gold), 0 0 18px 4px rgba(240,180,41,0.8);
+    animation: drop .28s ease, wildSpin 2.4s linear infinite;
+  }
+  .gem.sp-created{ animation: createdPulse .5s ease; }
+  .gem.locked-dim{ filter: grayscale(0.5) brightness(0.6); }
+
+  /* ---- Power-up activation effects layer ---- */
+  .fx-layer{
+    position:absolute; inset:0;
+    display:grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+    gap: 6px; padding: 8px;
+    pointer-events:none;
+    z-index: 6;
+  }
+  .fx-beam{ position:relative; border-radius:10px; }
+  .fx-beam-row{ background: linear-gradient(90deg, transparent, var(--fx-color, rgba(255,255,255,0.85)), transparent); animation: fxRowSweep .5s ease-out forwards; }
+  .fx-beam-col{ background: linear-gradient(180deg, transparent, var(--fx-color, rgba(255,255,255,0.85)), transparent); animation: fxColSweep .5s ease-out forwards; }
+  .fx-c-blue{ --fx-color: rgba(63,178,255,0.9); }
+  .fx-c-green{ --fx-color: rgba(111,255,176,0.9); }
+  .fx-c-purple{ --fx-color: rgba(176,111,255,0.9); }
+  .fx-c-orange{ --fx-color: rgba(255,138,61,0.95); }
+  @keyframes fxRowSweep{ 0%{ opacity:0; transform: scaleX(0.15); } 35%{ opacity:1; transform: scaleX(1.02); } 100%{ opacity:0; transform: scaleX(1.08); } }
+  @keyframes fxColSweep{ 0%{ opacity:0; transform: scaleY(0.15); } 35%{ opacity:1; transform: scaleY(1.02); } 100%{ opacity:0; transform: scaleY(1.08); } }
+
+  .fx-cell{ position:relative; }
+  .fx-ring{
+    position:absolute; top:50%; left:50%; width:230%; height:230%;
+    transform:translate(-50%,-50%) scale(0.15); border-radius:50%; opacity:0;
+  }
+  .fx-ring-red{ box-shadow:0 0 0 4px rgba(255,77,77,0.9), 0 0 42px 12px rgba(255,77,77,0.5); animation: fxRingPop .55s ease-out forwards; }
+  .fx-ring-gold{ box-shadow:0 0 0 4px rgba(240,180,41,0.95), 0 0 46px 14px rgba(240,180,41,0.55); animation: fxRingPop .6s ease-out forwards; }
+  .fx-ring-orange{ box-shadow:0 0 0 4px rgba(255,138,61,0.95), 0 0 42px 12px rgba(255,138,61,0.55); animation: fxRingPop .55s ease-out forwards; }
+  @keyframes fxRingPop{ 0%{ opacity:0; transform:translate(-50%,-50%) scale(0.15); } 30%{ opacity:1; } 100%{ opacity:0; transform:translate(-50%,-50%) scale(1.2); } }
+
+  .fx-star{
+    position:absolute; top:50%; left:50%; font-size:2.4em; color: var(--gold);
+    transform:translate(-50%,-50%) scale(0.2) rotate(0deg); opacity:0;
+    animation: fxStarPop .65s ease-out forwards;
+    text-shadow: 0 0 12px rgba(240,180,41,0.9);
+  }
+  @keyframes fxStarPop{
+    0%{ opacity:0; transform:translate(-50%,-50%) scale(0.2) rotate(0deg); }
+    40%{ opacity:1; transform:translate(-50%,-50%) scale(1.5) rotate(150deg); }
+    100%{ opacity:0; transform:translate(-50%,-50%) scale(2.3) rotate(280deg); }
+  }
+
+  .fx-flash{
+    position:relative; border-radius:10px;
+    background: radial-gradient(circle, rgba(255,255,255,0.95), rgba(240,180,41,0.5) 55%, transparent 100%);
+    opacity:0; animation: fxFlashPop .75s ease-out forwards;
+  }
+  @keyframes fxFlashPop{ 0%{ opacity:0; } 25%{ opacity:1; } 100%{ opacity:0; } }
+
+  /* ---- Confetti celebration ---- */
+  .confetti-piece{
+    position:fixed; top:-20px; z-index:80; pointer-events:none;
+    border-radius:2px;
+    animation: confettiFall linear forwards;
+  }
+  @keyframes confettiFall{
+    0%{ transform: translateY(0) rotate(0deg); opacity:1; }
+    100%{ transform: translateY(105vh) rotate(540deg); opacity:0.9; }
+  }
+
+  @keyframes boxPulse{ 0%,100%{ transform: scale(1); } 50%{ transform: scale(1.08); } }
+  @keyframes wildSpin{ from{ filter: hue-rotate(0deg) drop-shadow(0 1px 1px rgba(0,0,0,0.4)); } to{ filter: hue-rotate(360deg) drop-shadow(0 1px 1px rgba(0,0,0,0.4)); } }
+  @keyframes createdPulse{ 0%{ transform: scale(1.6); opacity:0.4; } 100%{ transform: scale(1); opacity:1; } }
+  @keyframes drop{ from{ transform: translateY(-140%) scale(0.8); opacity:0; } to{ transform: translateY(0) scale(1); opacity:1; } }
+  @keyframes pop{ 0%{ transform: scale(1); opacity:1; } 60%{ transform: scale(1.35); opacity:0.8; } 100%{ transform: scale(0); opacity:0; } }
+  @keyframes shake{ 0%,100%{ transform: translateX(0); } 25%{ transform: translateX(-5px); } 75%{ transform: translateX(5px); } }
+  .gem.invalid{ animation: shake .28s ease; }
+
+  #toast{
+    margin-top:16px; min-height: 26px; font-weight:700; letter-spacing:1px;
+    color: var(--gold); text-transform:uppercase; font-size:14px;
+    opacity:0; transition: opacity .25s ease; text-align:center;
+  }
+  #toast.show{ opacity:1; }
+
+  .controls{ margin-top: 18px; display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
+  button.ctl{
+    font-family:inherit; font-weight:700; letter-spacing: 1px; text-transform:uppercase; font-size:12px;
+    color: var(--ink);
+    background: linear-gradient(180deg, var(--gold), #c98a1a);
+    border:none; padding: 10px 20px; border-radius: 999px; cursor:pointer;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.4);
+    transition: transform .12s ease, filter .15s ease, box-shadow .15s ease;
+  }
+  button.ctl:hover{ filter: brightness(1.08); box-shadow: 0 8px 18px rgba(0,0,0,0.45); }
+  button.ctl.busy-disabled{ opacity: 0.4; pointer-events: none; filter: grayscale(0.5); }
+  button.ctl:active{ transform: translateY(2px); filter: brightness(0.97); }
+  button.ctl.secondary{ background: linear-gradient(180deg, #3a2717, #241708); color: var(--net-white); }
+  button.ctl:focus-visible{ outline: 2px solid var(--gold); outline-offset: 2px; }
+
+  #overlay{
+    position:fixed; inset:0; background: rgba(8,4,1,0.85);
+    display:none; align-items:center; justify-content:center; z-index: 50;
+    padding: 20px;
+  }
+  #overlay.show{ display:flex; }
+  .final-card{
+    background: linear-gradient(180deg, #241608, #150c04);
+    border: 3px solid var(--gold); border-radius: 16px;
+    padding: 34px 40px; text-align:center; max-width: 340px;
+    max-height: 88vh; overflow-y: auto;
+  }
+  .final-card .buzzer{ font-size: 44px; margin: 6px 0; }
+  .final-card h2{ margin:0 0 6px; font-family: Georgia, serif; color: var(--gold); font-size: 24px; }
+  .final-card p{ margin: 6px 0 18px; color:#d9c3a0; font-size:14px; line-height:1.5; }
+  .final-score{ font-family:'Courier New', monospace; font-size: 30px; font-weight:800; color: var(--net-white); margin-bottom: 12px; }
+  .extra-actions{ display:flex; gap:8px; justify-content:center; margin-top:10px; flex-wrap:wrap; }
+  .extra-actions button{
+    font-family:inherit; font-size:11px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase;
+    color: var(--net-white); background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(240,180,41,0.4); border-radius: 999px;
+    padding: 8px 14px; cursor:pointer;
+    transition: background .15s ease, transform .1s ease;
+    touch-action: manipulation;
+  }
+  .extra-actions button:hover{ background: rgba(255,255,255,0.16); }
+  .extra-actions button:active{ transform: translateY(1px); }
+
+  /* ---- Reusable modal overlay (leaderboard / pause / confirm) ---- */
+  .modal-overlay{
+    position:fixed; inset:0; background: rgba(8,4,1,0.85);
+    display:none; align-items:center; justify-content:center; z-index: 60;
+    padding: 20px;
+  }
+  .modal-overlay.show{ display:flex; }
+  .modal-card{
+    background: linear-gradient(180deg, #241608, #150c04);
+    border: 3px solid var(--gold); border-radius: 16px;
+    padding: 26px 24px; text-align:center; max-width: 380px; width:100%;
+    max-height: 88vh; overflow-y: auto; display:flex; flex-direction:column;
+  }
+  .modal-card h2{ margin:0 0 4px; font-family: Georgia, serif; color: var(--gold); font-size: 22px; }
+  .buzzer{ font-size: 44px; margin: 6px 0; }
+  .lb-hint{ font-size:11px; color:#a98a5e; margin-bottom:14px; }
+  .lb-list{ overflow-y:auto; margin-bottom:16px; display:flex; flex-direction:column; gap:8px; }
+  .lb-row{
+    display:flex; align-items:center; gap:10px;
+    background: rgba(255,255,255,0.05); border-radius:10px; padding:8px 12px;
+    border: 1px solid rgba(240,180,41,0.15);
+  }
+  .lb-row:first-child{ border-color: var(--gold); background: rgba(240,180,41,0.12); }
+  .lb-rank{ font-family:'Courier New', monospace; font-weight:800; color: var(--gold); width:28px; text-align:left; font-size:14px; }
+  .lb-info{ flex:1; text-align:left; font-size:12.5px; color:var(--net-white); line-height:1.4; }
+  .lb-date{ font-size:10px; color:#a98a5e; }
+  .lb-score{ font-family:'Courier New', monospace; font-weight:800; font-size:16px; color: var(--win-green); }
+  .lb-empty{ font-size:13px; color:#c9a877; padding: 10px 0 4px; }
+  .modal-card p{ color:#d9c3a0; font-size:14px; margin: 6px 0 18px; line-height:1.5; }
+  .modal-card h4{ margin:14px 0 6px; color:var(--gold); font-size:12px; letter-spacing:1px; text-transform:uppercase; }
+  .modal-card ul{ margin:4px 0; padding-left:20px; }
+  .modal-card li{ font-size:13px; line-height:1.75; color:#d9c3a0; }
+  .modal-card li strong{ color: var(--net-white); }
+
+  @media (max-width: 420px){
+    .brand .title{ font-size:18px; }
+    .brand .sub{ font-size:9px; letter-spacing:1px; }
+    .stat-block .value{ font-size:17px; }
+    .stat-block .label{ font-size:9px; }
+    .stats-row{ gap:10px; }
+    .scoreboard{ padding: 12px 12px; }
+    .legend{ font-size:10px; gap:8px; }
+    .controls{ gap:8px; }
+    button.ctl{ padding: 9px 14px; font-size:11px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="scoreboard">
+    <div class="brand">
+      <span class="title" id="levelName">SWISH MATCH</span>
+      <span class="sub" id="levelSub">Level 1 of 8</span>
+    </div>
+    <div class="stats-row">
+      <div class="stat-block">
+        <div class="label">Score</div>
+        <div class="value" id="scoreVal">0</div>
+      </div>
+      <div class="stat-block" id="timeStatBlock">
+        <div class="label">Time</div>
+        <div class="value" id="timeVal">00:00</div>
+      </div>
+      <div class="stat-block" id="movesStatBlock">
+        <div class="label">Moves</div>
+        <div class="value" id="movesVal">20</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="ctl secondary howto-toggle" id="howtoToggle" aria-expanded="false" aria-controls="howtoPanel">❓ How to Play ▾</button>
+  <div class="howto-panel" id="howtoPanel">
+    <h3>How to Play</h3>
+    <p><strong>Goal:</strong> Swap two adjacent pieces to match 3 or more of the same kind. Reach the target score before your moves run out to clear the level and advance.</p>
+    <p><strong>Controls:</strong> Tap a piece, then tap an adjacent piece to swap them. A swap that creates a match happens; otherwise the pieces shake and swap back — no move is wasted.</p>
+    <h4>Power-Ups</h4>
+    <p>Power-ups unlock gradually as you level up, so you can learn the basics first:</p>
+    <ul>
+      <li>➡ <strong>Fast Break</strong> (unlocks Level 10) — match 4 in a row or column to clear that whole line.</li>
+      <li>✚ <strong>Slam Dunk</strong> (unlocks Level 25) — match an L or T shape to blast a 3×3 area.</li>
+      <li>▦ <strong>Full Press</strong> (unlocks Level 40) — match a 2×2 square to clear its row <em>and</em> column.</li>
+      <li>★ <strong>Buzzer Beater</strong> (unlocks Level 60) — match 5 in a line to create a wild star. Swap it with any piece to clear every piece of that type — swap two together to clear the whole board!</li>
+      <li>✛ <strong>Alley-Oop</strong> (unlocks Level 80) — match 6 or more in a line for a big plus-shaped blast.</li>
+    </ul>
+    <h4>Tips</h4>
+    <p><strong>Combos:</strong> Chain reactions multiply your score — each cascading match after the first scores more than the last, so set up multi-step chains when you can.</p>
+    <p><strong>Moves &amp; Levels:</strong> Every level has a fixed move budget and target score. Run out of moves first and you'll retry the exact same puzzle with a fresh set of moves. A live timer tracks how long each attempt takes — your best completion times are saved to your personal leaderboard alongside your score.</p>
+    <p>Use <strong>Pause</strong> to step away, <strong>Quit</strong> to bail back to Level 1, and <strong>Sound</strong> to toggle audio — all available anytime from the buttons below the board.</p>
+    <p><strong>🌀 Zen Mode:</strong> No timer, no move limit, every power-up unlocked from the start. Keep matching on an endless board until no matches remain — chase your highest possible score. Switch to it anytime with the Zen Mode button.</p>
+    <p><strong>💡 Hint:</strong> Stuck? Tap Hint to glow-highlight a valid move. You get 3 per level (5 in Zen Mode) — they refresh on Retry or a new level.</p>
+  </div>
+
+  <div class="level-bar" id="levelBar">
+    <div class="row"><span>Progress</span><span id="targetLabel">0 / 800</span></div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+
+  <div class="legend" id="legendBar">
+    <span data-powerup="R"><span class="swatch sw-row">➡</span> 4 in a row: Fast Break — clears the line</span>
+    <span data-powerup="X"><span class="swatch sw-box">✚</span> L/T shape: Slam Dunk — clears 3×3</span>
+    <span data-powerup="P"><span class="swatch" style="background:radial-gradient(circle,#d9b3ff,#b06fff);">▦</span> 2×2 square: Full Press — clears row + column</span>
+    <span data-powerup="A"><span class="swatch" style="background:radial-gradient(circle,#ffc79d,#ff8a3d);">✛</span> 6 in a row: Alley-Oop — big plus-shaped blast</span>
+    <span data-powerup="S"><span class="swatch sw-wild">★</span> 5 in a row: Buzzer Beater — clears a type</span>
+    <span id="legendNone">No power-ups yet — just match 3+ to clear pieces. Keep playing to unlock your first one!</span>
+  </div>
+
+  <div class="court-wrap">
+    <div id="board"></div>
+  </div>
+
+  <div id="toast"></div>
+
+  <div class="controls">
+    <button class="ctl" id="retryBtn">Restart Level</button>
+    <button class="ctl secondary" id="hintBtn" aria-label="Show a hint">💡 Hint (3)</button>
+    <button class="ctl secondary" id="modeToggleBtn" aria-label="Switch game mode">🌀 Zen Mode</button>
+    <button class="ctl secondary" id="pauseBtn" aria-label="Pause game">⏸ Pause</button>
+    <button class="ctl secondary" id="quitBtn" aria-label="Quit to Level 1">✕ Quit</button>
+    <button class="ctl secondary" id="leaderboardBtn" aria-label="Open personal leaderboard">🏆 Leaderboard</button>
+    <button class="ctl secondary" id="muteBtn" aria-label="Toggle sound">🔊 Mute</button>
+  </div>
+</div>
+
+<div id="overlay">
+  <div class="final-card">
+    <div class="buzzer" id="overlayIcon">🏀</div>
+    <h2 id="overlayTitle">Level 1</h2>
+    <p id="overlayMessage">Score 800 points in 20 moves.</p>
+    <div class="final-score" id="overlayScore"></div>
+    <button class="ctl" id="overlayBtn">Start Level</button>
+    <div class="extra-actions" id="overlayExtras" style="display:none;">
+      <button id="overlayShareBtn">📤 Share Card</button>
+      <button id="overlayLeaderBtn">🏆 Leaderboard</button>
+    </div>
+  </div>
+</div>
+
+<div id="leaderboardOverlay" class="modal-overlay">
+  <div class="modal-card">
+    <h2>🏆 Personal Leaderboard</h2>
+    <div class="lb-hint">Your best completed-level scores</div>
+    <div class="lb-list" id="lbList">Loading…</div>
+    <button class="ctl secondary" id="lbCloseBtn">Close</button>
+  </div>
+</div>
+
+<div id="pauseOverlay" class="modal-overlay">
+  <div class="modal-card" style="max-width:300px;">
+    <div class="buzzer">⏸</div>
+    <h2>Paused</h2>
+    <p>Take a breather — your board is exactly as you left it.</p>
+    <button class="ctl" id="resumeBtn">Resume</button>
+  </div>
+</div>
+
+<div id="confirmOverlay" class="modal-overlay">
+  <div class="modal-card" style="max-width:320px;">
+    <div class="buzzer">🚪</div>
+    <h2>Quit This Run?</h2>
+    <p>You'll lose progress on the current level and head back to Level 1.</p>
+    <div class="extra-actions" style="justify-content:center;">
+      <button class="ctl" id="confirmYesBtn" style="padding:10px 20px;border-radius:999px;">Quit to Level 1</button>
+      <button class="ctl secondary" id="confirmNoBtn" style="padding:10px 20px;border-radius:999px;">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="welcomeOverlay" class="modal-overlay show">
+  <div class="modal-card" style="max-width:460px; text-align:left;">
+    <div class="buzzer" style="text-align:center;">🏀</div>
+    <h2 style="text-align:center;">Welcome to Swish Match</h2>
+    <div style="max-height:50vh; overflow-y:auto; margin:10px 0 4px;">
+      <p><strong>Goal:</strong> Swap two adjacent pieces to match 3 or more of the same kind. Reach the target score before your moves run out to clear the level and advance.</p>
+      <p><strong>Controls:</strong> Tap a piece, then tap an adjacent piece to swap them. A swap that creates a match happens; otherwise the pieces shake and swap back — no move is wasted.</p>
+      <h4>Power-Ups</h4>
+      <p>These unlock gradually as you level up — early levels are just pure matching so you can learn the ropes:</p>
+      <ul>
+        <li>➡ <strong>Fast Break</strong> (unlocks Level 10) — match 4 in a row or column to clear that whole line.</li>
+        <li>✚ <strong>Slam Dunk</strong> (unlocks Level 25) — match an L or T shape to blast a 3×3 area.</li>
+        <li>▦ <strong>Full Press</strong> (unlocks Level 40) — match a 2×2 square to clear its row <em>and</em> column.</li>
+        <li>★ <strong>Buzzer Beater</strong> (unlocks Level 60) — match 5 in a line to create a wild star. Swap it with any piece to clear every piece of that type — swap two together to clear the whole board!</li>
+        <li>✛ <strong>Alley-Oop</strong> (unlocks Level 80) — match 6 or more in a line for a big plus-shaped blast.</li>
+      </ul>
+      <h4>Tips</h4>
+      <p><strong>Combos:</strong> Chain reactions multiply your score — each cascading match after the first scores more than the last.</p>
+      <p><strong>Moves &amp; Levels:</strong> Every level has a fixed move budget and target score. Run out of moves and you'll retry the exact same puzzle. A live timer tracks each attempt and your best times are saved to your personal leaderboard.</p>
+      <p>Use <strong>Pause</strong>, <strong>Quit</strong>, and <strong>Sound</strong> anytime from the buttons below the board. You can reopen these instructions later from the <strong>❓ How to Play</strong> dropdown.</p>
+    </div>
+    <button class="ctl" id="welcomeStartBtn" style="align-self:center; margin-top:8px;">Let's Play 🏀</button>
+    <button class="ctl secondary" id="welcomeZenBtn" style="align-self:center; margin-top:8px;">🌀 Try Zen Mode (Endless, No Limits)</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  const SIZE = 8;
+  const PIECES_FULL = ['🏀','👟','🎽','🏆','🥇','🔥']; // ball, shoe, jersey, trophy, medal, hot streak
+
+  const LEVELS = [
+    {seed: 101, moves: 12, target: 240, types: 4, name:"Warm-Up Drill"},
+    {seed: 202, moves: 12, target: 260, types: 4, name:"Layup Line"},
+    {seed: 303, moves: 12, target: 270, types: 5, name:"Free Throw Focus"},
+    {seed: 404, moves: 13, target: 280, types: 5, name:"Full Court Press"},
+    {seed: 505, moves: 13, target: 290, types: 6, name:"Pick and Roll"},
+    {seed: 606, moves: 13, target: 300, types: 6, name:"Fast Break Frenzy"},
+    {seed: 707, moves: 13, target: 310, types: 6, name:"Playoff Push"},
+    {seed: 808, moves: 13, target: 320, types: 6, name:"Championship Round"},
+    {seed: 909, moves: 14, target: 330, types: 6, name:"Overtime Thriller"},
+    {seed: 1010, moves: 14, target: 340, types: 6, name:"Sudden Death"},
+    {seed: 1111, moves: 14, target: 350, types: 6, name:"Rivalry Night"},
+    {seed: 1212, moves: 14, target: 360, types: 6, name:"Conference Finals"},
+    {seed: 1313, moves: 14, target: 370, types: 6, name:"Home Court Heat"},
+    {seed: 1414, moves: 15, target: 380, types: 6, name:"Elite Eight"},
+    {seed: 1515, moves: 15, target: 390, types: 6, name:"Final Four"},
+    {seed: 1616, moves: 15, target: 400, types: 6, name:"MVP Showdown"},
+    {seed: 1717, moves: 15, target: 410, types: 6, name:"Double Overtime"},
+    {seed: 1818, moves: 15, target: 420, types: 6, name:"Buzzer to Buzzer"},
+    {seed: 1919, moves: 16, target: 430, types: 6, name:"Legacy Game"},
+    {seed: 2020, moves: 16, target: 440, types: 6, name:"Hall of Fame Bid"},
+    {seed: 2121, moves: 16, target: 450, types: 6, name:"Dynasty Builder"},
+    {seed: 2222, moves: 16, target: 460, types: 6, name:"Undefeated Season"},
+    {seed: 2323, moves: 16, target: 470, types: 6, name:"Perfect Game"},
+    {seed: 2424, moves: 17, target: 480, types: 6, name:"World Tour Finale"},
+    {seed: 2525, moves: 17, target: 490, types: 6, name:"Legend Status"},
+    {seed: 2626, moves: 17, target: 500, types: 6, name:"GOAT Run"},
+    {seed: 2727, moves: 17, target: 510, types: 6, name:"Ring Chase"},
+    {seed: 2828, moves: 17, target: 520, types: 6, name:"Repeat Bid"},
+    {seed: 2929, moves: 18, target: 530, types: 6, name:"Three-peat Watch"},
+    {seed: 3030, moves: 18, target: 540, types: 6, name:"Statement Game"},
+    {seed: 3131, moves: 18, target: 550, types: 6, name:"Signature Win"},
+    {seed: 3232, moves: 18, target: 560, types: 6, name:"Clutch Gene"},
+    {seed: 3333, moves: 18, target: 570, types: 6, name:"Ice in the Veins"},
+    {seed: 3434, moves: 19, target: 580, types: 6, name:"Cold Blooded"},
+    {seed: 3535, moves: 19, target: 590, types: 6, name:"No Fear Factor"},
+    {seed: 3636, moves: 19, target: 600, types: 6, name:"Mamba Mentality"},
+    {seed: 3737, moves: 19, target: 610, types: 6, name:"Relentless Pursuit"},
+    {seed: 3838, moves: 19, target: 620, types: 6, name:"Iron Will"},
+    {seed: 3939, moves: 20, target: 630, types: 6, name:"Unshakeable"},
+    {seed: 4040, moves: 20, target: 640, types: 6, name:"Timeless Form"},
+    {seed: 4141, moves: 20, target: 650, types: 6, name:"One-Man Show"},
+    {seed: 4242, moves: 20, target: 660, types: 6, name:"Impossible Angle"},
+    {seed: 4343, moves: 20, target: 670, types: 6, name:"Against All Odds"},
+    {seed: 4444, moves: 21, target: 680, types: 6, name:"Miracle Worker"},
+    {seed: 4545, moves: 21, target: 690, types: 6, name:"Living Legend"},
+    {seed: 4646, moves: 21, target: 700, types: 6, name:"Immortal"},
+    {seed: 4747, moves: 21, target: 710, types: 6, name:"World Stage"},
+    {seed: 4848, moves: 21, target: 720, types: 6, name:"Global Icon"},
+    {seed: 4949, moves: 22, target: 740, types: 6, name:"Century Club"},
+    {seed: 5050, moves: 22, target: 1050, types: 6, name:"Franchise Cornerstone"},
+    {seed: 5151, moves: 22, target: 1080, types: 6, name:"Dynasty Continues"},
+    {seed: 5252, moves: 22, target: 1090, types: 6, name:"Streak Keeper"},
+    {seed: 5353, moves: 22, target: 1120, types: 6, name:"Unrivaled"},
+    {seed: 5454, moves: 23, target: 1160, types: 6, name:"Peak Form"},
+    {seed: 5555, moves: 23, target: 1190, types: 6, name:"Apex Predator"},
+    {seed: 5656, moves: 23, target: 1200, types: 6, name:"Court Vision"},
+    {seed: 5757, moves: 23, target: 1230, types: 6, name:"Silent Assassin"},
+    {seed: 5858, moves: 23, target: 1260, types: 6, name:"Clutch Royalty"},
+    {seed: 5959, moves: 24, target: 1300, types: 6, name:"Legacy Cement"},
+    {seed: 6060, moves: 24, target: 1320, types: 6, name:"Rafter Retired"},
+    {seed: 6161, moves: 24, target: 1370, types: 6, name:"Statue Worthy"},
+    {seed: 6262, moves: 24, target: 1390, types: 6, name:"Eternal Flame"},
+    {seed: 6363, moves: 24, target: 1430, types: 6, name:"Beyond Greatness"},
+    {seed: 6464, moves: 25, target: 1460, types: 6, name:"Transcendent"},
+    {seed: 6565, moves: 25, target: 1500, types: 6, name:"Mythic Status"},
+    {seed: 6666, moves: 25, target: 1530, types: 6, name:"Folklore Chapter"},
+    {seed: 6767, moves: 25, target: 1570, types: 6, name:"Endless Prime"},
+    {seed: 6868, moves: 25, target: 1600, types: 6, name:"Timeless Echo"},
+    {seed: 6969, moves: 26, target: 1640, types: 6, name:"Infinite Range"},
+    {seed: 7070, moves: 26, target: 1650, types: 6, name:"Cosmic Reach"},
+    {seed: 7171, moves: 26, target: 1710, types: 6, name:"Stratosphere"},
+    {seed: 7272, moves: 26, target: 1750, types: 6, name:"Supernova"},
+    {seed: 7373, moves: 26, target: 1790, types: 6, name:"Galaxy's Best"},
+    {seed: 7474, moves: 27, target: 1830, types: 6, name:"Universal MVP"},
+    {seed: 7575, moves: 27, target: 1880, types: 6, name:"Final Ascension"},
+    {seed: 7676, moves: 27, target: 1930, types: 6, name:"Ultimate Legend"},
+    {seed: 7777, moves: 27, target: 1970, types: 6, name:"Iron Curtain Defense"},
+    {seed: 7878, moves: 28, target: 2020, types: 6, name:"Unstoppable Force"},
+    {seed: 7979, moves: 28, target: 2060, types: 6, name:"Paint Monster"},
+    {seed: 8080, moves: 28, target: 2100, types: 6, name:"Rim Protector"},
+    {seed: 8181, moves: 28, target: 2170, types: 6, name:"Glass Cleaner"},
+    {seed: 8282, moves: 28, target: 2210, types: 6, name:"Triple-Double Machine"},
+    {seed: 8383, moves: 29, target: 2270, types: 6, name:"Assist King"},
+    {seed: 8484, moves: 29, target: 2310, types: 6, name:"Point God"},
+    {seed: 8585, moves: 29, target: 2380, types: 6, name:"Sixth Man Legend"},
+    {seed: 8686, moves: 29, target: 2440, types: 6, name:"Bench Mob Boss"},
+    {seed: 8787, moves: 29, target: 2490, types: 6, name:"Two-Way Star"},
+    {seed: 8888, moves: 30, target: 2530, types: 6, name:"Defensive Player of the Year"},
+    {seed: 8989, moves: 30, target: 2600, types: 6, name:"Scoring Title"},
+    {seed: 9090, moves: 30, target: 2660, types: 6, name:"All-NBA First Team"},
+    {seed: 9191, moves: 30, target: 2730, types: 6, name:"All-Star Starter"},
+    {seed: 9292, moves: 30, target: 2800, types: 6, name:"Olympic Gold"},
+    {seed: 9393, moves: 31, target: 2840, types: 6, name:"World Cup Champion"},
+    {seed: 9494, moves: 31, target: 2910, types: 6, name:"International Icon"},
+    {seed: 9595, moves: 31, target: 3000, types: 6, name:"Basketball Royalty"},
+    {seed: 9696, moves: 31, target: 3070, types: 6, name:"Hardwood Deity"},
+    {seed: 9797, moves: 31, target: 3140, types: 6, name:"Rim to Rim Legend"},
+    {seed: 9898, moves: 32, target: 3210, types: 6, name:"Court Immortalized"},
+    {seed: 9999, moves: 32, target: 3280, types: 6, name:"One Step From History"},
+    {seed: 10000, moves: 32, target: 3360, types: 6, name:"Century Milestone"},
+    {seed: 11000, moves: 32, target: 3440, types: 6, name:"Overdrive"},
+    {seed: 11013, moves: 32, target: 3510, types: 6, name:"Nothing But Records"},
+    {seed: 11026, moves: 33, target: 3610, types: 6, name:"History Retold"},
+    {seed: 11039, moves: 33, target: 3670, types: 6, name:"Beyond the Rim"},
+    {seed: 11052, moves: 33, target: 3780, types: 6, name:"Cross-Generational"},
+    {seed: 11065, moves: 36, target: 3850, types: 6, name:"Time Capsule Game"},
+    {seed: 11078, moves: 36, target: 3950, types: 6, name:"Retired Number"},
+    {seed: 11091, moves: 36, target: 4060, types: 6, name:"Statue Unveiling"},
+    {seed: 11104, moves: 36, target: 4140, types: 6, name:"Museum Piece"},
+    {seed: 11117, moves: 36, target: 4260, types: 6, name:"Textbook Chapter"},
+    {seed: 11130, moves: 36, target: 4340, types: 6, name:"Curriculum Classic"},
+    {seed: 11143, moves: 36, target: 4450, types: 6, name:"Taught in Schools"},
+    {seed: 11156, moves: 36, target: 4550, types: 6, name:"Studied by Rookies"},
+    {seed: 11169, moves: 36, target: 4660, types: 6, name:"Blueprint Status"},
+    {seed: 11182, moves: 36, target: 4750, types: 6, name:"Origin Story"},
+    {seed: 11195, moves: 36, target: 4890, types: 6, name:"Genesis Block"},
+    {seed: 11208, moves: 36, target: 5000, types: 6, name:"Prime Directive"},
+    {seed: 11221, moves: 36, target: 5110, types: 6, name:"Zenith Point"},
+    {seed: 11234, moves: 36, target: 5220, types: 6, name:"Apex of Apexes"},
+    {seed: 11247, moves: 36, target: 5350, types: 6, name:"Beyond Measure"},
+    {seed: 11260, moves: 36, target: 5490, types: 6, name:"Off the Charts"},
+    {seed: 11273, moves: 36, target: 5600, types: 6, name:"Chart Breaker"},
+    {seed: 11286, moves: 37, target: 5740, types: 6, name:"New Scoreboard"},
+    {seed: 11299, moves: 37, target: 5870, types: 6, name:"Recalibration"},
+    {seed: 11312, moves: 37, target: 6010, types: 6, name:"System Overload"},
+    {seed: 11325, moves: 37, target: 6160, types: 6, name:"Redline Run"},
+    {seed: 11338, moves: 37, target: 6300, types: 6, name:"Overclocked"},
+    {seed: 11351, moves: 38, target: 6450, types: 6, name:"Turbo Mode"},
+    {seed: 11364, moves: 39, target: 6610, types: 6, name:"Nitro Boost"},
+    {seed: 11377, moves: 39, target: 6750, types: 6, name:"Afterburner"},
+    {seed: 11390, moves: 39, target: 6900, types: 6, name:"Hyperdrive"},
+    {seed: 11403, moves: 51, target: 7080, types: 6, name:"Warp Speed"},
+    {seed: 11416, moves: 51, target: 7240, types: 6, name:"Light Speed Layup"},
+    {seed: 11429, moves: 51, target: 7420, types: 6, name:"Faster Than Sound"},
+    {seed: 11442, moves: 51, target: 7570, types: 6, name:"Sonic Boom Shot"},
+    {seed: 11455, moves: 51, target: 7770, types: 6, name:"Thunderclap"},
+    {seed: 11468, moves: 51, target: 7950, types: 6, name:"Lightning Round"},
+    {seed: 11481, moves: 51, target: 8130, types: 6, name:"Storm Surge"},
+    {seed: 11494, moves: 51, target: 8320, types: 6, name:"Tidal Wave"},
+    {seed: 11507, moves: 51, target: 8510, types: 6, name:"Tsunami Run"},
+    {seed: 11520, moves: 51, target: 8710, types: 6, name:"Avalanche"},
+    {seed: 11533, moves: 53, target: 8920, types: 6, name:"Landslide Victory"},
+    {seed: 11546, moves: 53, target: 9140, types: 6, name:"Earthquake Game"},
+    {seed: 11559, moves: 55, target: 9370, types: 6, name:"Seismic Shift"},
+    {seed: 11572, moves: 55, target: 9560, types: 6, name:"Tectonic Shift"},
+    {seed: 11585, moves: 55, target: 9790, types: 6, name:"Continental Divide"},
+    {seed: 11598, moves: 55, target: 10040, types: 6, name:"Planetary Alignment"},
+    {seed: 11611, moves: 55, target: 10260, types: 6, name:"Solar Flare"},
+    {seed: 11624, moves: 55, target: 10500, types: 6, name:"Nova Burst"},
+    {seed: 11637, moves: 55, target: 10750, types: 6, name:"Big Bang Finale"},
+  ];
+
+  const board = document.getElementById('board');
+  const scoreVal = document.getElementById('scoreVal');
+  const movesVal = document.getElementById('movesVal');
+  const timeVal = document.getElementById('timeVal');
+  const targetLabel = document.getElementById('targetLabel');
+  const progressFill = document.getElementById('progressFill');
+  const levelName = document.getElementById('levelName');
+  const levelSub = document.getElementById('levelSub');
+  const toast = document.getElementById('toast');
+  const overlay = document.getElementById('overlay');
+  const overlayIcon = document.getElementById('overlayIcon');
+  const overlayTitle = document.getElementById('overlayTitle');
+  const overlayMessage = document.getElementById('overlayMessage');
+  const overlayScore = document.getElementById('overlayScore');
+  const overlayBtn = document.getElementById('overlayBtn');
+  const overlayExtras = document.getElementById('overlayExtras');
+  const overlayShareBtn = document.getElementById('overlayShareBtn');
+  const overlayLeaderBtn = document.getElementById('overlayLeaderBtn');
+  const retryBtn = document.getElementById('retryBtn');
+  const muteBtn = document.getElementById('muteBtn');
+  const leaderboardBtn = document.getElementById('leaderboardBtn');
+  const leaderboardOverlay = document.getElementById('leaderboardOverlay');
+  const lbList = document.getElementById('lbList');
+  const lbCloseBtn = document.getElementById('lbCloseBtn');
+  const pauseBtn = document.getElementById('pauseBtn');
+  const pauseOverlay = document.getElementById('pauseOverlay');
+  const resumeBtn = document.getElementById('resumeBtn');
+  const quitBtn = document.getElementById('quitBtn');
+  const confirmOverlay = document.getElementById('confirmOverlay');
+  const confirmYesBtn = document.getElementById('confirmYesBtn');
+  const confirmNoBtn = document.getElementById('confirmNoBtn');
+  const howtoToggle = document.getElementById('howtoToggle');
+  const howtoPanel = document.getElementById('howtoPanel');
+  const welcomeOverlay = document.getElementById('welcomeOverlay');
+  const welcomeStartBtn = document.getElementById('welcomeStartBtn');
+  const welcomeZenBtn = document.getElementById('welcomeZenBtn');
+  const modeToggleBtn = document.getElementById('modeToggleBtn');
+  const hintBtn = document.getElementById('hintBtn');
+  const timeStatBlock = document.getElementById('timeStatBlock');
+  const movesStatBlock = document.getElementById('movesStatBlock');
+  const levelBar = document.getElementById('levelBar');
+
+  howtoToggle.addEventListener('click', ()=>{
+    const isOpen = howtoPanel.classList.toggle('open');
+    howtoToggle.textContent = isOpen ? '❓ How to Play ▴' : '❓ How to Play ▾';
+    howtoToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  });
+
+  let grid = [];       // array of {p: emoji, sp: null|'R'|'C'|'X'|'S'|'P'|'A'}
+  let cells = [];
+  let fxLayer = null;
+  let score = 0;
+  let movesLeft = 0;
+  let levelIndex = 0;
+  let levelWon = false;
+  let selected = null;
+  let locked = true;
+  let soundOn = true;
+  let audioCtx = null;
+  let rng = Math.random;
+  let activePieces = PIECES_FULL.slice(0,4);
+
+  // Power-ups unlock progressively so early levels teach plain matching first.
+  // Thresholds are 0-indexed level numbers (level 1 = index 0).
+  const POWERUP_UNLOCK_LEVELS = {
+    R: 9,   // Fast Break   -> unlocks at Level 10
+    X: 24,  // Slam Dunk    -> unlocks at Level 25
+    P: 39,  // Full Press   -> unlocks at Level 40
+    S: 59,  // Buzzer Beater-> unlocks at Level 60
+    A: 79   // Alley-Oop    -> unlocks at Level 80
+  };
+  const POWERUP_NAMES = { R:'Fast Break', X:'Slam Dunk', P:'Full Press', S:'Buzzer Beater', A:'Alley-Oop' };
+  function computeUnlocked(levelIndex){
+    const u = {};
+    Object.keys(POWERUP_UNLOCK_LEVELS).forEach(k=>{ u[k] = levelIndex >= POWERUP_UNLOCK_LEVELS[k]; });
+    return u;
+  }
+  function newlyUnlockedAt(levelIndex){
+    return Object.keys(POWERUP_UNLOCK_LEVELS).filter(k => POWERUP_UNLOCK_LEVELS[k] === levelIndex);
+  }
+  let unlockedPowerUps = computeUnlocked(0);
+  let gameMode = 'levels'; // 'levels' | 'zen'
+  let hintsLeft = 3;
+  const HINTS_PER_LEVEL = 3;
+  const HINTS_PER_ZEN_RUN = 5;
+
+  function updateLegend(){
+    const legendBar = document.getElementById('legendBar');
+    if(!legendBar) return;
+    let anyUnlocked = false;
+    legendBar.querySelectorAll('[data-powerup]').forEach(el=>{
+      const key = el.getAttribute('data-powerup');
+      const show = !!unlockedPowerUps[key];
+      el.style.display = show ? '' : 'none';
+      if(show) anyUnlocked = true;
+    });
+    const noneEl = document.getElementById('legendNone');
+    if(noneEl) noneEl.style.display = anyUnlocked ? 'none' : '';
+  }
+  let sessionLeaderboard = []; // fallback store when persistent storage isn't available
+  let lastResult = null; // used by the share card button
+  let savedLockState = false; // used to restore lock state after pause/cancel
+  let timerIntervalId = null;
+  let timerAccumulatedMs = 0;
+  let timerRunStartTs = null;
+  let timerStarted = false;
+
+  function mulberry32(seed){
+    let a = seed;
+    return function(){
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = (t + Math.imul(t ^ t >>> 7, 61 | t)) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+
+  function beep(freq, dur, type='sine', vol=0.08){
+    if(!soundOn) return;
+    try{
+      if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = type;
+      o.frequency.value = freq;
+      g.gain.value = vol;
+      o.connect(g); g.connect(audioCtx.destination);
+      o.start();
+      g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
+      o.stop(audioCtx.currentTime + dur);
+    }catch(e){}
+  }
+
+  function randPiece(){ return activePieces[Math.floor(rng()*activePieces.length)]; }
+  function idx(r,c){ return r*SIZE + c; }
+
+  function buildBoardNoMatches(){
+    let g = new Array(SIZE*SIZE);
+    for(let r=0;r<SIZE;r++){
+      for(let c=0;c<SIZE;c++){
+        let p;
+        do{
+          p = randPiece();
+        } while(
+          (c>=2 && g[idx(r,c-1)].p===p && g[idx(r,c-2)].p===p) ||
+          (r>=2 && g[idx(r-1,c)].p===p && g[idx(r-2,c)].p===p)
+        );
+        g[idx(r,c)] = {p:p, sp:null};
+      }
+    }
+    return g;
+  }
+
+  function renderInitial(){
+    board.innerHTML = '';
+    cells = [];
+    for(let r=0;r<SIZE;r++){
+      for(let c=0;c<SIZE;c++){
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.dataset.r = r; cell.dataset.c = c;
+        cell.addEventListener('click', onCellClick);
+        board.appendChild(cell);
+        cells.push(cell);
+      }
+    }
+    for(let r=0;r<SIZE;r++) for(let c=0;c<SIZE;c++) renderCell(r,c);
+    fxLayer = document.createElement('div');
+    fxLayer.className = 'fx-layer';
+    board.appendChild(fxLayer);
+  }
+
+  function fxRow(r, colorClass){
+    if(!fxLayer) return;
+    const el = document.createElement('div');
+    el.className = 'fx-beam fx-beam-row ' + colorClass;
+    el.style.gridRow = (r+1);
+    el.style.gridColumn = '1 / -1';
+    fxLayer.appendChild(el);
+    setTimeout(()=> el.remove(), 520);
+  }
+  function fxCol(c, colorClass){
+    if(!fxLayer) return;
+    const el = document.createElement('div');
+    el.className = 'fx-beam fx-beam-col ' + colorClass;
+    el.style.gridColumn = (c+1);
+    el.style.gridRow = '1 / -1';
+    fxLayer.appendChild(el);
+    setTimeout(()=> el.remove(), 520);
+  }
+  function fxRing(r, c, ringClass){
+    if(!fxLayer) return;
+    const cell = document.createElement('div');
+    cell.className = 'fx-cell';
+    cell.style.gridRow = (r+1);
+    cell.style.gridColumn = (c+1);
+    const ring = document.createElement('div');
+    ring.className = 'fx-ring ' + ringClass;
+    cell.appendChild(ring);
+    fxLayer.appendChild(cell);
+    setTimeout(()=> cell.remove(), 620);
+  }
+  function fxStar(r, c){
+    if(!fxLayer) return;
+    const cell = document.createElement('div');
+    cell.className = 'fx-cell';
+    cell.style.gridRow = (r+1);
+    cell.style.gridColumn = (c+1);
+    const ring = document.createElement('div');
+    ring.className = 'fx-ring fx-ring-gold';
+    const star = document.createElement('div');
+    star.className = 'fx-star';
+    star.textContent = '★';
+    cell.appendChild(ring);
+    cell.appendChild(star);
+    fxLayer.appendChild(cell);
+    setTimeout(()=> cell.remove(), 660);
+  }
+  function fxFlash(){
+    if(!fxLayer) return;
+    const el = document.createElement('div');
+    el.className = 'fx-flash';
+    el.style.gridRow = '1 / -1';
+    el.style.gridColumn = '1 / -1';
+    fxLayer.appendChild(el);
+    setTimeout(()=> el.remove(), 720);
+  }
+
+  function spawnConfetti(count){
+    const colors = ['#f0b429','#e8590c','#3fb2ff','#6fffb0','#b06fff','#f7f3ec'];
+    const n = count || 36;
+    for(let i=0;i<n;i++){
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      const size = 6 + Math.random()*6;
+      piece.style.width = size + 'px';
+      piece.style.height = (size * (0.5 + Math.random()*0.8)) + 'px';
+      piece.style.left = (Math.random()*100) + 'vw';
+      piece.style.background = colors[Math.floor(Math.random()*colors.length)];
+      const duration = 1.8 + Math.random()*1.4;
+      const delay = Math.random()*0.4;
+      piece.style.animationDuration = duration + 's';
+      piece.style.animationDelay = delay + 's';
+      document.body.appendChild(piece);
+      setTimeout(()=> piece.remove(), (duration+delay)*1000 + 200);
+    }
+  }
+
+  function getCell(r,c){ return cells[idx(r,c)]; }
+  function getGem(r,c){ return getCell(r,c).querySelector('.gem'); }
+
+  function renderCell(r,c){
+    const cell = getCell(r,c);
+    const g = grid[idx(r,c)];
+    const gem = document.createElement('div');
+    gem.className = 'gem';
+    if(g.sp === 'S'){
+      gem.textContent = '⭐';
+      gem.classList.add('sp-wild');
+    } else {
+      gem.textContent = g.p;
+      if(g.sp === 'R') gem.classList.add('sp-row');
+      else if(g.sp === 'C') gem.classList.add('sp-col');
+      else if(g.sp === 'X') gem.classList.add('sp-box');
+      else if(g.sp === 'P') gem.classList.add('sp-press');
+      else if(g.sp === 'A') gem.classList.add('sp-alley');
+    }
+    cell.innerHTML = '';
+    cell.appendChild(gem);
+  }
+
+  function onCellClick(e){
+    if(locked) return;
+    const r = +e.currentTarget.dataset.r;
+    const c = +e.currentTarget.dataset.c;
+    if(!selected){
+      selected = {r,c};
+      getGem(r,c).classList.add('selected');
+      return;
+    }
+    const {r:sr, c:sc} = selected;
+    if(sr===r && sc===c){
+      getGem(r,c).classList.remove('selected');
+      selected = null;
+      return;
+    }
+    const adjacent = (Math.abs(sr-r)+Math.abs(sc-c)) === 1;
+    getGem(sr,sc).classList.remove('selected');
+    if(!adjacent){
+      selected = {r,c};
+      getGem(r,c).classList.add('selected');
+      return;
+    }
+    selected = null;
+    trySwap(sr,sc,r,c);
+  }
+
+  function swapData(r1,c1,r2,c2){
+    const tmp = grid[idx(r1,c1)];
+    grid[idx(r1,c1)] = grid[idx(r2,c2)];
+    grid[idx(r2,c2)] = tmp;
+  }
+
+  function scanRuns(){
+    const runs = [];
+    for(let r=0;r<SIZE;r++){
+      let c=0;
+      while(c<SIZE){
+        let c2=c;
+        while(c2<SIZE && grid[idx(r,c2)].p===grid[idx(r,c)].p) c2++;
+        const len = c2-c;
+        if(len>=3){
+          const arr=[];
+          for(let k=c;k<c2;k++) arr.push(idx(r,k));
+          runs.push({orientation:'h', cells:arr, piece:grid[idx(r,c)].p, len:len});
+        }
+        c=c2;
+      }
+    }
+    for(let c=0;c<SIZE;c++){
+      let r=0;
+      while(r<SIZE){
+        let r2=r;
+        while(r2<SIZE && grid[idx(r2,c)].p===grid[idx(r,c)].p) r2++;
+        const len = r2-r;
+        if(len>=3){
+          const arr=[];
+          for(let k=r;k<r2;k++) arr.push(idx(k,c));
+          runs.push({orientation:'v', cells:arr, piece:grid[idx(r,c)].p, len:len});
+        }
+        r=r2;
+      }
+    }
+    return runs;
+  }
+
+  function hasAnyMove(){
+    for(let i=0;i<SIZE*SIZE;i++){
+      if(grid[i].sp === 'S') return true;
+    }
+    for(let r=0;r<SIZE;r++){
+      for(let c=0;c<SIZE;c++){
+        if(c<SIZE-1){
+          swapData(r,c,r,c+1);
+          const found = scanRuns().length>0;
+          swapData(r,c,r,c+1);
+          if(found) return true;
+        }
+        if(r<SIZE-1){
+          swapData(r,c,r+1,c);
+          const found = scanRuns().length>0;
+          swapData(r,c,r+1,c);
+          if(found) return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  function findHintMove(){
+    // A wild piece is always a valid, and usually a strong, move.
+    for(let i=0;i<SIZE*SIZE;i++){
+      if(grid[i].sp === 'S'){
+        const r = Math.floor(i/SIZE), c = i%SIZE;
+        if(c<SIZE-1) return {r1:r,c1:c,r2:r,c2:c+1};
+        if(c>0) return {r1:r,c1:c,r2:r,c2:c-1};
+        if(r<SIZE-1) return {r1:r,c1:c,r2:r+1,c2:c};
+        if(r>0) return {r1:r,c1:c,r2:r-1,c2:c};
+      }
+    }
+    // Otherwise scan for the biggest immediate match available.
+    let best = null, bestSize = 0;
+    for(let r=0;r<SIZE;r++){
+      for(let c=0;c<SIZE;c++){
+        if(c<SIZE-1){
+          swapData(r,c,r,c+1);
+          const runs = scanRuns();
+          swapData(r,c,r,c+1);
+          if(runs.length>0){
+            const size = runs.reduce((s,run)=>s+run.cells.length,0);
+            if(size>bestSize){ bestSize=size; best={r1:r,c1:c,r2:r,c2:c+1}; }
+          }
+        }
+        if(r<SIZE-1){
+          swapData(r,c,r+1,c);
+          const runs = scanRuns();
+          swapData(r,c,r+1,c);
+          if(runs.length>0){
+            const size = runs.reduce((s,run)=>s+run.cells.length,0);
+            if(size>bestSize){ bestSize=size; best={r1:r,c1:c,r2:r+1,c2:c}; }
+          }
+        }
+      }
+    }
+    return best;
+  }
+
+  function updateHintBtn(){
+    hintBtn.textContent = '💡 Hint (' + hintsLeft + ')';
+    hintBtn.classList.toggle('busy-disabled', hintsLeft<=0);
+  }
+
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(()=> toast.classList.remove('show'), 1300);
+  }
+
+  function updateHUD(){
+    scoreVal.textContent = score;
+    if(gameMode === 'zen'){
+      levelSub.textContent = 'Endless — Score Attack';
+      return;
+    }
+    movesVal.textContent = movesLeft;
+    movesVal.style.color = movesLeft<=3 ? '#ff5a4e' : 'var(--net-white)';
+    const lvl = LEVELS[levelIndex];
+    targetLabel.textContent = Math.min(score,lvl.target) + ' / ' + lvl.target;
+    progressFill.style.width = Math.min(100, (score/lvl.target)*100) + '%';
+    levelSub.textContent = 'Level ' + (levelIndex+1) + ' of ' + LEVELS.length + ' — ' + lvl.name;
+  }
+
+  function updateModeUI(){
+    const isZen = gameMode === 'zen';
+    timeStatBlock.style.display = isZen ? 'none' : '';
+    movesStatBlock.style.display = isZen ? 'none' : '';
+    levelBar.style.display = isZen ? 'none' : '';
+    modeToggleBtn.textContent = isZen ? '🎯 Levels Mode' : '🌀 Zen Mode';
+    levelName.textContent = isZen ? 'SWISH MATCH — ZEN' : 'SWISH MATCH';
+    retryBtn.textContent = isZen ? 'New Zen Board' : 'Restart Level';
+  }
+
+  function formatTime(ms){
+    const totalSec = Math.max(0, Math.floor(ms/1000));
+    const mm = Math.floor(totalSec/60);
+    const ss = totalSec%60;
+    return String(mm).padStart(2,'0') + ':' + String(ss).padStart(2,'0');
+  }
+  function getElapsedMs(){
+    return timerAccumulatedMs + (timerRunStartTs ? (Date.now()-timerRunStartTs) : 0);
+  }
+  function updateTimerDisplay(){
+    timeVal.textContent = formatTime(getElapsedMs());
+  }
+  function startLevelClock(){
+    if(timerIntervalId) clearInterval(timerIntervalId);
+    timerAccumulatedMs = 0;
+    timerRunStartTs = Date.now();
+    updateTimerDisplay();
+    timerIntervalId = setInterval(updateTimerDisplay, 250);
+  }
+  function pauseLevelClock(){
+    if(timerRunStartTs){
+      timerAccumulatedMs += Date.now() - timerRunStartTs;
+      timerRunStartTs = null;
+    }
+  }
+  function resumeLevelClock(){
+    if(timerStarted && !timerRunStartTs){
+      timerRunStartTs = Date.now();
+    }
+  }
+  function stopLevelClock(){
+    pauseLevelClock();
+    if(timerIntervalId){ clearInterval(timerIntervalId); timerIntervalId = null; }
+    return timerAccumulatedMs;
+  }
+  function ensureClockStarted(){
+    if(!timerStarted){
+      timerStarted = true;
+      startLevelClock();
+    }
+  }
+
+  function trySwap(r1,c1,r2,c2){
+    if(locked) return;
+    const i1 = idx(r1,c1), i2 = idx(r2,c2);
+    if(grid[i1].sp === 'S' || grid[i2].sp === 'S'){
+      activateWildSwap(r1,c1,r2,c2);
+      return;
+    }
+    swapData(r1,c1,r2,c2);
+    const runs = scanRuns();
+    if(runs.length === 0){
+      swapData(r1,c1,r2,c2);
+      const g1 = getGem(r1,c1), g2 = getGem(r2,c2);
+      g1.classList.add('invalid'); g2.classList.add('invalid');
+      beep(120,0.15,'square',0.06);
+      setTimeout(()=>{ g1.classList.remove('invalid'); g2.classList.remove('invalid'); }, 300);
+      return;
+    }
+    ensureClockStarted();
+    locked = true;
+    movesLeft--;
+    updateHUD();
+    renderCell(r1,c1); renderCell(r2,c2);
+    beep(440,0.08,'triangle');
+    setTimeout(()=> resolveMatches(1, i2), 120);
+  }
+
+  function activateWildSwap(r1,c1,r2,c2){
+    ensureClockStarted();
+    locked = true;
+    movesLeft--;
+    updateHUD();
+    const i1 = idx(r1,c1), i2 = idx(r2,c2);
+    const cellA = grid[i1], cellB = grid[i2];
+    let clearSet = new Set();
+    let gained;
+    if(cellA.sp === 'S' && cellB.sp === 'S'){
+      for(let i=0;i<SIZE*SIZE;i++) clearSet.add(i);
+      showToast('DOUBLE BUZZER BEATER! Whole Court Cleared!');
+      gained = clearSet.size * 25;
+      beep(1000,0.4,'sine');
+      fxFlash();
+    } else {
+      const wildIdx = cellA.sp === 'S' ? i1 : i2;
+      const otherIdx = cellA.sp === 'S' ? i2 : i1;
+      const targetPiece = grid[otherIdx].p;
+      for(let i=0;i<SIZE*SIZE;i++){
+        if(grid[i].p === targetPiece) clearSet.add(i);
+      }
+      clearSet.add(wildIdx);
+      showToast('Buzzer Beater clears every ' + targetPiece + '!');
+      gained = clearSet.size * 18;
+      beep(880,0.25,'sine');
+      fxStar(Math.floor(wildIdx/SIZE), wildIdx%SIZE);
+    }
+    score += gained;
+    updateHUD();
+    clearSet.forEach(i=>{
+      const r = Math.floor(i/SIZE), c = i%SIZE;
+      getGem(r,c).classList.add('matched');
+    });
+    setTimeout(()=>{
+      applyGravity(clearSet);
+      setTimeout(()=> resolveMatches(1), 190);
+    }, 210);
+  }
+
+  function resolveMatches(comboMult, swappedIdx){
+    const runs = scanRuns();
+    if(runs.length === 0){
+      if(!hasAnyMove()){
+        if(gameMode === 'zen'){
+          endZenRun();
+          return;
+        }
+        reshuffle();
+        return;
+      }
+      locked = false;
+      if(gameMode === 'zen'){
+        return;
+      }
+      checkLevelStatus();
+      return;
+    }
+
+    const hRunAt = {}, vRunAt = {};
+    runs.forEach(run=>{
+      run.cells.forEach(i=>{
+        if(run.orientation==='h') hRunAt[i]=run; else vRunAt[i]=run;
+      });
+    });
+
+    const matchedSet = new Set();
+    runs.forEach(run=> run.cells.forEach(i=>matchedSet.add(i)));
+
+    const intersectionCells = [];
+    matchedSet.forEach(i=>{
+      if(hRunAt[i] && vRunAt[i]) intersectionCells.push(i);
+    });
+
+    // Detect 2x2 squares of the same piece -> "Full Press" power-up (clears row+col)
+    const squareCandidates = [];
+    for(let r=0;r<SIZE-1;r++){
+      for(let c=0;c<SIZE-1;c++){
+        const a=idx(r,c), b=idx(r,c+1), d=idx(r+1,c), e=idx(r+1,c+1);
+        if(grid[a].p===grid[b].p && grid[a].p===grid[d].p && grid[a].p===grid[e].p &&
+           matchedSet.has(a) && matchedSet.has(b) && matchedSet.has(d) && matchedSet.has(e)){
+          squareCandidates.push({cells:[a,b,d,e], piece:grid[a].p});
+        }
+      }
+    }
+
+    const specialLocations = new Map();
+    const usedRuns = new Set();
+
+    intersectionCells.forEach(i=>{
+      if(!unlockedPowerUps.X) return;
+      if(!specialLocations.has(i)) specialLocations.set(i, {type:'X', basePiece: grid[i].p});
+      if(hRunAt[i]) usedRuns.add(hRunAt[i]);
+      if(vRunAt[i]) usedRuns.add(vRunAt[i]);
+    });
+
+    squareCandidates.forEach(sq=>{
+      if(!unlockedPowerUps.P) return;
+      const loc = (swappedIdx!==undefined && sq.cells.includes(swappedIdx)) ? swappedIdx : sq.cells[0];
+      if(!specialLocations.has(loc)) specialLocations.set(loc, {type:'P', basePiece: sq.piece});
+    });
+
+    runs.forEach(run=>{
+      if(usedRuns.has(run) || run.len < 6) return;
+      if(!unlockedPowerUps.A) return;
+      let loc = (swappedIdx!==undefined && run.cells.includes(swappedIdx)) ? swappedIdx : run.cells[Math.floor(run.cells.length/2)];
+      if(!specialLocations.has(loc)) specialLocations.set(loc, {type:'A', basePiece: run.piece});
+      usedRuns.add(run);
+    });
+
+    runs.forEach(run=>{
+      if(usedRuns.has(run) || run.len < 5) return;
+      if(!unlockedPowerUps.S) return;
+      let loc = (swappedIdx!==undefined && run.cells.includes(swappedIdx)) ? swappedIdx : run.cells[Math.floor(run.cells.length/2)];
+      if(!specialLocations.has(loc)) specialLocations.set(loc, {type:'S', basePiece: run.piece});
+      usedRuns.add(run);
+    });
+
+    runs.forEach(run=>{
+      if(usedRuns.has(run) || run.len !== 4) return;
+      if(!unlockedPowerUps.R) return;
+      let loc = (swappedIdx!==undefined && run.cells.includes(swappedIdx)) ? swappedIdx : run.cells[Math.floor(run.cells.length/2)];
+      if(!specialLocations.has(loc)){
+        specialLocations.set(loc, {type: run.orientation==='h' ? 'R' : 'C', basePiece: run.piece});
+      }
+      usedRuns.add(run);
+    });
+
+    let clearSet = new Set(matchedSet);
+    specialLocations.forEach((v,k)=> clearSet.delete(k));
+
+    let queue = Array.from(clearSet);
+    let processed = new Set();
+    const activations = [];
+    while(queue.length){
+      const i = queue.pop();
+      if(processed.has(i)) continue;
+      processed.add(i);
+      const cell = grid[i];
+      if(cell.sp){
+        let extra = [];
+        const r = Math.floor(i/SIZE), c = i%SIZE;
+        activations.push({type: cell.sp, r, c});
+        if(cell.sp==='R'){ for(let cc=0;cc<SIZE;cc++) extra.push(idx(r,cc)); }
+        else if(cell.sp==='C'){ for(let rr=0;rr<SIZE;rr++) extra.push(idx(rr,c)); }
+        else if(cell.sp==='P'){
+          for(let cc=0;cc<SIZE;cc++) extra.push(idx(r,cc));
+          for(let rr=0;rr<SIZE;rr++) extra.push(idx(rr,c));
+        }
+        else if(cell.sp==='A'){
+          for(let d=-2;d<=2;d++){
+            if(c+d>=0 && c+d<SIZE) extra.push(idx(r,c+d));
+            if(r+d>=0 && r+d<SIZE) extra.push(idx(r+d,c));
+          }
+        }
+        else if(cell.sp==='X'){
+          for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++){
+            const rr=r+dr, cc=c+dc;
+            if(rr>=0 && rr<SIZE && cc>=0 && cc<SIZE) extra.push(idx(rr,cc));
+          }
+        }
+        else if(cell.sp==='S'){ for(let j=0;j<SIZE*SIZE;j++){ if(grid[j].p === cell.p) extra.push(j); } }
+        extra.forEach(e=>{
+          if(!clearSet.has(e) && !specialLocations.has(e)){
+            clearSet.add(e); queue.push(e);
+          }
+        });
+      }
+    }
+    specialLocations.forEach((v,k)=> clearSet.delete(k));
+
+    activations.forEach(a=>{
+      if(a.type==='R') fxRow(a.r, 'fx-c-blue');
+      else if(a.type==='C') fxCol(a.c, 'fx-c-green');
+      else if(a.type==='P'){ fxRow(a.r, 'fx-c-purple'); fxCol(a.c, 'fx-c-purple'); }
+      else if(a.type==='A'){ fxRow(a.r, 'fx-c-orange'); fxCol(a.c, 'fx-c-orange'); fxRing(a.r, a.c, 'fx-ring-orange'); }
+      else if(a.type==='X') fxRing(a.r, a.c, 'fx-ring-red');
+      else if(a.type==='S') fxStar(a.r, a.c);
+    });
+
+    let bonus = specialLocations.size * 60;
+    const comboScale = comboMult <= 1 ? 1 : Math.pow(1.6, comboMult - 1);
+    const gained = Math.round(clearSet.size*10*comboScale) + bonus;
+    score += gained;
+    updateHUD();
+
+    if(specialLocations.size > 0){
+      const first = specialLocations.values().next().value;
+      const names = {R:'Fast Break', C:'Fast Break', X:'Slam Dunk', S:'Buzzer Beater', P:'Full Press', A:'Alley-Oop'};
+      showToast(names[first.type] + ' Created! +' + gained);
+    } else if(comboMult > 1){
+      showToast('Combo x' + comboMult + '! +' + gained);
+    } else {
+      showToast(matchedSet.size >= 5 ? 'And-One! Big Match! +' + gained : 'Nice Shot! +' + gained);
+    }
+    beep(440 + comboMult*60, 0.12, 'sine');
+
+    clearSet.forEach(i=>{
+      const r = Math.floor(i/SIZE), c = i%SIZE;
+      getGem(r,c).classList.add('matched');
+    });
+
+    specialLocations.forEach((v,k)=>{
+      grid[k] = {p: v.basePiece, sp: v.type};
+      const r = Math.floor(k/SIZE), c = k%SIZE;
+      renderCell(r,c);
+      getGem(r,c).classList.add('sp-created');
+    });
+
+    setTimeout(()=>{
+      applyGravity(clearSet);
+      setTimeout(()=> resolveMatches(comboMult+1), 190);
+    }, 210);
+  }
+
+  function applyGravity(clearSet){
+    for(let c=0;c<SIZE;c++){
+      let writeR = SIZE-1;
+      for(let r=SIZE-1;r>=0;r--){
+        if(!clearSet.has(idx(r,c))){
+          grid[idx(writeR,c)] = grid[idx(r,c)];
+          writeR--;
+        }
+      }
+      for(let r=writeR;r>=0;r--){
+        grid[idx(r,c)] = {p: randPiece(), sp: null};
+      }
+    }
+    for(let r=0;r<SIZE;r++) for(let c=0;c<SIZE;c++) renderCell(r,c);
+  }
+
+  function reshuffle(){
+    showToast('No Moves Left — Reshuffling');
+    grid = buildBoardNoMatches();
+    for(let r=0;r<SIZE;r++) for(let c=0;c<SIZE;c++) renderCell(r,c);
+    locked = false;
+    checkLevelStatus();
+  }
+
+  function checkLevelStatus(){
+    const lvl = LEVELS[levelIndex];
+    if(score >= lvl.target && !levelWon){
+      levelWon = true;
+      locked = true;
+      const finalMs = stopLevelClock();
+      const isLast = levelIndex === LEVELS.length-1;
+      beep(660,0.15,'sine'); beep(880,0.18,'sine'); beep(1100,0.25,'sine');
+      spawnConfetti(isLast ? 90 : 36);
+      recordScore({levelIndex: levelIndex, levelName: lvl.name, score: score, movesLeft: movesLeft, timeMs: finalMs, won: true});
+      showOverlay({
+        icon: isLast ? '🏆' : '🔔',
+        title: isLast ? 'Championship Won!' : 'Level Complete!',
+        message: (isLast ? 'You cleared every puzzle in Swish Match. Incredible run.' : 'Target reached with ' + movesLeft + ' moves to spare.') + ' Time: ' + formatTime(finalMs) + '.',
+        score: score,
+        btnText: isLast ? 'Play Again From Level 1' : 'Next Level',
+        onClick: ()=> startLevel(isLast ? 0 : levelIndex+1),
+        showExtras: true
+      });
+      return;
+    }
+    if(movesLeft <= 0 && score < lvl.target){
+      locked = true;
+      const finalMs = stopLevelClock();
+      beep(200,0.4,'sawtooth',0.1);
+      lastResult = {levelIndex: levelIndex, levelName: lvl.name, score: score, movesLeft: 0, timeMs: finalMs, won: false, date: new Date().toLocaleDateString(undefined, {month:'short', day:'numeric'})};
+      showOverlay({
+        icon: '⏱️',
+        title: 'Out of Moves',
+        message: 'You reached ' + score + ' of ' + lvl.target + ' needed in ' + formatTime(finalMs) + '. Give it another shot — same puzzle, fresh moves.',
+        score: score,
+        btnText: 'Retry Level',
+        onClick: ()=> startLevel(levelIndex),
+        showExtras: true
+      });
+    }
+  }
+
+  function showOverlay({icon, title, message, score, btnText, onClick, showExtras}){
+    overlayIcon.textContent = icon;
+    overlayTitle.textContent = title;
+    overlayMessage.textContent = message;
+    overlayScore.textContent = (score!==undefined && score!==null) ? score : '';
+    overlayBtn.textContent = btnText;
+    overlayBtn.onclick = ()=>{
+      overlay.classList.remove('show');
+      onClick();
+    };
+    overlayExtras.style.display = showExtras ? 'flex' : 'none';
+    overlay.classList.add('show');
+  }
+
+  const hasPersistentStorage = typeof window.storage !== 'undefined' && window.storage !== null;
+
+  async function recordScore(entry){
+    entry.date = new Date().toLocaleDateString(undefined, {month:'short', day:'numeric'});
+    lastResult = entry;
+    const key = 'entry_' + Date.now() + '_' + Math.floor(Math.random()*100000);
+    if(hasPersistentStorage){
+      try{
+        await window.storage.set(key, JSON.stringify(entry), false);
+        return;
+      }catch(e){ /* fall through to session storage */ }
+    }
+    sessionLeaderboard.push(entry);
+  }
+
+  async function fetchLeaderboard(){
+    let entries = [];
+    if(hasPersistentStorage){
+      try{
+        const listRes = await window.storage.list('entry_', false);
+        const keys = (listRes && listRes.keys) || [];
+        for(const k of keys){
+          try{
+            const r = await window.storage.get(k, false);
+            if(r && r.value) entries.push(JSON.parse(r.value));
+          }catch(e){}
+        }
+      }catch(e){
+        entries = sessionLeaderboard.slice();
+      }
+    } else {
+      entries = sessionLeaderboard.slice();
+    }
+    entries.sort((a,b)=> b.score - a.score);
+    return entries.slice(0,10);
+  }
+
+  async function openLeaderboard(){
+    lbList.innerHTML = '<div class="lb-empty">Loading…</div>';
+    leaderboardOverlay.classList.add('show');
+    const top = await fetchLeaderboard();
+    if(top.length===0){
+      lbList.innerHTML = '<div class="lb-empty">No completed levels yet — finish a level to post a score!</div>';
+      if(!hasPersistentStorage){
+        lbList.innerHTML += '<div class="lb-empty">(Scores this session only — persistent storage isn\'t available here.)</div>';
+      }
+      return;
+    }
+    lbList.innerHTML = top.map((e,i)=>
+      '<div class="lb-row">' +
+        '<span class="lb-rank">#' + (i+1) + '</span>' +
+        '<span class="lb-info"><strong>' + e.levelName + '</strong><br><span class="lb-date">' + (e.levelIndex>=0 ? ('Level ' + (e.levelIndex+1) + ' · ') : '') + e.date + (typeof e.timeMs === 'number' ? ' · ' + formatTime(e.timeMs) : '') + '</span></span>' +
+        '<span class="lb-score">' + e.score + '</span>' +
+      '</div>'
+    ).join('');
+    if(!hasPersistentStorage){
+      lbList.innerHTML += '<div class="lb-empty">(Session only — open this game inside Claude to keep history across visits.)</div>';
+    }
+  }
+
+  function buildShareCard(result){
+    const canvas = document.createElement('canvas');
+    canvas.width = 640; canvas.height = 400;
+    const ctx = canvas.getContext('2d');
+    const grad = ctx.createLinearGradient(0,0,0,400);
+    grad.addColorStop(0,'#3a2413'); grad.addColorStop(1,'#0e0703');
+    ctx.fillStyle = grad; ctx.fillRect(0,0,640,400);
+    ctx.fillStyle = '#e8590c'; ctx.fillRect(0,0,640,10); ctx.fillRect(0,390,640,10);
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#f0b429';
+    ctx.font = '700 32px Georgia, serif';
+    ctx.fillText('SWISH MATCH', 320, 68);
+    ctx.font = '600 17px Segoe UI, sans-serif';
+    ctx.fillStyle = '#d99a4e';
+    ctx.fillText(result.levelIndex>=0 ? (result.won ? 'Level ' + (result.levelIndex+1) + ' Complete — ' + result.levelName : 'Level ' + (result.levelIndex+1) + ' — ' + result.levelName) : result.levelName, 320, 96);
+    ctx.font = '88px serif';
+    ctx.fillText(result.won ? (result.levelIndex<0 ? '🌀' : '🏆') : '🏀', 320, 205);
+    ctx.font = '700 52px "Courier New", monospace';
+    ctx.fillStyle = '#f7f3ec';
+    ctx.fillText(String(result.score), 320, 285);
+    ctx.font = '500 15px Segoe UI, sans-serif';
+    ctx.fillStyle = '#cbb08a';
+    ctx.fillText('POINTS SCORED' + (typeof result.timeMs === 'number' ? '   ·   TIME ' + formatTime(result.timeMs) : ''), 320, 312);
+    ctx.font = '400 13px Segoe UI, sans-serif';
+    ctx.fillStyle = '#9c7c50';
+    ctx.fillText(result.date + '  ·  swish-match.html', 320, 368);
+    return canvas.toDataURL('image/png');
+  }
+
+  function downloadDataUrl(dataUrl, filename){
+    const a = document.createElement('a');
+    a.href = dataUrl; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+  }
+
+  async function shareResult(){
+    if(!lastResult) return;
+    const dataUrl = buildShareCard(lastResult);
+    const text = 'I scored ' + lastResult.score + ' on ' + lastResult.levelName + ' in Swish Match' + (typeof lastResult.timeMs === 'number' ? ' in ' + formatTime(lastResult.timeMs) : '') + '! 🏀';
+    try{
+      if(navigator.share){
+        const res = await fetch(dataUrl);
+        const blob = await res.blob();
+        const file = new File([blob], 'swish-match-card.png', {type:'image/png'});
+        if(navigator.canShare && navigator.canShare({files:[file]})){
+          await navigator.share({files:[file], title:'Swish Match', text: text});
+          return;
+        }
+        await navigator.share({title:'Swish Match', text: text});
+        return;
+      }
+    }catch(e){ /* fall through to download */ }
+    downloadDataUrl(dataUrl, 'swish-match-card.png');
+  }
+
+  function startLevel(i){
+    gameMode = 'levels';
+    levelIndex = i;
+    const lvl = LEVELS[levelIndex];
+    rng = mulberry32(lvl.seed);
+    activePieces = PIECES_FULL.slice(0, lvl.types);
+    unlockedPowerUps = computeUnlocked(levelIndex);
+    updateLegend();
+    updateModeUI();
+    score = 0;
+    movesLeft = lvl.moves;
+    levelWon = false;
+    selected = null;
+    locked = true;
+    hintsLeft = HINTS_PER_LEVEL;
+    updateHintBtn();
+    if(timerIntervalId){ clearInterval(timerIntervalId); timerIntervalId = null; }
+    timerAccumulatedMs = 0;
+    timerRunStartTs = null;
+    timerStarted = false;
+    timeVal.textContent = '00:00';
+    grid = buildBoardNoMatches();
+    renderInitial();
+    updateHUD();
+    const unlocked = newlyUnlockedAt(levelIndex);
+    const unlockNote = unlocked.length
+      ? ' 🔓 New power-up unlocked: ' + unlocked.map(k=>POWERUP_NAMES[k]).join(', ') + '!'
+      : '';
+    showOverlay({
+      icon: unlocked.length ? '🔓' : '🏀',
+      title: 'Level ' + (levelIndex+1) + ': ' + lvl.name,
+      message: 'Score ' + lvl.target + ' points in ' + lvl.moves + ' moves. Board pieces: ' + lvl.types + ' types.' + unlockNote,
+      score: null,
+      btnText: 'Start Level',
+      onClick: ()=>{ locked = false; }
+    });
+  }
+
+  function startZenMode(){
+    gameMode = 'zen';
+    const seed = Math.floor(Math.random() * 1e9);
+    rng = mulberry32(seed);
+    activePieces = PIECES_FULL.slice(0, 6);
+    unlockedPowerUps = { R:true, X:true, P:true, S:true, A:true };
+    updateLegend();
+    updateModeUI();
+    score = 0;
+    movesLeft = Infinity;
+    levelWon = false;
+    selected = null;
+    locked = true;
+    hintsLeft = HINTS_PER_ZEN_RUN;
+    updateHintBtn();
+    if(timerIntervalId){ clearInterval(timerIntervalId); timerIntervalId = null; }
+    timerAccumulatedMs = 0;
+    timerRunStartTs = null;
+    timerStarted = false;
+    timeVal.textContent = '00:00';
+    grid = buildBoardNoMatches();
+    renderInitial();
+    updateHUD();
+    showOverlay({
+      icon: '🌀',
+      title: 'Zen Mode — Endless',
+      message: 'No timer. No move limit. Every power-up is unlocked from the start. Keep matching until the board runs completely dry — score as high as you can!',
+      score: null,
+      btnText: 'Start',
+      onClick: ()=>{ locked = false; }
+    });
+  }
+
+  function endZenRun(){
+    locked = true;
+    const finalMs = stopLevelClock();
+    beep(300,0.35,'sine'); beep(220,0.35,'sine');
+    recordScore({levelIndex:-1, levelName:'Zen Mode (Endless)', score:score, movesLeft:0, timeMs:finalMs, won:true});
+    showOverlay({
+      icon: '🌀',
+      title: 'Board Cleared Out!',
+      message: 'No more matches are possible — your endless run is over. Final score: ' + score + '.',
+      score: score,
+      btnText: 'Play Again (Zen)',
+      onClick: ()=> startZenMode(),
+      showExtras: true
+    });
+  }
+
+  retryBtn.addEventListener('click', ()=>{
+    if(midCascade()) return;
+    if(gameMode === 'zen') startZenMode();
+    else startLevel(levelIndex);
+  });
+  hintBtn.addEventListener('click', ()=>{
+    if(locked) return;
+    if(hintsLeft<=0){ showToast('No hints left!'); return; }
+    const move = findHintMove();
+    if(!move){ showToast('No moves found — board will reshuffle soon.'); return; }
+    hintsLeft--;
+    updateHintBtn();
+    const g1 = getGem(move.r1, move.c1), g2 = getGem(move.r2, move.c2);
+    g1.classList.add('hint-glow');
+    g2.classList.add('hint-glow');
+    beep(520, 0.1, 'sine', 0.06);
+    setTimeout(()=>{
+      g1.classList.remove('hint-glow');
+      g2.classList.remove('hint-glow');
+    }, 1400);
+  });
+  muteBtn.addEventListener('click', ()=>{
+    soundOn = !soundOn;
+    muteBtn.textContent = soundOn ? '🔊 Mute' : '🔇 Unmute';
+  });
+  leaderboardBtn.addEventListener('click', openLeaderboard);
+  lbCloseBtn.addEventListener('click', ()=> leaderboardOverlay.classList.remove('show'));
+  overlayShareBtn.addEventListener('click', shareResult);
+  overlayLeaderBtn.addEventListener('click', ()=>{
+    overlay.classList.remove('show');
+    openLeaderboard();
+  });
+
+  function anyModalOpen(){
+    return overlay.classList.contains('show') ||
+           leaderboardOverlay.classList.contains('show') ||
+           pauseOverlay.classList.contains('show') ||
+           confirmOverlay.classList.contains('show') ||
+           welcomeOverlay.classList.contains('show');
+  }
+  // True only while a match/cascade is actively resolving with no modal shown --
+  // resetting game state (retry/quit/mode-switch) in that window would let the
+  // still-pending animation timeouts mutate the freshly-reset board. Pausing is
+  // still allowed at any time since it doesn't touch grid/level state.
+  function midCascade(){
+    return locked && !anyModalOpen();
+  }
+  // Lightweight poll to visually gray out Retry/Quit/Mode-toggle while a cascade
+  // is genuinely in-flight, so blocked clicks read as "busy, wait a moment"
+  // rather than looking broken/unresponsive.
+  setInterval(()=>{
+    const busy = midCascade();
+    retryBtn.classList.toggle('busy-disabled', busy);
+    quitBtn.classList.toggle('busy-disabled', busy);
+    modeToggleBtn.classList.toggle('busy-disabled', busy);
+    hintBtn.classList.toggle('busy-disabled', busy || hintsLeft<=0);
+  }, 150);
+
+  pauseBtn.addEventListener('click', ()=>{
+    if(anyModalOpen()) return;
+    savedLockState = locked;
+    locked = true;
+    pauseLevelClock();
+    pauseOverlay.classList.add('show');
+  });
+  resumeBtn.addEventListener('click', ()=>{
+    pauseOverlay.classList.remove('show');
+    locked = savedLockState;
+    resumeLevelClock();
+  });
+
+  quitBtn.addEventListener('click', ()=>{
+    if(midCascade()) return;
+    if(anyModalOpen()) return;
+    savedLockState = locked;
+    locked = true;
+    pauseLevelClock();
+    confirmOverlay.classList.add('show');
+  });
+  confirmNoBtn.addEventListener('click', ()=>{
+    confirmOverlay.classList.remove('show');
+    locked = savedLockState;
+    resumeLevelClock();
+  });
+  confirmYesBtn.addEventListener('click', ()=>{
+    confirmOverlay.classList.remove('show');
+    startLevel(0);
+  });
+
+  welcomeStartBtn.addEventListener('click', ()=>{
+    welcomeOverlay.classList.remove('show');
+    startLevel(0);
+  });
+  welcomeZenBtn.addEventListener('click', ()=>{
+    welcomeOverlay.classList.remove('show');
+    startZenMode();
+  });
+
+  modeToggleBtn.addEventListener('click', ()=>{
+    if(midCascade()) return;
+    if(anyModalOpen()) return;
+    if(gameMode === 'levels'){
+      startZenMode();
+    } else {
+      startLevel(levelIndex);
+    }
+  });
+
+  levelName.textContent = 'SWISH MATCH';
+  updateLegend();
+  updateModeUI();
+})();
+</script>
+</body>
+</html>
