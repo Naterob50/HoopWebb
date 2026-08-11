@@ -1,3 +1,4 @@
+export const revalidate = 0;
 import Link from 'next/link';
 
 // Master List of Games (Add new games here anytime!)
