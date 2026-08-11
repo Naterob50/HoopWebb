@@ -55,12 +55,18 @@ export default function Home() {
           </p>
 
           {/* Action Buttons */}
-          <div className="flex items-center justify-center gap-4 pt-2">
+          <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
             <Link
               href="/games"
               className="bg-orange-500 hover:bg-orange-600 text-black font-extrabold text-sm px-7 py-4 rounded-lg shadow-[0_0_25px_rgba(249,115,22,0.4)] transition-all flex items-center gap-2 uppercase tracking-wider"
             >
               BROWSE ALL GAMES →
+            </Link>
+            <Link
+              href="/odds-board"
+              className="bg-neutral-900 hover:bg-neutral-800 border border-orange-500/50 hover:border-orange-500 text-orange-400 font-bold text-sm px-7 py-4 rounded-lg transition-all uppercase tracking-wider flex items-center gap-2"
+            >
+              📊 THE ODDS BOARD
             </Link>
             <Link
               href="/story"
