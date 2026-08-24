@@ -54,12 +54,19 @@ export default function HomePage() {
             The free, open basketball gaming hub. Games, interactive experiences, and custom fan builds—no paywalls, no fluff, strictly basketball.
           </p>
 
-          <div className="flex items-center justify-center gap-4 pt-2">
+          {/* Hero Action Buttons */}
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 pt-2">
             <Link
               href="/games"
               className="bg-orange-500 hover:bg-orange-600 text-black font-extrabold px-6 py-3 rounded-lg text-xs sm:text-sm tracking-wider uppercase transition-all shadow-lg shadow-orange-500/20"
             >
               BROWSE ALL GAMES →
+            </Link>
+            <Link
+              href="/odds-board"
+              className="bg-neutral-900 hover:bg-neutral-800 border border-orange-500/40 text-orange-400 hover:text-orange-300 font-bold px-6 py-3 rounded-lg text-xs sm:text-sm tracking-wider uppercase transition-colors"
+            >
+              ODDS BOARD
             </Link>
             <Link
               href="/about"
