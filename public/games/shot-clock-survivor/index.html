@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shot Clock Survivor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --o:#F85C1A;--o2:#C63D00;--oglow:rgba(248,92,26,.4);--ofaint:rgba(248,92,26,.08);
+  --bg:#07070F;--s1:#0E0E1C;--s2:#151526;--s3:#1C1C30;--s4:#24243A;
+  --gb:rgba(255,255,255,.07);--gbl:rgba(255,255,255,.12);
+  --t:#EEEEF8;--t2:#8888A8;--t3:#44445A;
+  --green:#1FD97A;--greenbg:rgba(31,217,122,.1);--greenbdr:rgba(31,217,122,.3);
+  --red:#FF3A50;--redbg:rgba(255,58,80,.1);--redbdr:rgba(255,58,80,.3);
+  --r:12px;--rl:18px;--rxl:24px;
+}
+html{-webkit-font-smoothing:antialiased}
+body{
+  background:var(--bg);
+  background-image:
+    radial-gradient(ellipse 90% 40% at 50% 0%,rgba(248,92,26,.13) 0%,transparent 70%),
+    radial-gradient(ellipse 40% 30% at 80% 80%,rgba(60,40,120,.15) 0%,transparent 60%);
+  color:var(--t);
+  font-family:'Inter',system-ui,sans-serif;
+  min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;
+  padding:0 16px 72px;
+}
+
+/* HEADER */
+header{width:100%;max-width:640px;padding:48px 0 32px;text-align:center}
+.eyebrow{
+  font-size:10px;font-weight:700;letter-spacing:4px;text-transform:uppercase;
+  color:var(--o);margin-bottom:12px;opacity:.9;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.eyebrow::before,.eyebrow::after{content:'';flex:1;max-width:40px;height:1px;background:linear-gradient(90deg,transparent,rgba(248,92,26,.4))}
+.eyebrow::after{background:linear-gradient(90deg,rgba(248,92,26,.4),transparent)}
+h1{
+  font-family:'Bebas Neue',sans-serif;font-size:72px;letter-spacing:5px;line-height:.95;
+  background:linear-gradient(150deg,#FF8050 0%,#F85C1A 45%,#C03000 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  text-shadow:none;
+  filter:drop-shadow(0 0 40px rgba(248,92,26,.3));
+}
+.tagline{font-size:14px;color:var(--t2);margin-top:12px;letter-spacing:.3px;line-height:1.5}
+
+/* GAME */
+#game{width:100%;max-width:640px;display:flex;flex-direction:column;align-items:center;gap:12px}
+
+/* HUD */
+#hud{width:100%;display:flex;align-items:stretch;gap:10px}
+.stat-card{
+  flex:1;
+  background:var(--s1);
+  border:1px solid var(--gb);
+  border-radius:var(--rl);
+  padding:18px 12px;
+  text-align:center;
+  position:relative;overflow:hidden;
+}
+.stat-card::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent);
+}
+.stat-card .val{
+  font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:1px;
+  color:var(--t);line-height:1;
+}
+.stat-card .lbl{font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:2px;margin-top:5px}
+
+/* CLOCK */
+#clock-wrap{position:relative;width:130px;height:130px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+#clock-bg-glow{
+  position:absolute;inset:-16px;border-radius:50%;
+  background:radial-gradient(circle,var(--oglow) 0%,transparent 65%);
+  pointer-events:none;transition:all .5s;
+}
+#clock-svg{transform:rotate(-90deg);filter:drop-shadow(0 0 2px rgba(0,0,0,.5))}
+#clock-track{transition:none}
+#clock-arc{transition:stroke .4s}
+#clock-num{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:0;
+  color:var(--t);transition:color .4s;
+  text-shadow:0 0 20px rgba(248,92,26,.4);
+}
+
+/* LIVES */
+#lives-bar{
+  width:100%;display:flex;align-items:center;justify-content:center;gap:10px;
+  padding:2px 0;
+}
+.lives-lbl{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin-right:4px}
+.life-dot{
+  width:9px;height:9px;border-radius:50%;
+  background:var(--o);
+  box-shadow:0 0 10px var(--oglow),0 0 4px var(--o);
+  transition:all .35s cubic-bezier(.4,0,.2,1);
+}
+.life-dot.lost{background:var(--s3);box-shadow:none;transform:scale(.7)}
+
+/* XP BAR */
+#xp-wrap{width:100%;display:flex;flex-direction:column;gap:6px}
+#xp-labels{display:flex;justify-content:space-between;font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:1px}
+#xp-track{width:100%;height:3px;background:var(--s3);border-radius:99px;overflow:hidden}
+#xp-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--o2),var(--o));border-radius:99px;transition:width .4s cubic-bezier(.4,0,.2,1)}
+
+/* QUESTION CARD */
+#q-card{
+  width:100%;
+  background:linear-gradient(145deg,var(--s2),var(--s1));
+  border:1px solid var(--gb);
+  border-radius:var(--rxl);
+  padding:26px 28px 22px;
+  display:none;
+  position:relative;overflow:hidden;
+}
+#q-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);
+}
+#q-card::after{
+  content:'';position:absolute;top:-60px;right:-60px;width:180px;height:180px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(248,92,26,.06) 0%,transparent 70%);
+  pointer-events:none;
+}
+.q-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+#cat-badge{
+  font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:2px;
+  padding:5px 12px;border-radius:99px;
+  background:var(--ofaint);border:1px solid rgba(248,92,26,.2);color:var(--o);
+}
+#q-num{font-size:10px;font-weight:600;color:var(--t3);letter-spacing:1px;text-transform:uppercase}
+#q-text{font-size:20px;font-weight:600;line-height:1.55;color:var(--t);min-height:60px}
+
+/* ANSWERS */
+#answers{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ans-btn{
+  position:relative;
+  padding:15px 15px 15px 48px;
+  border-radius:var(--r);
+  border:1px solid var(--gb);
+  background:var(--s1);
+  color:var(--t);
+  font-family:'Inter',sans-serif;font-size:14px;font-weight:500;
+  cursor:pointer;text-align:left;line-height:1.45;
+  transition:background .12s,border-color .12s,transform .1s,box-shadow .12s;
+  overflow:hidden;
+}
+.ans-btn::before{
+  content:attr(data-letter);
+  position:absolute;left:13px;top:50%;transform:translateY(-50%);
+  width:22px;height:22px;border-radius:7px;
+  background:var(--s3);border:1px solid var(--s4);
+  color:var(--t2);font-size:10px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  line-height:22px;text-align:center;
+  transition:background .12s,border-color .12s,color .12s;
+}
+.ans-btn::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent);
+}
+.ans-btn:hover:not(:disabled){
+  background:var(--s2);border-color:var(--gbl);
+  transform:translateY(-2px);
+  box-shadow:0 6px 20px rgba(0,0,0,.3);
+}
+.ans-btn:active:not(:disabled){transform:translateY(0);box-shadow:none}
+.ans-btn:disabled{cursor:default}
+.ans-btn.correct{
+  background:var(--greenbg);border-color:var(--greenbdr);color:var(--green);
+  box-shadow:0 0 20px rgba(31,217,122,.1);
+}
+.ans-btn.correct::before{background:var(--greenbg);border-color:var(--greenbdr);color:var(--green)}
+.ans-btn.wrong{background:var(--redbg);border-color:var(--redbdr);color:var(--red);opacity:.75}
+.ans-btn.wrong::before{background:var(--redbg);border-color:var(--redbdr);color:var(--red)}
+
+/* MSG */
+#msg{font-size:13px;font-weight:500;color:var(--t2);min-height:18px;text-align:center;letter-spacing:.2px}
+
+/* START BTN */
+.btn{
+  font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:3px;
+  padding:16px 48px;border-radius:var(--r);border:none;
+  background:linear-gradient(135deg,#FF6830 0%,#E84000 100%);
+  color:#fff;cursor:pointer;
+  transition:transform .12s,box-shadow .15s;
+  box-shadow:0 4px 24px rgba(248,92,26,.35),0 1px 0 rgba(255,255,255,.15) inset,0 -1px 0 rgba(0,0,0,.3) inset;
+  position:relative;overflow:hidden;
+}
+.btn::before{content:'';position:absolute;top:0;left:0;right:0;height:40%;background:linear-gradient(rgba(255,255,255,.14),transparent);pointer-events:none}
+.btn:hover{transform:translateY(-2px);box-shadow:0 10px 36px rgba(248,92,26,.5),0 1px 0 rgba(255,255,255,.15) inset}
+.btn:active{transform:translateY(0);box-shadow:0 2px 12px rgba(248,92,26,.3)}
+
+/* GAME OVER */
+#screen-over{
+  display:none;flex-direction:column;align-items:center;gap:20px;
+  width:100%;
+  background:linear-gradient(145deg,var(--s2),var(--s1));
+  border:1px solid var(--gb);border-radius:var(--rxl);
+  padding:40px 32px;text-align:center;
+  position:relative;overflow:hidden;
+}
+#screen-over::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(248,92,26,.6),transparent)}
+#screen-over::after{content:'';position:absolute;top:-80px;left:50%;transform:translateX(-50%);width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(248,92,26,.1) 0%,transparent 70%);pointer-events:none}
+.over-emoji{font-size:44px;line-height:1;position:relative;z-index:1}
+#screen-over h2{
+  font-family:'Bebas Neue',sans-serif;font-size:54px;letter-spacing:4px;
+  background:linear-gradient(135deg,#FF8050,#F85C1A);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  position:relative;z-index:1;
+}
+.over-stats{display:flex;gap:32px;justify-content:center;align-items:center;position:relative;z-index:1}
+.over-stat .osv{font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--t);letter-spacing:1px;line-height:1}
+.over-stat .osl{font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:2px;margin-top:4px}
+.over-div{width:1px;height:44px;background:var(--gb)}
+#tier-badge{
+  font-size:13px;font-weight:600;padding:9px 22px;border-radius:99px;
+  background:var(--ofaint);border:1px solid rgba(248,92,26,.25);color:var(--o);
+  letter-spacing:.3px;position:relative;z-index:1;
+}
+
+/* HOW TO PLAY */
+#htp{
+  width:100%;
+  background:linear-gradient(145deg,var(--s2),var(--s1));
+  border:1px solid var(--gb);border-radius:var(--rxl);
+  padding:28px 28px 20px;
+  display:flex;flex-direction:column;
+  position:relative;overflow:hidden;
+}
+#htp::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent)}
+.htp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+#htp h3{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--t)}
+.htp-pill{font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--o);background:var(--ofaint);border:1px solid rgba(248,92,26,.2);padding:4px 12px;border-radius:99px}
+.rule{display:flex;align-items:flex-start;gap:16px;padding:16px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.rule:last-of-type{border-bottom:none;padding-bottom:0}
+.rule-ico{
+  width:40px;height:40px;border-radius:13px;flex-shrink:0;
+  background:var(--ofaint);border:1px solid rgba(248,92,26,.18);
+  display:flex;align-items:center;justify-content:center;font-size:19px;
+}
+.rule-body strong{display:block;font-size:13px;font-weight:700;color:var(--t);margin-bottom:3px;letter-spacing:-.1px}
+.rule-body span{font-size:13px;color:var(--t2);line-height:1.55}
+.clocks{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:12px}
+.cl{background:var(--s3);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:10px 6px;text-align:center}
+.cl .clt{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--o);line-height:1}
+.cl .cll{font-size:9px;color:var(--t3);margin-top:3px;font-weight:600;letter-spacing:.5px}
+.cat-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:12px}
+.cat-chip{background:var(--s3);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:10px 6px;text-align:center;display:flex;flex-direction:column;gap:2px}
+.cat-chip .cat-n{font-family:"Bebas Neue",sans-serif;font-size:22px;color:var(--o);line-height:1}
+.cat-chip .cat-l{font-size:9px;color:var(--t3);font-weight:600;letter-spacing:.5px}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pop{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+@keyframes clockPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+.fade-up{animation:fadeUp .28s ease both}
+.pop-anim{animation:pop .22s ease}
+.shake-anim{animation:shake .25s ease}
+
+/* RESPONSIVE */
+@media(max-width:520px){
+  h1{font-size:52px}
+  #q-text{font-size:16px}
+  #answers{grid-template-columns:1fr}
+  .clocks{grid-template-columns:repeat(2,1fr)}
+  .over-stats{gap:20px}
+  .over-stat .osv{font-size:34px}
+  #screen-over h2{font-size:42px}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="eyebrow">NBA Trivia Game</div>
+  <h1>Shot Clock<br>Survivor</h1>
+  <p class="tagline">Answer before the clock hits zero &mdash; three lives, no mercy.</p>
+</header>
+
+<div id="game">
+  <div id="hud">
+    <div class="stat-card">
+      <div class="val" id="score-val">0</div>
+      <div class="lbl">Score</div>
+    </div>
+    <div id="clock-wrap">
+      <div id="clock-bg-glow"></div>
+      <svg id="clock-svg" width="130" height="130" viewBox="0 0 130 130">
+        <circle id="clock-track" cx="65" cy="65" r="56" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="7"/>
+        <circle id="clock-arc" cx="65" cy="65" r="56" fill="none" stroke="#F85C1A"
+          stroke-width="7" stroke-linecap="round"
+          stroke-dasharray="351.9" stroke-dashoffset="0"/>
+      </svg>
+      <div id="clock-num">24</div>
+    </div>
+    <div class="stat-card">
+      <div class="val" id="level-val">1</div>
+      <div class="lbl">Level</div>
+    </div>
+  </div>
+
+  <div id="lives-bar">
+    <span class="lives-lbl">Lives</span>
+    <div class="life-dot" id="l0"></div>
+    <div class="life-dot" id="l1"></div>
+    <div class="life-dot" id="l2"></div>
+  </div>
+
+  <div id="xp-wrap">
+    <div id="xp-labels">
+      <span>Level <span id="cur-level">1</span></span>
+      <span><span id="xp-cur">0</span>&thinsp;/&thinsp;<span id="xp-max">5</span> xp to next</span>
+    </div>
+    <div id="xp-track"><div id="xp-fill"></div></div>
+  </div>
+
+  <div id="q-card">
+    <div class="q-meta">
+      <div id="cat-badge">rules</div>
+      <div id="q-num">Q1</div>
+    </div>
+    <div id="q-text"></div>
+  </div>
+
+  <div id="answers"></div>
+  <div id="msg"></div>
+
+  <div id="screen-over">
+    <div class="over-emoji">&#127936;</div>
+    <h2>Game Over</h2>
+    <div class="over-stats">
+      <div class="over-stat">
+        <div class="osv" id="over-score">0</div>
+        <div class="osl">Points</div>
+      </div>
+      <div class="over-div"></div>
+      <div class="over-stat">
+        <div class="osv" id="over-level">1</div>
+        <div class="osl">Level</div>
+      </div>
+    </div>
+    <div id="tier-badge">Still Warming Up</div>
+    <button class="btn" id="play-again-btn">Play Again</button>
+  </div>
+
+  <div id="htp">
+    <div class="htp-head">
+      <h3>How to Play</h3>
+      <span class="htp-pill">437 Questions</span>
+    </div>
+
+    <div class="rule">
+      <div class="rule-ico">&#9201;</div>
+      <div class="rule-body">
+        <strong>Beat the shot clock</strong>
+        <span>Each question comes with 4 answer choices. Pick the right one before the orange ring drains to zero &mdash; or you lose a life.</span>
+      </div>
+    </div>
+
+    <div class="rule">
+      <div class="rule-ico">&#9889;</div>
+      <div class="rule-body">
+        <strong>Speed = more points</strong>
+        <span>Answer fast to score big. You earn up to 6 bonus points for answering in the first 2 seconds. Slow answers still score, but only 1 point.</span>
+      </div>
+    </div>
+
+    <div class="rule">
+      <div class="rule-ico">&#128308;</div>
+      <div class="rule-body">
+        <strong>Three lives</strong>
+        <span>Wrong answer or clock expires = lose a life. Lose all three and the game ends. There are no extra lives.</span>
+      </div>
+    </div>
+
+    <div class="rule">
+      <div class="rule-ico">&#128200;</div>
+      <div class="rule-body">
+        <strong>Level up &mdash; clock gets shorter</strong>
+        <span>Correct answers earn XP. Fill the bar to level up &mdash; but every two levels the shot clock drops. At level 7+ you only get 12 seconds.</span>
+        <div class="clocks">
+          <div class="cl"><div class="clt">24s</div><div class="cll">Lvl 1&ndash;2</div></div>
+          <div class="cl"><div class="clt">20s</div><div class="cll">Lvl 3&ndash;4</div></div>
+          <div class="cl"><div class="clt">16s</div><div class="cll">Lvl 5&ndash;6</div></div>
+          <div class="cl"><div class="clt">12s</div><div class="cll">Lvl 7+</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rule">
+      <div class="rule-ico">&#127944;</div>
+      <div class="rule-body">
+        <strong>437 questions across 5 categories</strong>
+        <div class="cat-grid">
+          <div class="cat-chip"><span class="cat-n">136</span><span class="cat-l">History</span></div>
+          <div class="cat-chip"><span class="cat-n">117</span><span class="cat-l">Players</span></div>
+          <div class="cat-chip"><span class="cat-n">86</span><span class="cat-l">Rules</span></div>
+          <div class="cat-chip"><span class="cat-n">66</span><span class="cat-l">Records</span></div>
+          <div class="cat-chip"><span class="cat-n">32</span><span class="cat-l">Teams</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <button class="btn" id="start-btn">Start Game</button>
+</div>
+
+<script>
+const QUESTIONS = [
+  {q:"How many seconds is the NBA shot clock?",a:"24",c:["14","20","24","30"],cat:"rules"},
+  {q:"How many players are on the court per team?",a:"5",c:["4","5","6","7"],cat:"rules"},
+  {q:"How many points is a shot beyond the arc worth?",a:"3",c:["2","3","4","5"],cat:"rules"},
+  {q:"How many fouls before a player fouls out in the NBA?",a:"6",c:["4","5","6","7"],cat:"rules"},
+  {q:"How many periods in a regulation NBA game?",a:"4",c:["2","3","4","5"],cat:"rules"},
+  {q:"How long is each NBA quarter in minutes?",a:"12",c:["10","12","15","20"],cat:"rules"},
+  {q:"How tall is a regulation basketball hoop in feet?",a:"10",c:["8","9","10","12"],cat:"rules"},
+  {q:"What does MVP stand for?",a:"Most Valuable Player",c:["Most Valued Pro","Most Valuable Player","Most Versatile Player","Maximum Victory Points"],cat:"rules"},
+  {q:"What is a 'traveling' violation?",a:"Moving with the ball without dribbling",c:["Moving with the ball without dribbling","Stepping out of bounds","Throwing the ball out of play","Knocking the ball away"],cat:"rules"},
+  {q:"What is a double-double?",a:"Double digits in 2 stat categories",c:["Two 3-pointers in a row","Double overtime","Double digits in 2 stat categories","Two consecutive free throws"],cat:"rules"},
+  {q:"What is a triple-double?",a:"Double digits in 3 stat categories",c:["Three 3-pointers in one game","Triple overtime","Double digits in 3 stat categories","3 fouls in one quarter"],cat:"rules"},
+  {q:"How many free throws after a shooting foul on a 2-point attempt?",a:"2",c:["1","2","3","4"],cat:"rules"},
+  {q:"Which team has won the most NBA championships?",a:"Boston Celtics",c:["LA Lakers","Chicago Bulls","Boston Celtics","Golden State Warriors"],cat:"history"},
+  {q:"Who is known as 'The Mailman'?",a:"Karl Malone",c:["John Stockton","Karl Malone","Patrick Ewing","Charles Barkley"],cat:"players"},
+  {q:"Which player is nicknamed 'The Black Mamba'?",a:"Kobe Bryant",c:["LeBron James","Kobe Bryant","Dwyane Wade","Kevin Durant"],cat:"players"},
+  {q:"Who holds the NBA record for most career points?",a:"LeBron James",c:["Kareem Abdul-Jabbar","LeBron James","Michael Jordan","Wilt Chamberlain"],cat:"records"},
+  {q:"In what year was the NBA founded?",a:"1946",c:["1936","1946","1952","1960"],cat:"history"},
+  {q:"How many rings did Michael Jordan win with the Bulls?",a:"6",c:["4","5","6","7"],cat:"history"},
+  {q:"Which team did LeBron James NOT play for?",a:"San Antonio Spurs",c:["Cleveland Cavaliers","Miami Heat","Los Angeles Lakers","San Antonio Spurs"],cat:"players"},
+  {q:"What is the diameter of a basketball hoop in inches?",a:"18",c:["15","16","18","20"],cat:"rules"},
+  {q:"Who scored 100 points in a single NBA game?",a:"Wilt Chamberlain",c:["Kobe Bryant","Michael Jordan","Wilt Chamberlain","LeBron James"],cat:"records"},
+  {q:"Which city do the Knicks play in?",a:"New York",c:["Chicago","Los Angeles","New York","Boston"],cat:"teams"},
+  {q:"Who invented basketball?",a:"James Naismith",c:["James Naismith","Michael Jordan","Larry Bird","Julius Erving"],cat:"history"},
+  {q:"Where did James Naismith invent basketball?",a:"Springfield, Massachusetts",c:["New York City","Springfield, Massachusetts","Toronto","Chicago"],cat:"history"},
+  {q:"Stephen Curry plays for which team?",a:"Golden State Warriors",c:["Dallas Mavericks","Golden State Warriors","Phoenix Suns","Miami Heat"],cat:"players"},
+  {q:"Which player is nicknamed 'The Greek Freak'?",a:"Giannis Antetokounmpo",c:["Nikola Jokic","Luka Doncic","Giannis Antetokounmpo","Dirk Nowitzki"],cat:"players"},
+  {q:"Which position typically handles the ball the most?",a:"Point guard",c:["Center","Power forward","Point guard","Shooting guard"],cat:"rules"},
+  {q:"Which team plays at Crypto.com Arena?",a:"LA Lakers & LA Clippers",c:["Dallas Mavericks","LA Lakers & LA Clippers","Phoenix Suns","Sacramento Kings"],cat:"teams"},
+  {q:"Kobe Bryant spent his entire career with which team?",a:"Los Angeles Lakers",c:["Chicago Bulls","Boston Celtics","Los Angeles Lakers","Miami Heat"],cat:"players"},
+  {q:"Who won the NBA's first-ever slam dunk contest?",a:"Julius Erving",c:["Michael Jordan","Dominique Wilkins","Julius Erving","Darryl Dawkins"],cat:"history"},
+  {q:"The 'Dream Team' played in which Olympic year?",a:"1992",c:["1984","1988","1992","1996"],cat:"history"},
+  {q:"Shaquille O'Neal's nickname was?",a:"Shaq Diesel / The Big Aristotle",c:["The Mailman","Shaq Diesel / The Big Aristotle","The Admiral","The Answer"],cat:"players"},
+  {q:"Which team drafted Kobe Bryant in 1996?",a:"Charlotte Hornets",c:["Los Angeles Lakers","Charlotte Hornets","Minnesota Timberwolves","Philadelphia 76ers"],cat:"history"},
+  {q:"The 'Bad Boy' Pistons won championships in which years?",a:"1989 & 1990",c:["1987 & 1988","1989 & 1990","1991 & 1992","1993 & 1994"],cat:"history"},
+  {q:"Which country does Luka Doncic come from?",a:"Slovenia",c:["Croatia","Serbia","Slovenia","Greece"],cat:"players"},
+  // --- 35 new questions ---
+  {q:"What is the width of the NBA court in feet?",a:"50",c:["44","46","50","54"],cat:"rules"},
+  {q:"How long is the NBA court in feet?",a:"94",c:["84","90","94","100"],cat:"rules"},
+  {q:"What is the name of the area directly under the basket?",a:"The paint / key",c:["The block","The paint / key","The arc","The lane"],cat:"rules"},
+  {q:"How many seconds can an offensive player stand in the paint?",a:"3",c:["2","3","4","5"],cat:"rules"},
+  {q:"Which award is given to the best defensive player each season?",a:"Defensive Player of the Year",c:["Best Defender Award","Iron Glove Trophy","Defensive Player of the Year","Lockdown Award"],cat:"rules"},
+  {q:"What is a 'flagrant foul'?",a:"Unnecessary or excessive contact",c:["A foul on a 3-point shot","Missing two free throws","Unnecessary or excessive contact","A technical foul on a coach"],cat:"rules"},
+  {q:"How many timeouts per team in NBA overtime?",a:"2",c:["1","2","3","4"],cat:"rules"},
+  {q:"Which player won the most NBA MVP awards?",a:"Kareem Abdul-Jabbar",c:["Michael Jordan","LeBron James","Kareem Abdul-Jabbar","Bill Russell"],cat:"records"},
+  {q:"How many NBA titles did Bill Russell win?",a:"11",c:["8","9","10","11"],cat:"records"},
+  {q:"Who holds the NBA record for most assists in a career?",a:"John Stockton",c:["Magic Johnson","Steve Nash","John Stockton","Jason Kidd"],cat:"records"},
+  {q:"Who holds the NBA single-season scoring average record?",a:"Wilt Chamberlain",c:["Michael Jordan","Elgin Baylor","Wilt Chamberlain","LeBron James"],cat:"records"},
+  {q:"What year did the 3-point line come to the NBA?",a:"1979",c:["1972","1975","1979","1983"],cat:"history"},
+  {q:"Which team did Magic Johnson play for his entire career?",a:"Los Angeles Lakers",c:["Boston Celtics","Chicago Bulls","Los Angeles Lakers","Detroit Pistons"],cat:"players"},
+  {q:"Larry Bird played for which team?",a:"Boston Celtics",c:["Indiana Pacers","Los Angeles Lakers","Boston Celtics","Detroit Pistons"],cat:"players"},
+  {q:"Which player is nicknamed 'The Admiral'?",a:"David Robinson",c:["Patrick Ewing","Hakeem Olajuwon","David Robinson","Alonzo Mourning"],cat:"players"},
+  {q:"Allen Iverson played most of his career for which team?",a:"Philadelphia 76ers",c:["Denver Nuggets","Detroit Pistons","Philadelphia 76ers","Washington Wizards"],cat:"players"},
+  {q:"Which player is known as 'King James'?",a:"LeBron James",c:["Kevin Durant","LeBron James","Giannis Antetokounmpo","Kawhi Leonard"],cat:"players"},
+  {q:"Kevin Durant won his first NBA title with which team?",a:"Golden State Warriors",c:["Oklahoma City Thunder","Brooklyn Nets","Golden State Warriors","Phoenix Suns"],cat:"players"},
+  {q:"Which team has the most consecutive NBA championships?",a:"Boston Celtics (8 in a row)",c:["Chicago Bulls","Los Angeles Lakers","Boston Celtics (8 in a row)","Golden State Warriors"],cat:"history"},
+  {q:"The ABA merged with the NBA in which year?",a:"1976",c:["1968","1972","1976","1980"],cat:"history"},
+  {q:"Who coached the Chicago Bulls to all 6 of their championships?",a:"Phil Jackson",c:["Doug Collins","Phil Jackson","Johnny Bach","Tex Winter"],cat:"history"},
+  {q:"Michael Jordan's jersey number with the Bulls was?",a:"23",c:["32","23","45","33"],cat:"players"},
+  {q:"Which player wore number 33 for the Celtics?",a:"Larry Bird",c:["Kevin McHale","Larry Bird","Robert Parish","Bill Russell"],cat:"players"},
+  {q:"What team does Jayson Tatum play for?",a:"Boston Celtics",c:["Brooklyn Nets","Milwaukee Bucks","Boston Celtics","Philadelphia 76ers"],cat:"players"},
+  {q:"Nikola Jokic plays for which team?",a:"Denver Nuggets",c:["Utah Jazz","Denver Nuggets","Portland Trail Blazers","Sacramento Kings"],cat:"players"},
+  {q:"Which city are the Cavaliers from?",a:"Cleveland",c:["Columbus","Cincinnati","Cleveland","Chicago"],cat:"teams"},
+  {q:"The Raptors are the NBA's only team from which country?",a:"Canada",c:["Mexico","UK","France","Canada"],cat:"teams"},
+  {q:"Which arena do the Chicago Bulls play in?",a:"United Center",c:["Wintrust Arena","Allstate Arena","United Center","Chase Center"],cat:"teams"},
+  {q:"What is the name of the Dallas NBA team?",a:"Mavericks",c:["Rockets","Spurs","Mavericks","Thunder"],cat:"teams"},
+  {q:"The Utah Jazz play in which city?",a:"Salt Lake City",c:["Provo","Ogden","Salt Lake City","Las Vegas"],cat:"teams"},
+  {q:"Hakeem Olajuwon won championships with which team?",a:"Houston Rockets",c:["Dallas Mavericks","Houston Rockets","San Antonio Spurs","Miami Heat"],cat:"history"},
+  {q:"Which team did Charles Barkley win an MVP with?",a:"Phoenix Suns",c:["Philadelphia 76ers","Houston Rockets","Phoenix Suns","Orlando Magic"],cat:"history"},
+  {q:"Who was the first pick in the 2003 NBA Draft?",a:"LeBron James",c:["Carmelo Anthony","Dwyane Wade","LeBron James","Chris Bosh"],cat:"history"},
+  {q:"Stephen Curry set the single-season 3-pointer record with how many?",a:"402",c:["286","329","402","455"],cat:"records"},
+  {q:"Which player has the most All-Star Game appearances?",a:"Kareem Abdul-Jabbar",c:["LeBron James","Kobe Bryant","Kareem Abdul-Jabbar","Karl Malone"],cat:"records"},
+  // --- 30 more questions ---
+  {q:"Which team did Tim Duncan spend his entire career with?",a:"San Antonio Spurs",c:["Dallas Mavericks","Houston Rockets","San Antonio Spurs","Memphis Grizzlies"],cat:"players"},
+  {q:"Who is nicknamed 'The Claw' or 'The Klaw'?",a:"Kawhi Leonard",c:["Kevin Durant","Paul George","Kawhi Leonard","Jimmy Butler"],cat:"players"},
+  {q:"Which player won Finals MVP with three different teams?",a:"LeBron James",c:["Shaquille O'Neal","Kareem Abdul-Jabbar","LeBron James","Kevin Durant"],cat:"records"},
+  {q:"Dirk Nowitzki played his entire career for which team?",a:"Dallas Mavericks",c:["San Antonio Spurs","Dallas Mavericks","Houston Rockets","Oklahoma City Thunder"],cat:"players"},
+  {q:"Which country is Dirk Nowitzki from?",a:"Germany",c:["Austria","Switzerland","Germany","Netherlands"],cat:"players"},
+  {q:"Who was nicknamed 'The Answer'?",a:"Allen Iverson",c:["Stephon Marbury","Allen Iverson","Tracy McGrady","Vince Carter"],cat:"players"},
+  {q:"Vince Carter played in how many different decades?",a:"4",c:["2","3","4","5"],cat:"records"},
+  {q:"Which team did Dwyane Wade play most of his career with?",a:"Miami Heat",c:["Chicago Bulls","Cleveland Cavaliers","Miami Heat","New Orleans Pelicans"],cat:"players"},
+  {q:"Who won the NBA Finals MVP in 2023?",a:"Nikola Jokic",c:["Jamal Murray","Kawhi Leonard","Nikola Jokic","Jimmy Butler"],cat:"history"},
+  {q:"The Oklahoma City Thunder were previously known as?",a:"Seattle SuperSonics",c:["Vancouver Grizzlies","New Jersey Nets","Seattle SuperSonics","Charlotte Bobcats"],cat:"history"},
+  {q:"Which team did Kevin Garnett win a championship with?",a:"Boston Celtics",c:["Minnesota Timberwolves","Brooklyn Nets","Boston Celtics","San Antonio Spurs"],cat:"history"},
+  {q:"Who holds the record for most blocks in NBA history?",a:"Hakeem Olajuwon",c:["Dikembe Mutombo","David Robinson","Hakeem Olajuwon","Mark Eaton"],cat:"records"},
+  {q:"What is the NBA record for most points scored in a single game?",a:"100 (Wilt Chamberlain)",c:["81 (Kobe Bryant)","100 (Wilt Chamberlain)","73 (David Thompson)","92 (Elgin Baylor)"],cat:"records"},
+  {q:"Kobe Bryant scored how many points in his famous 81-point game?",a:"81",c:["78","79","81","83"],cat:"records"},
+  {q:"Which team did Dennis Rodman NOT play for?",a:"Los Angeles Lakers",c:["Detroit Pistons","San Antonio Spurs","Chicago Bulls","Los Angeles Lakers"],cat:"players"},
+  {q:"Who was Magic Johnson's famous rival on the Celtics?",a:"Larry Bird",c:["Kevin McHale","Robert Parish","Larry Bird","Danny Ainge"],cat:"history"},
+  {q:"In what city do the Nuggets play?",a:"Denver",c:["Salt Lake City","Denver","Portland","Phoenix"],cat:"teams"},
+  {q:"The Memphis NBA team is called?",a:"Grizzlies",c:["Wolves","Tigers","Grizzlies","Bears"],cat:"teams"},
+  {q:"Which team plays at Madison Square Garden?",a:"New York Knicks",c:["Brooklyn Nets","New York Knicks","Philadelphia 76ers","Boston Celtics"],cat:"teams"},
+  {q:"How many teams are in the NBA?",a:"30",c:["28","29","30","32"],cat:"rules"},
+  {q:"How many teams make the NBA playoffs?",a:"16",c:["12","14","16","20"],cat:"rules"},
+  {q:"What is a 'pick and roll'?",a:"A screen set then the screener rolls to the basket",c:["A fast break play","A screen set then the screener rolls to the basket","A defensive rotation","A turnover off a bad pass"],cat:"rules"},
+  {q:"What does 'PER' stand for in basketball stats?",a:"Player Efficiency Rating",c:["Points Earned per Run","Player Efficiency Rating","Points per Extended Run","Personal Excellence Record"],cat:"rules"},
+  {q:"Which city hosts the NBA All-Star Game most often?",a:"No fixed city — it rotates",c:["New York","Los Angeles","Las Vegas","No fixed city — it rotates"],cat:"rules"},
+  {q:"Who was the first international player to be drafted #1 overall?",a:"Yao Ming",c:["Dirk Nowitzki","Pau Gasol","Yao Ming","Manu Ginobili"],cat:"history"},
+  {q:"The Golden State Warriors' dynasty era was led by which coach?",a:"Steve Kerr",c:["Mark Jackson","Don Nelson","Steve Kerr","Alvin Gentry"],cat:"history"},
+  {q:"Which player was known as 'Pistol Pete'?",a:"Pete Maravich",c:["Pete Axthelm","Pete Chilcutt","Pete Maravich","Pete Myers"],cat:"players"},
+  {q:"Who was the first player selected in the 1984 NBA Draft?",a:"Hakeem Olajuwon",c:["Michael Jordan","Charles Barkley","Hakeem Olajuwon","Sam Bowie"],cat:"history"},
+  {q:"Michael Jordan was picked at what number in the 1984 draft?",a:"3rd",c:["1st","2nd","3rd","5th"],cat:"history"},
+  {q:"Which team won the first NBA championship in 1947?",a:"Philadelphia Warriors",c:["Boston Celtics","New York Knicks","Philadelphia Warriors","Chicago Stags"],cat:"history"},
+  {q:"Who won NBA Rookie of the Year in 2004?",a:"LeBron James",c:["Carmelo Anthony","Dwyane Wade","LeBron James","Chris Bosh"],cat:"history"},
+  {q:"Which player is known for 'The Shot' over Craig Ehlo in 1989?",a:"Michael Jordan",c:["Isiah Thomas","Magic Johnson","Michael Jordan","Larry Bird"],cat:"history"},
+  {q:"Pau Gasol is originally from which country?",a:"Spain",c:["Argentina","Brazil","Spain","France"],cat:"players"},
+  {q:"Who made 'The Block' in Game 7 of the 2016 NBA Finals?",a:"LeBron James",c:["Kyrie Irving","Kevin Love","LeBron James","Tristan Thompson"],cat:"history"},
+  {q:"Who hit the winning shot in Game 7 of the 2016 NBA Finals?",a:"Kyrie Irving",c:["LeBron James","Kevin Love","J.R. Smith","Kyrie Irving"],cat:"history"},
+  {q:"Which player holds the record for most steals in NBA history?",a:"John Stockton",c:["Gary Payton","Michael Jordan","John Stockton","Jason Kidd"],cat:"records"},
+  {q:"Which team did Scottie Pippen mostly play for?",a:"Chicago Bulls",c:["Portland Trail Blazers","Houston Rockets","Chicago Bulls","Seattle SuperSonics"],cat:"players"},
+  {q:"How many referees officiate an NBA game?",a:"3",c:["2","3","4","5"],cat:"rules"},
+  {q:"What does 'FG%' stand for in basketball stats?",a:"Field Goal Percentage",c:["Free Game Points","Final Game Percentage","Field Goal Percentage","Fast Game Passing"],cat:"rules"},
+  {q:"Which position is typically the tallest on a team?",a:"Center",c:["Small forward","Power forward","Center","Shooting guard"],cat:"rules"},
+  {q:"What is the name of the trophy given to the NBA champion?",a:"Larry O'Brien Championship Trophy",c:["Bill Russell Trophy","Naismith Cup","Larry O'Brien Championship Trophy","NBA Gold Trophy"],cat:"rules"},
+  {q:"The New Orleans NBA team is called?",a:"Pelicans",c:["Jazz","Hornets","Pelicans","Saints"],cat:"teams"},
+  {q:"Which team plays at Fiserv Forum?",a:"Milwaukee Bucks",c:["Indiana Pacers","Cleveland Cavaliers","Milwaukee Bucks","Detroit Pistons"],cat:"teams"},
+  {q:"The Sacramento NBA team is called?",a:"Kings",c:["Knights","Royals","Raiders","Kings"],cat:"teams"},
+  {q:"Which team drafted Stephen Curry in 2009?",a:"Golden State Warriors",c:["Charlotte Bobcats","Golden State Warriors","Memphis Grizzlies","Oklahoma City Thunder"],cat:"history"},
+  {q:"Giannis won the NBA title in which year?",a:"2021",c:["2019","2020","2021","2022"],cat:"history"},
+  {q:"Which team did Shaquille O'Neal win 3 consecutive titles with?",a:"Los Angeles Lakers",c:["Miami Heat","Orlando Magic","Los Angeles Lakers","Boston Celtics"],cat:"history"},
+  {q:"Who coached the San Antonio Spurs to 5 championships?",a:"Gregg Popovich",c:["Larry Brown","Don Nelson","Gregg Popovich","Rick Adelman"],cat:"history"},
+  {q:"Manu Ginobili is from which country?",a:"Argentina",c:["Brazil","Spain","Argentina","Uruguay"],cat:"players"},
+  {q:"Tony Parker is from which country?",a:"France",c:["Belgium","Spain","Italy","France"],cat:"players"},
+  {q:"Which player was nicknamed 'Big Fundamental'?",a:"Tim Duncan",c:["David Robinson","Tim Duncan","Shaquille O'Neal","Karl Malone"],cat:"players"},
+  {q:"The Toronto Raptors won their only NBA title in which year?",a:"2019",c:["2017","2018","2019","2020"],cat:"history"},
+  {q:"Which team did Ray Allen play for when he hit his famous corner 3 in the 2013 Finals?",a:"Miami Heat",c:["Boston Celtics","Milwaukee Bucks","Miami Heat","Seattle SuperSonics"],cat:"history"},
+  {q:"What year did Michael Jordan retire for the first time?",a:"1993",c:["1991","1992","1993","1994"],cat:"history"},
+  {q:"Michael Jordan attempted which sport after his first retirement?",a:"Baseball",c:["Golf","Tennis","Baseball","Soccer"],cat:"history"},
+  {q:"What is the trophy given to the NBA champion called?",a:"Larry O'Brien Trophy",c:["Bill Russell Cup","Naismith Trophy","Larry O'Brien Trophy","Commissioner's Cup"],cat:"rules"},
+  {q:"Jerry West's silhouette is used as which famous logo?",a:"The NBA logo",c:["The Spalding logo","The NBA logo","The ESPN logo","The Converse logo"],cat:"history"},
+  {q:"Which player popularized the 'skyhook' shot?",a:"Kareem Abdul-Jabbar",c:["Wilt Chamberlain","Bill Russell","Kareem Abdul-Jabbar","Patrick Ewing"],cat:"players"},
+  {q:"How tall is Yao Ming?",a:"7 feet 6 inches",c:["7 feet 0 inches","7 feet 2 inches","7 feet 4 inches","7 feet 6 inches"],cat:"players"},
+  {q:"Which team does Anthony Edwards play for?",a:"Minnesota Timberwolves",c:["Atlanta Hawks","Minnesota Timberwolves","Oklahoma City Thunder","Sacramento Kings"],cat:"players"},
+  {q:"Shai Gilgeous-Alexander plays for which team?",a:"Oklahoma City Thunder",c:["Toronto Raptors","Phoenix Suns","Oklahoma City Thunder","Indiana Pacers"],cat:"players"},
+  {q:"Which player won the 1988 Slam Dunk Contest in a duel with Dominique Wilkins?",a:"Michael Jordan",c:["Clyde Drexler","Spud Webb","Michael Jordan","Julius Erving"],cat:"history"},
+  {q:"Which player famously won the 1986 Slam Dunk Contest despite being only 5'7\"?",a:"Spud Webb",c:["Muggsy Bogues","Spud Webb","Calvin Murphy","Nate Robinson"],cat:"history"},
+  {q:"Who was the NBA's first commissioner?",a:"Maurice Podoloff",c:["David Stern","Adam Silver","Walter Kennedy","Maurice Podoloff"],cat:"history"},
+  {q:"David Stern served as NBA commissioner for how many years?",a:"30",c:["20","25","30","35"],cat:"history"},
+  {q:"Which player is nicknamed 'Chef Curry'?",a:"Stephen Curry",c:["Damian Lillard","Trae Young","Stephen Curry","Kyrie Irving"],cat:"players"},
+  {q:"Damian Lillard plays for which team as of 2024?",a:"Milwaukee Bucks",c:["Portland Trail Blazers","Milwaukee Bucks","Miami Heat","Brooklyn Nets"],cat:"players"},
+  {q:"Which team did Kevin Durant join in 2016 that caused major controversy?",a:"Golden State Warriors",c:["Brooklyn Nets","Phoenix Suns","Golden State Warriors","Washington Wizards"],cat:"history"},
+  {q:"What does 'PnR' stand for in basketball?",a:"Pick and Roll",c:["Pass and Run","Pivot and Release","Pick and Roll","Push and Run"],cat:"rules"},
+  {q:"Which player holds the record for most rebounds in a single game?",a:"Wilt Chamberlain (55)",c:["Bill Russell (51)","Wilt Chamberlain (55)","Dennis Rodman (34)","Shaquille O'Neal (28)"],cat:"records"},
+  {q:"Who won the 1995 NBA Slam Dunk Contest?",a:"Harold Miner",c:["Anfernee Hardaway","Harold Miner","Isaiah Rider","Cedric Ceballos"],cat:"history"},
+  {q:"Which team did Carmelo Anthony win a scoring title with?",a:"New York Knicks",c:["Denver Nuggets","New York Knicks","Oklahoma City Thunder","Portland Trail Blazers"],cat:"players"},
+  {q:"What is the maximum number of players on an NBA roster?",a:"15",c:["12","13","15","17"],cat:"rules"},
+  {q:"Which team did Paul Pierce play most of his career with?",a:"Boston Celtics",c:["Brooklyn Nets","Washington Wizards","Boston Celtics","Los Angeles Clippers"],cat:"players"},
+  {q:"Who was nicknamed 'The Big Ticket'?",a:"Kevin Garnett",c:["Shaquille O'Neal","Kevin Garnett","Tim Duncan","Patrick Ewing"],cat:"players"},
+  {q:"Which player famously said 'I am not a role model'?",a:"Charles Barkley",c:["Dennis Rodman","Charles Barkley","Allen Iverson","Shaquille O'Neal"],cat:"players"},
+  {q:"The Indiana Pacers play in which city?",a:"Indianapolis",c:["Fort Wayne","Bloomington","Indianapolis","Cincinnati"],cat:"teams"},
+  {q:"Which franchise has the most total wins in NBA history?",a:"Los Angeles Lakers",c:["Boston Celtics","Los Angeles Lakers","San Antonio Spurs","Golden State Warriors"],cat:"records"},
+  {q:"What year did LeBron James win his first NBA championship?",a:"2012",c:["2011","2012","2013","2016"],cat:"history"},
+  {q:"Which team did Tracy McGrady play for when he won back-to-back scoring titles?",a:"Orlando Magic",c:["Houston Rockets","Toronto Raptors","Orlando Magic","Detroit Pistons"],cat:"players"},
+  {q:"What is the name of the line players must not cross when inbounding from the baseline?",a:"End line / baseline",c:["Free throw line","Mid-court line","End line / baseline","3-point arc"],cat:"rules"},
+  {q:"Who won the 2021-22 NBA MVP award?",a:"Nikola Jokic",c:["Joel Embiid","LeBron James","Nikola Jokic","Giannis Antetokounmpo"],cat:"history"},
+  {q:"Where did Pete Maravich average 44.2 points per game in college?",a:"LSU",c:["Duke","Kentucky","LSU","UCLA"],cat:"players"},
+  {q:"Which team did Chris Paul play for when he reached his first NBA Finals?",a:"Phoenix Suns",c:["Los Angeles Clippers","Houston Rockets","Phoenix Suns","Oklahoma City Thunder"],cat:"players"},
+  {q:"How many points is a free throw worth?",a:"1",c:["0.5","1","2","3"],cat:"rules"},
+  {q:"What does 'DNP' mean in a box score?",a:"Did Not Play",c:["Did Not Pass","Did Not Play","Double Night Performance","Did Not Produce"],cat:"rules"},
+  {q:"Which team did Draymond Green win all his championships with?",a:"Golden State Warriors",c:["Oklahoma City Thunder","Cleveland Cavaliers","Golden State Warriors","Miami Heat"],cat:"players"},
+  {q:"Who holds the record for most career playoff points?",a:"LeBron James",c:["Michael Jordan","Kobe Bryant","LeBron James","Kareem Abdul-Jabbar"],cat:"records"},
+  {q:"The Charlotte NBA team is called?",a:"Hornets",c:["Bobcats","Panthers","Hornets","Hawks"],cat:"teams"},
+  {q:"Which city do the Suns play in?",a:"Phoenix",c:["Tempe","Scottsdale","Tucson","Phoenix"],cat:"teams"},
+  {q:"Who was the first player to win three straight NBA MVP awards?",a:"Bill Russell",c:["Wilt Chamberlain","Bill Russell","Kareem Abdul-Jabbar","Larry Bird"],cat:"records"},
+  {q:"Kyrie Irving went to which college?",a:"Duke",c:["Kentucky","Kansas","Duke","Ohio State"],cat:"players"},
+  {q:"Which team plays at Ball Arena?",a:"Denver Nuggets",c:["Utah Jazz","Portland Trail Blazers","Denver Nuggets","Oklahoma City Thunder"],cat:"teams"},
+  {q:"What is a 'charge' in basketball?",a:"An offensive foul when a player runs into a set defender",c:["A fast break","An offensive foul when a player runs into a set defender","A technical foul","A defensive foul for blocking"],cat:"rules"},
+  {q:"Who won NBA Finals MVP in 2016?",a:"LeBron James",c:["Kyrie Irving","Kevin Love","LeBron James","Tristan Thompson"],cat:"history"},
+  {q:"Which player is nicknamed 'Slim Reaper'?",a:"Kevin Durant",c:["Kawhi Leonard","Jimmy Butler","Kevin Durant","Paul George"],cat:"players"},
+  {q:"Oscar Robertson averaged a triple-double over an entire season in which year?",a:"1961-62",c:["1959-60","1961-62","1965-66","1968-69"],cat:"history"},
+  {q:"Which player won the most consecutive scoring titles?",a:"Michael Jordan (7)",c:["Wilt Chamberlain (7)","Michael Jordan (7)","Kevin Durant (4)","LeBron James (3)"],cat:"records"},
+  {q:"The Minnesota NBA team is called?",a:"Timberwolves",c:["Lynx","Wolves","Timberwolves","Vikings"],cat:"teams"},
+  {q:"Who was the first player drafted by the New Orleans Hornets in 2002?",a:"They didn't exist — it was the Charlotte Hornets",c:["Chris Paul","David West","They didn't exist — it was the Charlotte Hornets","Baron Davis"],cat:"history"},
+  {q:"Which country is Manu Ginobili from?",a:"Argentina",c:["Uruguay","Brazil","Argentina","Chile"],cat:"players"},
+  {q:"What is a 'zone defense'?",a:"Defending an area rather than a specific player",c:["Man-to-man coverage","A full-court press","Defending an area rather than a specific player","A trap defense near half-court"],cat:"rules"},
+  {q:"Which player won three Finals MVPs with three different teams?",a:"No player has done this",c:["LeBron James","Shaquille O'Neal","No player has done this","Kareem Abdul-Jabbar"],cat:"records"},
+  {q:"Which player holds the NBA record for most offensive rebounds in a career?",a:"Moses Malone",c:["Dennis Rodman","Charles Barkley","Moses Malone","Shaquille O'Neal"],cat:"records"},
+  {q:"Who won the first NBA Draft Lottery pick in 1985?",a:"New York Knicks (Patrick Ewing)",c:["Cleveland Cavaliers","New York Knicks (Patrick Ewing)","Golden State Warriors","Indiana Pacers"],cat:"history"},
+  {q:"Which player is known for the 'Dream Shake' move?",a:"Hakeem Olajuwon",c:["David Robinson","Patrick Ewing","Hakeem Olajuwon","Shaquille O'Neal"],cat:"players"},
+  {q:"What team did Julius 'Dr. J' Erving play for in the NBA?",a:"Philadelphia 76ers",c:["New York Nets","Boston Celtics","Philadelphia 76ers","Atlanta Hawks"],cat:"players"},
+  {q:"How long is NBA halftime in minutes?",a:"15",c:["10","12","15","20"],cat:"rules"},
+  {q:"Which team did Gary Payton win a championship with?",a:"Miami Heat",c:["Seattle SuperSonics","Los Angeles Lakers","Boston Celtics","Miami Heat"],cat:"players"},
+  {q:"Who holds the record for most 3-pointers made in a single playoff game?",a:"Klay Thompson (11)",c:["Stephen Curry (9)","Ray Allen (8)","Klay Thompson (11)","Damian Lillard (9)"],cat:"records"},
+  {q:"Which player is nicknamed 'The Process' fanbase refers to?",a:"Joel Embiid",c:["Ben Simmons","Joel Embiid","Markelle Fultz","Jahlil Okafor"],cat:"players"},
+  {q:"What is 'small ball' in basketball?",a:"Playing smaller, faster lineups without a traditional center",c:["Playing only guards","Using the shot clock fully","Playing smaller, faster lineups without a traditional center","A youth basketball variant"],cat:"rules"},
+  {q:"Which city does the NBA team the Hawks play in?",a:"Atlanta",c:["Nashville","Charlotte","Atlanta","Memphis"],cat:"teams"},
+  {q:"Who was the NBA's all-time leader in assists before John Stockton?",a:"Magic Johnson",c:["Oscar Robertson","Isiah Thomas","Magic Johnson","Bob Cousy"],cat:"records"},
+  {q:"In which year did the NBA introduce the challenge rule for coaches?",a:"2019",c:["2015","2017","2019","2021"],cat:"rules"},
+  {q:"Which team won the 2011 NBA championship?",a:"Dallas Mavericks",c:["Miami Heat","San Antonio Spurs","Dallas Mavericks","Oklahoma City Thunder"],cat:"history"},
+  {q:"Who won Finals MVP in the 2011 NBA Finals?",a:"Dirk Nowitzki",c:["Jason Kidd","Dwyane Wade","Dirk Nowitzki","LeBron James"],cat:"history"},
+  {q:"Which player is known for 'The Flu Game' in the 1997 Finals?",a:"Michael Jordan",c:["Scottie Pippen","Dennis Rodman","Michael Jordan","Toni Kukoc"],cat:"history"},
+  {q:"How many points did Klay Thompson score in one quarter vs Sacramento in 2015?",a:"37",c:["29","33","37","41"],cat:"records"},
+  {q:"Which team did Ben Wallace win Defensive Player of the Year with four times?",a:"Detroit Pistons",c:["Orlando Magic","Chicago Bulls","Detroit Pistons","Washington Bullets"],cat:"players"},
+  {q:"What is a 'transition offense'?",a:"Attacking quickly before the defense sets up",c:["A play run after a timeout","Attacking quickly before the defense sets up","A half-court set play","Rotating defenders"],cat:"rules"},
+  {q:"Which player wore number 34 for the Celtics and won the 2008 title?",a:"Paul Pierce",c:["Kevin Garnett","Ray Allen","Paul Pierce","Rajon Rondo"],cat:"players"},
+  {q:"Who won the NBA championship in 2004?",a:"Detroit Pistons",c:["San Antonio Spurs","Indiana Pacers","Detroit Pistons","Los Angeles Lakers"],cat:"history"},
+  {q:"Which player famously crossed over Michael Jordan in 1996?",a:"Allen Iverson",c:["Tim Hardaway","Allen Iverson","Stephon Marbury","Gary Payton"],cat:"history"},
+  {q:"The Oklahoma City Thunder's home arena is called?",a:"Paycom Center",c:["BOK Center","Chesapeake Energy Arena","Paycom Center","Cox Convention Center"],cat:"teams"},
+  {q:"Who was the first player ever to lead the NBA in scoring and assists in the same season?",a:"Nate Archibald",c:["Oscar Robertson","Magic Johnson","Nate Archibald","Jerry West"],cat:"records"},
+  {q:"Which team did Isaiah Thomas (the shorter one) play for when he averaged 28.9 PPG?",a:"Boston Celtics",c:["Sacramento Kings","Phoenix Suns","Cleveland Cavaliers","Boston Celtics"],cat:"players"},
+  {q:"Rudy Gobert is from which country?",a:"France",c:["Belgium","Senegal","France","Spain"],cat:"players"},
+  {q:"What does 'eFG%' stand for?",a:"Effective Field Goal Percentage",c:["Estimated Field Goals","Effective Field Goal Percentage","Extended Free Goal","Efficiency Field Gauge"],cat:"rules"},
+  {q:"Which coach has the most NBA wins ever?",a:"Don Nelson",c:["Phil Jackson","Larry Brown","Don Nelson","Gregg Popovich"],cat:"history"},
+  {q:"Who hit the buzzer-beater to send the 1998 Finals Game 6 into a title for Chicago?",a:"Michael Jordan",c:["Scottie Pippen","Toni Kukoc","Michael Jordan","Steve Kerr"],cat:"history"},
+  {q:"Which team did Kevin McHale play for his entire career?",a:"Boston Celtics",c:["Minnesota Timberwolves","Boston Celtics","Detroit Pistons","Philadelphia 76ers"],cat:"players"},
+  {q:"The Portland NBA team is called?",a:"Trail Blazers",c:["Trailblazers","Trail Blazers","Pioneers","Timbers"],cat:"teams"},
+  {q:"Who won the NBA Finals in 2014?",a:"San Antonio Spurs",c:["Miami Heat","Oklahoma City Thunder","San Antonio Spurs","Indiana Pacers"],cat:"history"},
+  {q:"Which player scored 81 points in a game on January 22, 2006?",a:"Kobe Bryant",c:["LeBron James","Kobe Bryant","Allen Iverson","Tracy McGrady"],cat:"records"},
+  {q:"What is a 'and-one'?",a:"Scoring while being fouled, earning a free throw",c:["A one-point bonus shot","Scoring while being fouled, earning a free throw","A charity stripe layup","An uncontested layup"],cat:"rules"},
+  {q:"Which player has the most All-NBA First Team selections?",a:"Kareem Abdul-Jabbar (10)",c:["LeBron James (13)","Kobe Bryant (11)","Kareem Abdul-Jabbar (10)","Michael Jordan (10)"],cat:"records"},
+  {q:"James Harden won his only MVP award with which team?",a:"Houston Rockets",c:["Brooklyn Nets","Philadelphia 76ers","Houston Rockets","Oklahoma City Thunder"],cat:"players"},
+  {q:"Which player won the 2022-23 NBA MVP award?",a:"Joel Embiid",c:["Nikola Jokic","Luka Doncic","Joel Embiid","Jayson Tatum"],cat:"history"},
+  {q:"Who was the first player in NBA history to record a 5x5 (5 stats with 5+ each)?",a:"Hakeem Olajuwon",c:["Magic Johnson","LeBron James","Hakeem Olajuwon","David Robinson"],cat:"records"},
+  {q:"Which team did Reggie Miller play his entire career with?",a:"Indiana Pacers",c:["Detroit Pistons","Indiana Pacers","Charlotte Hornets","Milwaukee Bucks"],cat:"players"},
+  {q:"Reggie Miller is famous for scoring how many points in 8.9 seconds vs the Knicks in 1995?",a:"8",c:["6","7","8","9"],cat:"history"},
+  {q:"Which player holds the record for highest single-season scoring average?",a:"Wilt Chamberlain (50.4 PPG)",c:["Michael Jordan (37.1)","Wilt Chamberlain (50.4 PPG)","Elgin Baylor (38.3)","LeBron James (31.4)"],cat:"records"},
+  {q:"What is a 'triple threat position'?",a:"Stance where a player can pass, dribble, or shoot",c:["Being guarded by three defenders","Having three players set screens","Stance where a player can pass, dribble, or shoot","A play with three options"],cat:"rules"},
+  {q:"Which city do the Wizards play in?",a:"Washington D.C.",c:["Baltimore","Arlington","Washington D.C.","Bethesda"],cat:"teams"},
+  {q:"Who was the NBA's Sixth Man of the Year in 2020?",a:"Montrezl Harrell",c:["Lou Williams","Montrezl Harrell","Dennis Schroder","Jordan Clarkson"],cat:"history"},
+  {q:"Which player is nicknamed 'The Beard'?",a:"James Harden",c:["Nikola Jokic","James Harden","Giannis Antetokounmpo","Rudy Gobert"],cat:"players"},
+  {q:"In what year did the NBA introduce the shot clock?",a:"1954",c:["1950","1954","1958","1962"],cat:"history"},
+  {q:"Who invented the shot clock?",a:"Danny Biasone",c:["Red Auerbach","Danny Biasone","Walter Brown","Ned Irish"],cat:"history"},
+  {q:"Which player won the most Defensive Player of the Year awards?",a:"Dikembe Mutombo (4)",c:["Ben Wallace (4)","Hakeem Olajuwon (2)","Dikembe Mutombo (4)","David Robinson (1)"],cat:"records"},
+  {q:"What is the distance of the NBA 3-point line from the basket at the corners?",a:"22 feet",c:["20 feet","21 feet","22 feet","23.75 feet"],cat:"rules"},
+  {q:"What is the distance of the NBA 3-point line from the basket at the top of the arc?",a:"23 feet 9 inches",c:["22 feet","23 feet","23 feet 9 inches","25 feet"],cat:"rules"},
+  {q:"Which team drafted Dirk Nowitzki before trading him to Dallas?",a:"Milwaukee Bucks",c:["Golden State Warriors","Milwaukee Bucks","Minnesota Timberwolves","Chicago Bulls"],cat:"history"},
+  {q:"Who scored the most points in a single All-Star Game?",a:"Anthony Davis (52 in 2017)",c:["Michael Jordan (40)","LeBron James (38)","Anthony Davis (52 in 2017)","Wilt Chamberlain (42)"],cat:"records"},
+  {q:"Which player is known for the 'Baby Hook' shot?",a:"LeBron James",c:["Kareem Abdul-Jabbar","LeBron James","Dirk Nowitzki","Kevin McHale"],cat:"players"},
+  {q:"The New Jersey Nets relocated to become which team?",a:"Brooklyn Nets",c:["New York Nets","Brooklyn Nets","Newark Nets","Queens Nets"],cat:"history"},
+  {q:"Who is the all-time leader in NBA playoff games played?",a:"LeBron James",c:["Derek Fisher","Robert Horry","LeBron James","Kareem Abdul-Jabbar"],cat:"records"},
+  {q:"Which player won the 2020 NBA Finals MVP?",a:"LeBron James",c:["Anthony Davis","LeBron James","Rajon Rondo","Danny Green"],cat:"history"},
+  {q:"Which team won the 2020 NBA title in the Bubble?",a:"Los Angeles Lakers",c:["Miami Heat","Boston Celtics","Los Angeles Lakers","Denver Nuggets"],cat:"history"},
+  {q:"What is 'iso' short for in basketball?",a:"Isolation — one-on-one play",c:["Isolated zone defense","Isolation — one-on-one play","International shot option","Inside out offense"],cat:"rules"},
+  {q:"Which player wore number 6 for the Celtics and had his number retired by all 30 teams?",a:"Bill Russell",c:["Larry Bird","Bill Russell","John Havlicek","Kevin McHale"],cat:"history"},
+  {q:"What is a 'swat' in basketball slang?",a:"A blocked shot",c:["A behind-the-back pass","A steal","A blocked shot","A dunk"],cat:"rules"},
+  {q:"Which player won 6 NBA Finals MVP awards?",a:"No player — Michael Jordan won 6 Finals MVPs",c:["Kareem Abdul-Jabbar","Shaquille O'Neal","No player — Michael Jordan won 6 Finals MVPs","LeBron James"],cat:"records"},
+  {q:"The Vancouver Grizzlies relocated to become which team?",a:"Memphis Grizzlies",c:["New Orleans Grizzlies","Memphis Grizzlies","Las Vegas Grizzlies","Seattle Grizzlies"],cat:"history"},
+  {q:"Which player holds the Celtics' all-time scoring record?",a:"John Havlicek",c:["Larry Bird","Paul Pierce","John Havlicek","Kevin McHale"],cat:"records"},
+  {q:"What year did the Chicago Bulls win their first NBA championship?",a:"1991",c:["1989","1990","1991","1992"],cat:"history"},
+  {q:"Who did the Bulls beat in their first NBA championship?",a:"Los Angeles Lakers",c:["Portland Trail Blazers","Phoenix Suns","Los Angeles Lakers","Cleveland Cavaliers"],cat:"history"},
+  {q:"Which arena do the Miami Heat play in?",a:"Kaseya Center",c:["FTX Arena","AmericanAirlines Arena","Kaseya Center","Miami-Dade Arena"],cat:"teams"},
+  {q:"What is a 'no-look pass'?",a:"A pass made without looking at the recipient",c:["A blind cross-court pass","A lob pass","A pass made without looking at the recipient","A bounce pass behind the back"],cat:"rules"},
+  {q:"Who won the 2018 NBA Finals MVP?",a:"Kevin Durant",c:["Stephen Curry","Klay Thompson","Kevin Durant","Draymond Green"],cat:"history"},
+  {q:"Which player is known for popularizing the 'Eurostep'?",a:"Manu Ginobili",c:["Tony Parker","Pau Gasol","Manu Ginobili","Dirk Nowitzki"],cat:"players"},
+  {q:"How far is the free throw line from the basket?",a:"15 feet",c:["12 feet","13 feet","15 feet","18 feet"],cat:"rules"},
+  {q:"Which team did Shaquille O'Neal play for when he won his first championship?",a:"Los Angeles Lakers",c:["Orlando Magic","Miami Heat","Los Angeles Lakers","Boston Celtics"],cat:"players"},
+  {q:"What does 'GOAT' stand for in sports?",a:"Greatest Of All Time",c:["Greatest On Any Team","Greatest Overall Athletic Trophy","Greatest Of All Time","Greatest Of Any Tournament"],cat:"rules"},
+  {q:"Who won the very first NBA Finals in 1947?",a:"Philadelphia Warriors",c:["Chicago Stags","Philadelphia Warriors","Washington Capitols","New York Knicks"],cat:"history"},
+  {q:"Which team plays at Gainbridge Fieldhouse?",a:"Indiana Pacers",c:["Cleveland Cavaliers","Detroit Pistons","Indiana Pacers","Milwaukee Bucks"],cat:"teams"},
+  {q:"Who was the tallest player in NBA history?",a:"Gheorghe Muresan & Manute Bol (7 ft 7 in)",c:["Yao Ming (7 ft 6 in)","Shawn Bradley (7 ft 6 in)","Gheorghe Muresan & Manute Bol (7 ft 7 in)","Tacko Fall (7 ft 5 in)"],cat:"records"},
+  {q:"Which player is nicknamed 'The Big Fundamental'?",a:"Tim Duncan",c:["David Robinson","Shaquille O'Neal","Tim Duncan","Kevin Garnett"],cat:"players"},
+  {q:"What is 'post play'?",a:"Offense played near the low block, close to the basket",c:["Playing after halftime","Offense played near the low block, close to the basket","A play called after a timeout","Defense near half court"],cat:"rules"},
+  {q:"Stephen Curry won his first two MVP awards in which consecutive seasons?",a:"2014-15 and 2015-16",c:["2013-14 and 2014-15","2014-15 and 2015-16","2015-16 and 2016-17","2016-17 and 2017-18"],cat:"history"},
+  {q:"Who was the Charlotte Hornets' first-ever NBA Draft pick in 1988?",a:"Rex Chapman",c:["Rex Chapman","Muggsy Bogues","Dell Curry","Kelly Tripucka"],cat:"history"},
+  {q:"Which player is famous for saying 'We talkin' about practice'?",a:"Allen Iverson",c:["Charles Barkley","Dennis Rodman","Allen Iverson","Latrell Sprewell"],cat:"players"},
+  {q:"Who coached the Golden State Warriors to their first title in 40 years in 2015?",a:"Steve Kerr",c:["Mark Jackson","Alvin Gentry","Steve Kerr","Mike Brown"],cat:"history"},
+  {q:"What is the name for when a team scores on every possession in a quarter?",a:"A perfect offensive quarter",c:["A shutout","A sweep","A perfect offensive quarter","A clean slate"],cat:"rules"},
+  {q:"Which player holds the record for most turnovers in NBA history?",a:"Karl Malone",c:["LeBron James","John Stockton","Karl Malone","Jason Kidd"],cat:"records"},
+  {q:"Trae Young plays for which team?",a:"Atlanta Hawks",c:["Charlotte Hornets","New Orleans Pelicans","Atlanta Hawks","Memphis Grizzlies"],cat:"players"},
+  {q:"Ja Morant plays for which team?",a:"Memphis Grizzlies",c:["New Orleans Pelicans","Oklahoma City Thunder","Memphis Grizzlies","Houston Rockets"],cat:"players"},
+  {q:"Which team did Dennis Rodman win championships with besides the Bulls?",a:"Detroit Pistons",c:["San Antonio Spurs","Detroit Pistons","Los Angeles Lakers","Miami Heat"],cat:"players"},
+  {q:"Which team won the 2022 NBA championship?",a:"Golden State Warriors",c:["Boston Celtics","Miami Heat","Golden State Warriors","Dallas Mavericks"],cat:"history"},
+{q:"Who won Finals MVP in the 2022 NBA Finals?",a:"Stephen Curry",c:["Klay Thompson","Draymond Green","Stephen Curry","Andrew Wiggins"],cat:"history"},
+{q:"Which team did Dwyane Wade win his first NBA title with?",a:"Miami Heat",c:["Chicago Bulls","Cleveland Cavaliers","Miami Heat","New Orleans Hornets"],cat:"history"},
+{q:"Who won the 2017 NBA Finals MVP?",a:"Kevin Durant",c:["Stephen Curry","LeBron James","Kevin Durant","Klay Thompson"],cat:"history"},
+{q:"In which year did the Golden State Warriors finish 73-9, the best record ever?",a:"2015-16",c:["2014-15","2015-16","2016-17","2017-18"],cat:"history"},
+{q:"Which team did LeBron James lead back from 3-1 down to win the 2016 title?",a:"Cleveland Cavaliers",c:["Miami Heat","Boston Celtics","Cleveland Cavaliers","Chicago Bulls"],cat:"history"},
+{q:"Who was the first player to win NBA MVP as a rookie?",a:"Wilt Chamberlain",c:["Oscar Robertson","Kareem Abdul-Jabbar","Wilt Chamberlain","LeBron James"],cat:"history"},
+{q:"Which team won the most games in a single NBA season?",a:"Golden State Warriors (73 wins, 2015-16)",c:["Chicago Bulls (72 wins, 1995-96)","Los Angeles Lakers (69 wins, 1971-72)","Golden State Warriors (73 wins, 2015-16)","Boston Celtics (68 wins, 1972-73)"],cat:"records"},
+{q:"Who is the only player to win NBA MVP, Finals MVP, and Defensive Player of the Year in the same season?",a:"Hakeem Olajuwon (1994)",c:["Michael Jordan","LeBron James","Hakeem Olajuwon (1994)","David Robinson"],cat:"records"},
+{q:"Which year did Michael Jordan win his last NBA championship?",a:"1998",c:["1996","1997","1998","1999"],cat:"history"},
+{q:"Jaylen Brown plays for which team?",a:"Boston Celtics",c:["Brooklyn Nets","Milwaukee Bucks","Atlanta Hawks","Boston Celtics"],cat:"players"},
+{q:"Devin Booker plays for which team?",a:"Phoenix Suns",c:["Los Angeles Clippers","Memphis Grizzlies","Phoenix Suns","Utah Jazz"],cat:"players"},
+{q:"Which player is known as the Joker (Jokic nickname)?",a:"Nikola Jokic",c:["Luka Doncic","Nikola Jokic","Giannis Antetokounmpo","Joel Embiid"],cat:"players"},
+{q:"Donovan Mitchell plays for which team as of 2024?",a:"Cleveland Cavaliers",c:["Utah Jazz","New York Knicks","Cleveland Cavaliers","Chicago Bulls"],cat:"players"},
+{q:"Which player famously dunked over a car at the 2000 Slam Dunk Contest?",a:"Vince Carter",c:["Tracy McGrady","Kobe Bryant","Jason Richardson","Vince Carter"],cat:"players"},
+{q:"Who did Kobe Bryant idolize and model his game after?",a:"Michael Jordan",c:["Magic Johnson","Julius Erving","Michael Jordan","Jerry West"],cat:"players"},
+{q:"Which player wore number 45 when he returned from his first retirement?",a:"Michael Jordan",c:["Scottie Pippen","Dennis Rodman","Michael Jordan","Toni Kukoc"],cat:"players"},
+{q:"Who is Bronny James the son of?",a:"LeBron James",c:["Magic Johnson","Kobe Bryant","LeBron James","Dwyane Wade"],cat:"players"},
+{q:"Which player earned the nickname Big Shot Rob for hitting clutch playoff shots?",a:"Robert Horry",c:["Derek Fisher","Robert Horry","Manu Ginobili","Steve Kerr"],cat:"players"},
+{q:"Robert Horry won how many NBA championships?",a:"7",c:["5","6","7","8"],cat:"records"},
+{q:"Which team plays at the Chase Center?",a:"Golden State Warriors",c:["Sacramento Kings","Los Angeles Clippers","Golden State Warriors","Portland Trail Blazers"],cat:"teams"},
+{q:"Which team plays at Rocket Mortgage FieldHouse?",a:"Cleveland Cavaliers",c:["Indiana Pacers","Detroit Pistons","Cleveland Cavaliers","Chicago Bulls"],cat:"teams"},
+{q:"The New Orleans Pelicans were previously known as?",a:"New Orleans Hornets",c:["New Orleans Jazz","New Orleans Hornets","Charlotte Hornets","New Orleans Bobcats"],cat:"history"},
+{q:"Which team plays at Little Caesars Arena?",a:"Detroit Pistons",c:["Cleveland Cavaliers","Detroit Pistons","Indiana Pacers","Milwaukee Bucks"],cat:"teams"},
+{q:"The Utah Jazz were originally from which city?",a:"New Orleans",c:["Salt Lake City","Denver","New Orleans","Seattle"],cat:"history"},
+{q:"Which team plays at Toyota Center?",a:"Houston Rockets",c:["Dallas Mavericks","San Antonio Spurs","Houston Rockets","Memphis Grizzlies"],cat:"teams"},
+{q:"Which team plays at Smoothie King Center?",a:"New Orleans Pelicans",c:["Memphis Grizzlies","Atlanta Hawks","Charlotte Hornets","New Orleans Pelicans"],cat:"teams"},
+{q:"What is the penalty for a technical foul?",a:"One free throw for the opposing team",c:["Ejection from the game","One free throw for the opposing team","Two free throws","Loss of possession only"],cat:"rules"},
+{q:"How many steps can you take before shooting a layup without dribbling?",a:"2",c:["1","2","3","unlimited"],cat:"rules"},
+{q:"What is a defensive three-second violation?",a:"A defender staying in the paint for more than 3 seconds",c:["Three fouls in one quarter","A defender staying in the paint for more than 3 seconds","Three consecutive blocks","Guarding three players at once"],cat:"rules"},
+{q:"What does NBA stand for?",a:"National Basketball Association",c:["National Ball Association","North American Basketball Association","National Basketball Association","National Basketball Alliance"],cat:"rules"},
+{q:"What is the shot clock reset to after an offensive rebound in the NBA?",a:"14 seconds",c:["24 seconds","20 seconds","14 seconds","10 seconds"],cat:"rules"},
+{q:"What is a jump ball?",a:"A toss-up between two players to start play",c:["A rebound contest","A disputed call that goes to replay","A toss-up between two players to start play","A player jumping out of bounds"],cat:"rules"},
+{q:"How many players can be on the court for each team at once in 3-on-3 basketball?",a:"3",c:["2","3","4","5"],cat:"rules"},
+{q:"What is a full-court press?",a:"Defending the opposing team across the entire court",c:["A dunk attempt from half court","Defending the opposing team across the entire court","A fast break going the full length","A press conference after a game"],cat:"rules"},
+{q:"Which hand signal does a referee use to indicate a 3-point shot?",a:"Three fingers raised",c:["Pointing at the arc","A circular motion","Three fingers raised","Hands crossed overhead"],cat:"rules"},
+{q:"What is a loose ball foul?",a:"A foul committed while neither team has possession",c:["A flagrant foul","Fouling someone without the ball","A foul committed while neither team has possession","A technical foul on the bench"],cat:"rules"},
+{q:"What does the term paint refer to in basketball?",a:"The colored rectangular area under the basket",c:["The court surface material","The colored rectangular area under the basket","The 3-point arc area","The lane markings"],cat:"rules"},
+{q:"How many quarters are in an NBA game?",a:"4",c:["2","3","4","6"],cat:"rules"},
+{q:"What is the max contract length an NBA player can sign?",a:"5 years",c:["3 years","4 years","5 years","7 years"],cat:"rules"},
+{q:"What is a slam dunk?",a:"Scoring by jumping and pushing the ball through the hoop with one or both hands",c:["A high-arc shot","A layup off the glass","Scoring by jumping and pushing the ball through the hoop with one or both hands","A reverse layup"],cat:"rules"},
+{q:"How tall is the NBA backboard in feet?",a:"3.5 feet tall by 6 feet wide",c:["3 feet tall by 5 feet wide","3.5 feet tall by 6 feet wide","4 feet tall by 6 feet wide","4 feet tall by 7 feet wide"],cat:"rules"},
+{q:"Which player scored 70 or more points in a game besides Wilt Chamberlain?",a:"Devin Booker (70 pts in 2017)",c:["Kobe Bryant (81 pts)","Devin Booker (70 pts in 2017)","David Robinson (71 pts)","Elgin Baylor (71 pts)"],cat:"records"},
+{q:"Which team has the longest playoff losing streak in NBA history?",a:"Sacramento Kings (18 years without a playoff win)",c:["Charlotte Hornets","Memphis Grizzlies","Sacramento Kings (18 years without a playoff win)","Minnesota Timberwolves"],cat:"records"},
+{q:"Who holds the single-season record for most triple-doubles?",a:"Oscar Robertson (41 in 1961-62)",c:["Russell Westbrook (42 in 2016-17)","Magic Johnson (30)","Oscar Robertson (41 in 1961-62)","LeBron James (27)"],cat:"records"},
+{q:"Russell Westbrook won the MVP award in which season?",a:"2016-17",c:["2014-15","2015-16","2016-17","2017-18"],cat:"history"},
+{q:"Which player is the all-time leader in NBA 3-pointers made?",a:"Stephen Curry",c:["Ray Allen","Reggie Miller","Stephen Curry","Klay Thompson"],cat:"records"},
+{q:"Who was the youngest player to score 60 or more points in an NBA game?",a:"Devin Booker (20 years old)",c:["LeBron James","Kevin Durant","Devin Booker (20 years old)","Kobe Bryant"],cat:"records"},
+{q:"What team did Bill Walton win a championship with in 1977?",a:"Portland Trail Blazers",c:["Boston Celtics","Los Angeles Lakers","Portland Trail Blazers","San Diego Clippers"],cat:"history"},
+{q:"Who won the first NBA 3-point contest?",a:"Larry Bird",c:["Dale Ellis","Craig Hodges","Larry Bird","Danny Ainge"],cat:"history"},
+{q:"Larry Bird won how many consecutive 3-point contests?",a:"3",c:["2","3","4","5"],cat:"records"},
+  {q:"Which player holds the record for most points in a playoff game?",a:"Michael Jordan (63 vs Celtics, 1986)",c:["Wilt Chamberlain (56)","LeBron James (51)","Michael Jordan (63 vs Celtics, 1986)","Elgin Baylor (61)"],cat:"records"},
+  {q:"Who coached the Boston Celtics to their most recent championship in 2024?",a:"Joe Mazzulla",c:["Brad Stevens","Ime Udoka","Doc Rivers","Joe Mazzulla"],cat:"history"},
+  {q:"The Boston Celtics won their 18th championship in which year?",a:"2024",c:["2022","2023","2024","2025"],cat:"history"},
+  {q:"Which player won the 2024 Finals MVP?",a:"Jaylen Brown",c:["Jayson Tatum","Al Horford","Jaylen Brown","Derrick White"],cat:"history"},
+  {q:"Who was the first player to win back-to-back MVP awards in the 2000s?",a:"Steve Nash",c:["LeBron James","Kobe Bryant","Steve Nash","Dirk Nowitzki"],cat:"history"},
+  {q:"Steve Nash won consecutive MVP awards playing for which team?",a:"Phoenix Suns",c:["Dallas Mavericks","Toronto Raptors","Phoenix Suns","Los Angeles Lakers"],cat:"players"},
+  {q:"Which player made the shot known as the Miracle in Mirage or Damian Lillard Time?",a:"Damian Lillard",c:["Russell Westbrook","Stephen Curry","Damian Lillard","Chris Paul"],cat:"players"},
+  
+  {q:"Which player is nicknamed Bubble-less or the Bubble MVP?",a:"Jamal Murray",c:["Tyler Herro","Jimmy Butler","Jamal Murray","Bam Adebayo"],cat:"players"},
+  {q:"What is Luka Doncic number on his jersey?",a:"77",c:["7","17","77","27"],cat:"players"},
+  {q:"Which player was drafted 1st overall in the 2019 NBA Draft?",a:"Zion Williamson",c:["Ja Morant","RJ Barrett","Zion Williamson","Darius Garland"],cat:"history"},
+  {q:"Zion Williamson plays for which team?",a:"New Orleans Pelicans",c:["Oklahoma City Thunder","Memphis Grizzlies","Charlotte Hornets","New Orleans Pelicans"],cat:"players"},
+  {q:"Which player was drafted 1st overall in the 2020 NBA Draft?",a:"Anthony Edwards",c:["LaMelo Ball","James Wiseman","Anthony Edwards","Deni Avdija"],cat:"history"},
+  {q:"LaMelo Ball plays for which team?",a:"Charlotte Hornets",c:["Los Angeles Lakers","Golden State Warriors","Charlotte Hornets","Miami Heat"],cat:"players"},
+  {q:"Which player was drafted 1st overall in the 2021 NBA Draft?",a:"Cade Cunningham",c:["Evan Mobley","Jalen Green","Cade Cunningham","Scottie Barnes"],cat:"history"},
+  {q:"Cade Cunningham plays for which team?",a:"Detroit Pistons",c:["Houston Rockets","Cleveland Cavaliers","Detroit Pistons","Sacramento Kings"],cat:"players"},
+  {q:"Victor Wembanyama was drafted 1st overall in which year?",a:"2023",c:["2021","2022","2023","2024"],cat:"history"},
+  {q:"Victor Wembanyama plays for which team?",a:"San Antonio Spurs",c:["Oklahoma City Thunder","Charlotte Hornets","Detroit Pistons","San Antonio Spurs"],cat:"players"},
+  {q:"Which country is Victor Wembanyama from?",a:"France",c:["Belgium","Germany","Spain","France"],cat:"players"},
+  {q:"What is Victor Wembanyama height?",a:"7 ft 4 in",c:["7 ft 0 in","7 ft 2 in","7 ft 4 in","7 ft 6 in"],cat:"players"},
+  {q:"Which player won Rookie of the Year in 2023?",a:"Paolo Banchero",c:["Bennedict Mathurin","Jabari Smith Jr","Paolo Banchero","Keegan Murray"],cat:"history"},
+  {q:"Paolo Banchero plays for which team?",a:"Orlando Magic",c:["Charlotte Hornets","Atlanta Hawks","Washington Wizards","Orlando Magic"],cat:"players"},
+  {q:"Which team had the worst record in NBA history?",a:"Charlotte Bobcats (7-59 in 2011-12)",c:["Philadelphia 76ers (10-72 in 2015-16)","Charlotte Bobcats (7-59 in 2011-12)","Cleveland Cavaliers (19-63)","New York Knicks (22-60)"],cat:"records"},
+  {q:"The Philadelphia 76ers infamous rebuild era was nicknamed what?",a:"The Process",c:["The Rebuild","The Tank","The Process","The Plan"],cat:"history"},
+  {q:"Who was the head coach during the Cleveland Cavaliers 2016 championship run?",a:"Tyronn Lue",c:["David Blatt","Tyronn Lue","Larry Drew","John Beilein"],cat:"history"},
+  {q:"Which team finished 72-10 in the 1995-96 season?",a:"Chicago Bulls",c:["Los Angeles Lakers","Golden State Warriors","Chicago Bulls","San Antonio Spurs"],cat:"records"},
+  {q:"Who was the point guard on the 1995-96 Bulls dynasty team?",a:"Ron Harper",c:["John Paxson","B.J. Armstrong","Ron Harper","Steve Kerr"],cat:"players"},
+  {q:"Which player holds the record for most career free throws made?",a:"Karl Malone",c:["LeBron James","Kobe Bryant","Karl Malone","Oscar Robertson"],cat:"records"},
+  {q:"What percentage of free throws did Steve Nash shoot for his career?",a:"90.4 percent",c:["88.7 percent","89.8 percent","90.4 percent","92.1 percent"],cat:"records"},
+  {q:"Which player had a famous rivalry with LeBron James in the 2011 and 2012 Finals?",a:"Dirk Nowitzki and Kevin Durant",c:["Kobe Bryant","Paul Pierce","Dirk Nowitzki and Kevin Durant","Dwyane Wade"],cat:"history"},
+  {q:"How many consecutive seasons did LeBron James go to the Finals from 2011 to 2018?",a:"8",c:["6","7","8","9"],cat:"records"},
+  {q:"Which player is the only one to average 30 plus points and 10 plus assists in a season?",a:"Oscar Robertson",c:["Magic Johnson","LeBron James","Oscar Robertson","Russell Westbrook"],cat:"records"},
+  {q:"Isaiah Thomas (short one) stood at what height?",a:"5 ft 9 in",c:["5 ft 7 in","5 ft 8 in","5 ft 9 in","5 ft 11 in"],cat:"players"},
+  {q:"Muggsy Bogues was how tall?",a:"5 ft 3 in",c:["5 ft 1 in","5 ft 3 in","5 ft 5 in","5 ft 7 in"],cat:"players"},
+  {q:"Which team does Karl-Anthony Towns play for as of 2024?",a:"New York Knicks",c:["Minnesota Timberwolves","Brooklyn Nets","New York Knicks","Cleveland Cavaliers"],cat:"players"},
+  {q:"Which player wore jersey number 00?",a:"Robert Parish",c:["Shaquille O'Neal","Hakeem Olajuwon","Robert Parish","Dikembe Mutombo"],cat:"players"},
+  {q:"Who was nicknamed Big Country?",a:"Bryant Reeves",c:["Kevin Garnett","Bryant Reeves","Shawn Kemp","Vin Baker"],cat:"players"},
+  {q:"Which player is nicknamed Playoff P?",a:"Paul George",c:["Kawhi Leonard","Paul George","Jimmy Butler","Khris Middleton"],cat:"players"},
+  {q:"Which team did Paul George request a trade from to join the LA Clippers?",a:"Oklahoma City Thunder",c:["Indiana Pacers","Los Angeles Lakers","Oklahoma City Thunder","Denver Nuggets"],cat:"players"},
+  {q:"Who was the first player drafted out of high school in the modern era?",a:"Kevin Garnett (1995)",c:["Kobe Bryant (1996)","LeBron James (2003)","Kevin Garnett (1995)","Tracy McGrady (1997)"],cat:"history"},
+  {q:"When did the NBA ban players from entering the draft straight out of high school?",a:"2005",c:["2001","2003","2005","2007"],cat:"rules"},
+  {q:"What is the NBA G League?",a:"The NBA developmental minor league",c:["A European pro league","The NBA developmental minor league","A youth basketball program","A summer tournament"],cat:"rules"},
+  {q:"Which arena do the San Antonio Spurs play in?",a:"Frost Bank Center",c:["AT and T Center","Alamodome","Frost Bank Center","SBC Center"],cat:"teams"},
+  {q:"Which player was nicknamed Vinsanity?",a:"Vince Carter",c:["Tracy McGrady","Jason Richardson","Vince Carter","Josh Smith"],cat:"players"},
+  {q:"Vince Carter played how many NBA seasons in total?",a:"22",c:["18","20","22","24"],cat:"records"},
+  {q:"Which player played for both the Celtics and Lakers in his career?",a:"Shaquille O'Neal",c:["Kevin Garnett","Ray Allen","Shaquille O'Neal","Paul Pierce"],cat:"players"},
+  {q:"Who made the famous Shot over Bryon Russell to win the 1998 NBA title?",a:"Michael Jordan",c:["Scottie Pippen","Steve Kerr","Michael Jordan","Toni Kukoc"],cat:"history"},
+  {q:"Which player made the Series-winning shot in Game 6 of the 1997 Finals?",a:"Steve Kerr",c:["Michael Jordan","Scottie Pippen","Steve Kerr","Dennis Rodman"],cat:"history"},
+  {q:"What is the name of the basketball used in the NBA?",a:"Spalding (now Wilson)",c:["Rawlings","Spalding (now Wilson)","Nike","Adidas"],cat:"rules"},
+  {q:"Which team won the inaugural NBA In-Season Tournament in 2023?",a:"Los Angeles Lakers",c:["Indiana Pacers","Sacramento Kings","Los Angeles Lakers","New Orleans Pelicans"],cat:"history"},
+  {q:"Which player is known for the chasedown block?",a:"LeBron James",c:["Kawhi Leonard","Andre Iguodala","LeBron James","Giannis Antetokounmpo"],cat:"players"},
+  {q:"Who holds the record for most career NBA games played?",a:"Robert Parish",c:["Kareem Abdul-Jabbar","Robert Parish","Karl Malone","Vince Carter"],cat:"records"},
+  {q:"What is the term for a defensive stop on every possession in a quarter?",a:"A defensive shutout quarter",c:["A clean sheet","A defensive shutout quarter","A goose egg","A zero quarter"],cat:"rules"},
+  {q:"Which player is nicknamed the Human Highlight Film?",a:"Dominique Wilkins",c:["Julius Erving","Dominique Wilkins","Vince Carter","Shawn Kemp"],cat:"players"},
+  {q:"Dominique Wilkins played most of his career for which team?",a:"Atlanta Hawks",c:["Boston Celtics","Atlanta Hawks","Los Angeles Clippers","San Antonio Spurs"],cat:"players"},
+  {q:"Who is the all-time leading scorer for the Atlanta Hawks franchise?",a:"Dominique Wilkins",c:["Trae Young","Dominique Wilkins","Lou Hudson","Bob Pettit"],cat:"records"},
+  {q:"What is a flagrant 2 foul?",a:"An automatic ejection for excessive contact",c:["A technical foul on the coach","An automatic ejection for excessive contact","A double technical","A foul that results in two free throws only"],cat:"rules"},
+  {q:"Which team did Bob Cousy play his entire career with?",a:"Boston Celtics",c:["New York Knicks","Boston Celtics","Philadelphia Warriors","Syracuse Nationals"],cat:"players"},
+  {q:"What was the original name of the Sacramento Kings franchise?",a:"Rochester Royals",c:["Cincinnati Royals","Rochester Royals","Kansas City Kings","Syracuse Royals"],cat:"history"},
+  {q:"Which team did the Sacramento Kings relocate from before Sacramento?",a:"Kansas City Kings",c:["Cincinnati Royals","Kansas City Kings","Rochester Royals","Omaha Kings"],cat:"history"},
+  {q:"Who was the head coach of the Showtime Lakers in the 1980s?",a:"Pat Riley",c:["Phil Jackson","Pat Riley","Jerry West","Bill Sharman"],cat:"history"},
+  {q:"Which player popularized the term Showtime for the Lakers offense?",a:"Magic Johnson",c:["Kareem Abdul-Jabbar","James Worthy","Magic Johnson","Byron Scott"],cat:"history"},
+  {q:"What is the Mendoza Line equivalent in basketball used to describe bad shooting?",a:"There is no official term — shooters under 40 percent FG are often criticized",c:["33 percent shooting","There is no official term — shooters under 40 percent FG are often criticized","Below 50 percent free throws","Sub-.500 record"],cat:"rules"},
+  {q:"Which player set the rookie scoring record with 7,219 points in a season?",a:"Wilt Chamberlain",c:["Oscar Robertson","Wilt Chamberlain","LeBron James","Michael Jordan"],cat:"records"},
+  {q:"What does the term garbage time refer to?",a:"Late game minutes when the outcome is already decided",c:["Overtime periods","Late game minutes when the outcome is already decided","Time spent on the bench","The final 24 seconds of a close game"],cat:"rules"},
+  {q:"Which player had the nickname Dream referring to his skill?",a:"Hakeem Olajuwon",c:["David Robinson","Patrick Ewing","Hakeem Olajuwon","Alonzo Mourning"],cat:"players"},
+  {q:"What city is the Phoenix Suns arena located in?",a:"Phoenix",c:["Tempe","Scottsdale","Mesa","Phoenix"],cat:"teams"},
+  {q:"Which arena do the Phoenix Suns play in?",a:"Footprint Center",c:["US Airways Center","Talking Stick Resort Arena","Footprint Center","America West Arena"],cat:"teams"},
+  {q:"Which player was the first to be named Defensive Player of the Year and MVP in the same season after Hakeem Olajuwon?",a:"No one else has done it",c:["Kevin Garnett","Dwight Howard","No one else has done it","Giannis Antetokounmpo"],cat:"records"},
+  {q:"What is a give-and-go play?",a:"Passing the ball then immediately cutting for a return pass",c:["Trading players mid-season","Passing the ball then immediately cutting for a return pass","A play where a player gives up the ball permanently","Switching defenders"],cat:"rules"},
+  {q:"Which legendary player is known for the phrase Just win baby in football, but had a basketball equivalent nicknamed Mr Clutch?",a:"Jerry West",c:["Bill Russell","Jerry West","Oscar Robertson","Elgin Baylor"],cat:"players"},
+  {q:"Jerry West played his entire career for which team?",a:"Los Angeles Lakers",c:["Minneapolis Lakers","Los Angeles Lakers","Boston Celtics","Philadelphia Warriors"],cat:"players"},
+  {q:"What is a euro step typically used to avoid?",a:"A charging foul or blocked shot at the rim",c:["A backcourt violation","A charging foul or blocked shot at the rim","A travel call","A double dribble"],cat:"rules"},
+  {q:"Which player is famous for inventing or popularizing the step-back three?",a:"James Harden",c:["Kyrie Irving","Stephen Curry","James Harden","Damian Lillard"],cat:"players"},
+  {q:"What does the term heat check mean?",a:"Taking a tough shot after making several in a row to test a hot streak",c:["Checking a players body temperature","Taking a tough shot after making several in a row to test a hot streak","A timeout to cool down","A defensive substitution"],cat:"rules"},
+  {q:"Which player is credited with popularizing the term and one for clutch plays?",a:"It is a general basketball term, not credited to one player",c:["Reggie Miller","It is a general basketball term, not credited to one player","Michael Jordan","Larry Bird"],cat:"rules"},
+  {q:"Who won the Sixth Man of the Year award in 2023?",a:"Malcolm Brogdon",c:["Naz Reid","Malcolm Brogdon","Bobby Portis","Immanuel Quickley"],cat:"history"},
+  {q:"Which player has won the most Sixth Man of the Year awards?",a:"Lou Williams (3)",c:["Jamal Crawford (3)","Lou Williams (3)","Manu Ginobili (1)","James Harden (1)"],cat:"records"},
+  {q:"Lou Williams played for which team when he won most of his Sixth Man awards?",a:"Los Angeles Clippers",c:["Atlanta Hawks","Philadelphia 76ers","Los Angeles Clippers","Houston Rockets"],cat:"players"},
+  {q:"What is the term for a player who specializes in defense and rebounding but not scoring?",a:"A role player or glue guy",c:["A franchise player","A role player or glue guy","A sixth man","A floor general"],cat:"rules"},
+  {q:"Which team did Patrick Ewing play his entire career with?",a:"New York Knicks",c:["Seattle SuperSonics","Orlando Magic","New York Knicks","Boston Celtics"],cat:"players"},
+  {q:"Patrick Ewing never won an NBA championship despite making how many All-Star teams?",a:"11",c:["8","9","11","13"],cat:"records"},
+  {q:"Which player is the Knicks all-time leading scorer?",a:"Patrick Ewing",c:["Walt Frazier","Patrick Ewing","Carmelo Anthony","Willis Reed"],cat:"records"},
+  {q:"Who won the 2009 NBA championship with the Lakers?",a:"Kobe Bryant led the team, winning Finals MVP",c:["Shaquille O'Neal led the team","Kobe Bryant led the team, winning Finals MVP","Pau Gasol won Finals MVP","Derek Fisher won Finals MVP"],cat:"history"},
+  {q:"Which team did the Lakers beat in the 2009 NBA Finals?",a:"Orlando Magic",c:["Cleveland Cavaliers","Boston Celtics","Orlando Magic","San Antonio Spurs"],cat:"history"},
+  {q:"Dwight Howard led the league in rebounding how many times?",a:"5",c:["3","4","5","6"],cat:"records"},
+  {q:"Which player set the record for most blocks in a single game?",a:"Elmore Smith (17 blocks)",c:["Hakeem Olajuwon (15)","Elmore Smith (17 blocks)","Manute Bol (15)","Mark Eaton (14)"],cat:"records"},
+  {q:"What is a put-back dunk?",a:"Dunking your own missed shot off the rebound",c:["A reverse dunk","Dunking your own missed shot off the rebound","A two-handed alley-oop","A dunk after a steal"],cat:"rules"},
+  {q:"Which player popularized wearing a headband as a signature look?",a:"Several players, including Larry Bird and Allen Iverson",c:["Michael Jordan","Several players, including Larry Bird and Allen Iverson","Magic Johnson","Kareem Abdul-Jabbar"],cat:"rules"},
+  {q:"What is a possession in basketball defined as?",a:"The period a team controls the ball before scoring, missing, or turning it over",c:["A full quarter of play","The period a team controls the ball before scoring, missing, or turning it over","Half of the game","A single shot attempt"],cat:"rules"},
+  {q:"Which player has won the most NBA championships as a player?",a:"Bill Russell (11)",c:["Michael Jordan (6)","Sam Jones (10)","Bill Russell (11)","Kareem Abdul-Jabbar (6)"],cat:"records"},
+  {q:"Which team won the championship in 2005?",a:"San Antonio Spurs",c:["Detroit Pistons","Miami Heat","San Antonio Spurs","Phoenix Suns"],cat:"history"},
+  {q:"Who won Finals MVP in the 2005 NBA Finals?",a:"Tim Duncan",c:["Tony Parker","Manu Ginobili","Tim Duncan","Robert Horry"],cat:"history"},
+  {q:"Which team won the 2006 NBA championship?",a:"Miami Heat",c:["Dallas Mavericks","Miami Heat","Detroit Pistons","San Antonio Spurs"],cat:"history"},
+  {q:"Who won Finals MVP in 2006?",a:"Dwyane Wade",c:["Shaquille O'Neal","Dwyane Wade","Udonis Haslem","Jason Williams"],cat:"history"},
+  {q:"Which team won the 2007 NBA championship?",a:"San Antonio Spurs",c:["Cleveland Cavaliers","San Antonio Spurs","Detroit Pistons","Phoenix Suns"],cat:"history"},
+  {q:"Which team did the Spurs sweep in the 2007 Finals?",a:"Cleveland Cavaliers",c:["Detroit Pistons","Phoenix Suns","Cleveland Cavaliers","Utah Jazz"],cat:"history"},
+  {q:"Which team won the 2008 NBA championship?",a:"Boston Celtics",c:["Los Angeles Lakers","Boston Celtics","San Antonio Spurs","Cleveland Cavaliers"],cat:"history"},
+  {q:"Who won Finals MVP in 2008?",a:"Paul Pierce",c:["Kevin Garnett","Ray Allen","Paul Pierce","Rajon Rondo"],cat:"history"},
+  {q:"Which team won the 2010 NBA championship?",a:"Los Angeles Lakers",c:["Boston Celtics","Orlando Magic","Los Angeles Lakers","Cleveland Cavaliers"],cat:"history"},
+  {q:"Who won Finals MVP in 2010?",a:"Kobe Bryant",c:["Pau Gasol","Kobe Bryant","Ron Artest","Derek Fisher"],cat:"history"},
+  {q:"Which team won the 2013 NBA championship?",a:"Miami Heat",c:["San Antonio Spurs","Miami Heat","Indiana Pacers","Oklahoma City Thunder"],cat:"history"},
+  {q:"Who won Finals MVP in 2013?",a:"LeBron James",c:["Dwyane Wade","Chris Bosh","LeBron James","Tim Duncan"],cat:"history"},
+  {q:"Which team won the 2015 NBA championship?",a:"Golden State Warriors",c:["Cleveland Cavaliers","Golden State Warriors","Houston Rockets","Atlanta Hawks"],cat:"history"},
+  {q:"Who won Finals MVP in 2015?",a:"Andre Iguodala",c:["Stephen Curry","Klay Thompson","Andre Iguodala","Draymond Green"],cat:"history"},
+  {q:"Which team won the 2019 NBA championship?",a:"Toronto Raptors",c:["Golden State Warriors","Toronto Raptors","Milwaukee Bucks","Portland Trail Blazers"],cat:"history"},
+  {q:"What is the term for when a player scores 50 or more points in a game?",a:"A 50-point game",c:["A century mark","A 50-point game","A double century","A grand slam game"],cat:"rules"},
+  {q:"Which player holds the record for most consecutive games scoring 30 or more points?",a:"Wilt Chamberlain (65 games)",c:["Michael Jordan (40 games)","Wilt Chamberlain (65 games)","Kobe Bryant (22 games)","George Gervin (20 games)"],cat:"records"},
+  {q:"Who is known as The Iceman for his cool demeanor on the court?",a:"George Gervin",c:["Rick Barry","George Gervin","Bernard King","Adrian Dantley"],cat:"players"},
+  {q:"George Gervin played most of his career for which team?",a:"San Antonio Spurs",c:["Detroit Pistons","Chicago Bulls","San Antonio Spurs","Virginia Squires"],cat:"players"},
+  {q:"What league did George Gervin start his career in before the NBA?",a:"ABA",c:["CBA","ABA","USBL","D-League"],cat:"history"},
+  {q:"Earl Manigault was a legendary playground basketball player from which city?",a:"New York City (Harlem)",c:["Chicago","Philadelphia","New York City (Harlem)","Los Angeles"],cat:"history"},
+  {q:"What is the AND1 Mixtape Tour known for?",a:"Showcasing streetball players with flashy moves",c:["NBA preseason exhibitions","Showcasing streetball players with flashy moves","A college recruiting tour","An international tournament"],cat:"history"},
+  {q:"Who won the 2016 Slam Dunk Contest?",a:"Zach LaVine",c:["Aaron Gordon","Zach LaVine","Andre Drummond","Glenn Robinson III"],cat:"history"},
+  {q:"The 2016 Dunk Contest between Zach LaVine and Aaron Gordon is considered one of the greatest ever in which format?",a:"It went into multiple tie-breaker rounds",c:["It was decided by fan vote only","It went into multiple tie-breaker rounds","It ended in a draw with shared trophy","It was the shortest contest ever"],cat:"history"},
+  {q:"Nate Robinson won the Dunk Contest a record how many times?",a:"3",c:["2","3","4","5"],cat:"records"},
+  {q:"Which player at 5 ft 9 in won 3 Slam Dunk Contests?",a:"Nate Robinson",c:["Spud Webb","Nate Robinson","Isaiah Thomas","Allen Iverson"],cat:"players"},
+  {q:"What is a putback in basketball?",a:"Scoring immediately off your own offensive rebound",c:["A defensive rebound","Scoring immediately off your own offensive rebound","A blocked shot returned for a dunk","A steal converted to a layup"],cat:"rules"},
+  {q:"Which team did Grant Hill spend the first part of his career with?",a:"Detroit Pistons",c:["Orlando Magic","Phoenix Suns","Detroit Pistons","Los Angeles Clippers"],cat:"players"},
+  {q:"Which players are considered the Splash Brothers?",a:"Stephen Curry and Klay Thompson",c:["Stephen Curry and Kevin Durant","Stephen Curry and Klay Thompson","Klay Thompson and Draymond Green","Curry and Draymond Green"],cat:"players"},
+  {q:"What was the nickname for the Detroit Pistons championship teams of 1989 and 1990?",a:"The Bad Boys",c:["The Bad Boys","The Motor City Mob","The Detroit Dynasty","The Pistons Posse"],cat:"history"},
+  {q:"Vinnie Johnson earned what nickname for his clutch scoring off the bench?",a:"Microwave",c:["The Spark","Microwave","Instant Offense","Sixth Man Supreme"],cat:"players"},
+  {q:"Which Pistons player was known as Microwave for heating up quickly?",a:"Vinnie Johnson",c:["Joe Dumars","Vinnie Johnson","Dennis Rodman","Isiah Thomas"],cat:"players"},
+  {q:"Which streetball legend is the subject of the documentary Soul in the Hole and known by the nickname The Goat?",a:"Earl Manigault",c:["Joe Hammond","Earl Manigault","Pee Wee Kirkland","Herman Knowings"],cat:"history"},
+  {q:"Who won the 2016 Slam Dunk Contest in a showdown widely considered one of the best ever?",a:"Zach LaVine",c:["Aaron Gordon","Zach LaVine","Glenn Robinson III","Andre Drummond"],cat:"history"},
+  {q:"Nate Robinson is tied for the most Slam Dunk Contest wins with how many titles?",a:"3",c:["2","3","4","5"],cat:"records"},
+  {q:"Which year did Dominique Wilkins win his first Slam Dunk Contest title?",a:"1985",c:["1984","1985","1986","1990"],cat:"history"},
+  {q:"What duo is famously nicknamed the Splash Brothers for the Golden State Warriors?",a:"Stephen Curry and Klay Thompson",c:["Curry and Durant","Stephen Curry and Klay Thompson","Thompson and Green","Curry and Green"],cat:"players"},
+  {q:"Which Detroit Pistons player was famous for his physical, enforcer style of play in the Bad Boys era?",a:"Bill Laimbeer",c:["Isiah Thomas","Joe Dumars","Bill Laimbeer","Vinnie Johnson"],cat:"players"},
+];
+
+const CIRC=351.9, LETTERS=['A','B','C','D'];
+let score=0,level=1,lives=3,timeLeft=24,timer=null,active=false;
+let used=[],cur=null,xp=0,qn=0;
+
+const $=id=>document.getElementById(id);
+const scoreEl=$('score-val'),levelEl=$('level-val');
+const clockNum=$('clock-num'),clockArc=$('clock-arc'),clockGlow=$('clock-bg-glow');
+const answersEl=$('answers'),msgEl=$('msg');
+const qCard=$('q-card'),qText=$('q-text'),catBadge=$('cat-badge'),qNumEl=$('q-num');
+const startBtn=$('start-btn'),screenOver=$('screen-over'),htp=$('htp');
+const xpFill=$('xp-fill'),curLvlEl=$('cur-level'),xpCurEl=$('xp-cur'),xpMaxEl=$('xp-max');
+
+const shuffle=a=>{const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b};
+const clockTime=()=>level<=2?24:level<=4?20:level<=6?16:12;
+const xpToNext=()=>level*5;
+
+function updateLives(){for(let i=0;i<3;i++)$('l'+i).classList.toggle('lost',i>=lives)}
+
+function updateXP(){
+  const max=xpToNext();
+  xpFill.style.width=Math.min((xp/max)*100,100)+'%';
+  curLvlEl.textContent=level; xpCurEl.textContent=xp; xpMaxEl.textContent=max;
+}
+
+function setClockStyle(pct){
+  const hot=pct<=0.25,warn=pct<=0.5;
+  const color=hot?'#FF3A50':warn?'#FFAA20':'#F85C1A';
+  const glowColor=hot?'rgba(255,58,80,.4)':warn?'rgba(255,170,32,.3)':'rgba(248,92,26,.4)';
+  clockArc.style.stroke=color;
+  clockArc.style.filter=`drop-shadow(0 0 8px ${color}99)`;
+  clockGlow.style.background=`radial-gradient(circle,${glowColor} 0%,transparent 65%)`;
+  clockNum.style.color=hot?'#FF3A50':'var(--t)';
+  if(hot) clockNum.style.textShadow=`0 0 24px rgba(255,58,80,.6)`;
+  else clockNum.style.textShadow='0 0 20px rgba(248,92,26,.4)';
+}
+
+function nextQ(){
+  if(used.length>=QUESTIONS.length) used=[];
+  const pool=QUESTIONS.map((_,i)=>i).filter(i=>!used.includes(i));
+  const idx=pool[Math.floor(Math.random()*pool.length)];
+  used.push(idx); cur=QUESTIONS[idx]; qn++;
+
+  catBadge.textContent=cur.cat;
+  qText.textContent=cur.q;
+  qNumEl.textContent='Q'+qn;
+  qCard.style.display='block';
+  qCard.className='fade-up';
+
+  const choices=shuffle(cur.c);
+  answersEl.innerHTML='';
+  choices.forEach((c,i)=>{
+    const btn=document.createElement('button');
+    btn.className='ans-btn fade-up';
+    btn.style.animationDelay=(i*.06)+'s';
+    btn.textContent=c;
+    btn.setAttribute('data-letter',LETTERS[i]);
+    btn.addEventListener('click',()=>answer(c,btn));
+    answersEl.appendChild(btn);
+  });
+
+  timeLeft=clockTime();
+  clockNum.textContent=timeLeft;
+  clockArc.setAttribute('stroke-dashoffset','0');
+  setClockStyle(1);
+  msgEl.textContent='';
+  clearInterval(timer);
+  timer=setInterval(tick,1000);
+}
+
+function tick(){
+  timeLeft--;
+  clockNum.textContent=timeLeft;
+  const pct=timeLeft/clockTime();
+  clockArc.setAttribute('stroke-dashoffset',CIRC*(1-pct));
+  setClockStyle(pct);
+  if(timeLeft<=0){clearInterval(timer);loseLife('Shot clock expired')}
+}
+
+function answer(choice,btn){
+  clearInterval(timer);
+  document.querySelectorAll('.ans-btn').forEach(b=>b.disabled=true);
+  const ok=choice===cur.a;
+  if(ok){
+    btn.classList.add('correct','pop-anim');
+    const pts=Math.max(1,Math.ceil(timeLeft/4));
+    score+=pts; xp+=pts;
+    scoreEl.textContent=score;
+    scoreEl.parentElement.classList.add('pop-anim');
+    setTimeout(()=>scoreEl.parentElement.classList.remove('pop-anim'),250);
+    if(xp>=xpToNext()){xp-=xpToNext();level++}
+    levelEl.textContent=level;
+    updateXP();
+    setTimeout(nextQ,620);
+  } else {
+    btn.classList.add('wrong');
+    document.querySelectorAll('.ans-btn').forEach(b=>{if(b.textContent===cur.a)b.classList.add('correct')});
+    loseLife('Wrong answer');
+  }
+}
+
+function loseLife(reason){
+  clearInterval(timer);
+  lives--; updateLives();
+  msgEl.textContent=reason+(lives>0?' \u2014 '+lives+' life'+(lives===1?'':'s')+' left':'');
+  if(lives<=0) setTimeout(endGame,900);
+  else setTimeout(nextQ,1050);
+}
+
+function tier(s){
+  if(s>=51) return '&#127775; Legendary';
+  if(s>=31) return '&#128293; Hot Hand';
+  if(s>=16) return '&#127919; Sharp Shooter';
+  return '&#127936; Still Warming Up';
+}
+
+function endGame(){
+  active=false; clearInterval(timer);
+  qCard.style.display='none'; answersEl.innerHTML=''; msgEl.textContent='';
+  startBtn.style.display='none';
+  screenOver.style.display='flex'; htp.style.display='flex';
+  $('over-score').textContent=score;
+  $('over-level').textContent=level;
+  $('tier-badge').innerHTML=tier(score);
+}
+
+function startGame(){
+  score=0;level=1;lives=3;used=[];xp=0;qn=0;
+  scoreEl.textContent='0'; levelEl.textContent='1';
+  updateLives(); updateXP(); active=true;
+  startBtn.style.display='none';
+  screenOver.style.display='none';
+  htp.style.display='none';
+  nextQ();
+}
+
+startBtn.addEventListener('click',startGame);
+$('play-again-btn').addEventListener('click',startGame);
+</script>
+</body>
+</html>

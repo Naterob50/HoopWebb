@@ -4,6 +4,13 @@ export const revalidate = 0;
 
 const ALL_GAMES = [
   {
+    slug: "shot-clock-survivor",
+    title: "Shot Clock Survivor",
+    category: "NBA TRIVIA",
+    description: "Answer rapid-fire trivia questions before the clock hits zero. 3 lives, leveling shot clocks, no mercy.",
+    status: "NEW",
+  },
+  {
     slug: "stat-line-swivel",
     title: "Stat Line Swivel",
     category: "DAILY BOX SCORE",
