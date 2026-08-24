@@ -1,104 +1,74 @@
-import Link from 'next/link';
+import Link from "next/link";
+
+export const revalidate = 0;
 
 export default function AboutPage() {
   return (
-    <main className="min-h-screen bg-black text-white relative court-grid p-6 md:p-12 overflow-hidden">
-      <div className="max-w-4xl mx-auto space-y-12 relative z-10">
-        
-        {/* Top Navigation */}
-        <div className="flex justify-between items-center pb-6 border-b border-neutral-800">
-          <Link 
-            href="/" 
-            className="text-neutral-400 hover:text-orange-500 font-bold text-sm transition flex items-center gap-2 group"
+    <main className="min-h-screen bg-black text-white relative court-grid p-4 sm:p-6 md:p-12">
+      <div className="max-w-4xl mx-auto space-y-10 sm:space-y-12">
+        {/* Navigation Header */}
+        <header className="flex justify-between items-center border-b border-neutral-800 pb-6">
+          <Link
+            href="/"
+            className="text-xs font-mono text-neutral-400 hover:text-orange-500 transition-colors uppercase tracking-wider"
           >
-            <span className="group-hover:-translate-x-1 transition-transform">←</span>
-            <span>BACK TO HOME</span>
+            ← BACK TO ARCADE
           </Link>
-
-          <span className="text-xs font-mono text-orange-500">
-            SYSTEM // MISSION BRIEF
+          <span className="text-xs font-mono text-orange-500 uppercase tracking-widest bg-orange-500/10 border border-orange-500/30 px-3 py-1 rounded-full">
+            OUR STORY
           </span>
-        </div>
+        </header>
 
-        {/* Page Header */}
-        <div className="space-y-3 text-center md:text-left">
-          <div className="inline-block bg-orange-500/10 text-orange-400 font-bold px-3 py-1 rounded text-xs border border-orange-500/30">
-            INDEPENDENT SPORTS ARCADE
-          </div>
-          <h1 className="text-5xl md:text-7xl font-arcade text-white tracking-tight">
-            ABOUT <span className="text-orange-500">HOOPWEBB</span>
+        {/* Hero Section */}
+        <section className="space-y-4">
+          <h1 className="text-4xl sm:text-6xl font-black uppercase tracking-tight text-white">
+            THE STORY BEHIND <span className="text-orange-500">HOOPWEBB</span>
           </h1>
-        </div>
-
-        {/* Section 1: Our Story */}
-        <section className="bg-neutral-950 border-2 border-neutral-800 rounded-xl p-8 space-y-4 relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-600 via-amber-500 to-orange-600" />
-          <h2 className="text-2xl font-arcade text-orange-500">OUR STORY</h2>
-          <div className="space-y-4 text-neutral-300 leading-relaxed text-sm md:text-base font-medium">
-            <p>
-              HOOPWEBB wasn’t born in a corporate boardroom or backed by massive media conglomerates. It was built from scratch by a single founder with a clear vision: to create the ultimate digital arcade for the modern, analytical basketball enthusiast.
-            </p>
-            <p>
-              We grew tired of jumping between five different tabs just to mock a trade, check betting lines, rank players, and play daily hoops trivia. So, we did what any passionate fan would do—we built a centralized network to house it all in one seamless experience.
-            </p>
-          </div>
-        </section>
-
-        {/* Section 2: The Manifesto */}
-        <section className="bg-neutral-950 border-2 border-neutral-800 rounded-xl p-8 space-y-4 relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-500 to-orange-600" />
-          <h2 className="text-2xl font-arcade text-white">THE MANIFESTO</h2>
-          <div className="space-y-4 text-neutral-300 leading-relaxed text-sm md:text-base font-medium">
-            <p>
-              We believe that basketball entertainment should be interactive, incredibly accurate, and completely free.
-            </p>
-            <p>
-              Whether you live in the salary cap sheets, track the daily betting lines, or spend your mornings debating basketball history, HOOPWEBB is built specifically for you.
-            </p>
-          </div>
-        </section>
-
-        {/* Section 3: Driven by the Community */}
-        <section className="bg-neutral-950 border-2 border-orange-500/40 rounded-xl p-8 space-y-6 relative overflow-hidden shadow-[0_0_30px_rgba(249,115,22,0.15)]">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-600 via-amber-500 to-orange-600" />
-          
-          <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-arcade text-orange-500">DRIVEN BY THE COMMUNITY</h2>
-            <span className="text-xs font-mono text-emerald-400">100% INDEPENDENT</span>
-          </div>
-
-          <div className="space-y-4 text-neutral-300 leading-relaxed text-sm md:text-base font-medium">
-            <p>
-              HOOPWEBB operates on an independent, "Support the Developer" model. We don't lock our tools behind expensive premium paywalls or clutter your screen with aggressive corporate advertising.
-            </p>
-            <p>
-              Everything you play on this network is completely free to access. If our Trade Generator helped you architect a blockbuster dynasty, or you beat the daily clock on NBA Scramble, consider throwing a few bucks into the platform’s tip jar. Your voluntary support directly funds real-time data updates, server costs, and the development of future basketball tools.
-            </p>
-          </div>
-
-          {/* Tip Jar Callout */}
-          <div className="pt-4 border-t border-neutral-900 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <span className="text-xs font-mono text-neutral-400">
-              SUPPORT THE ARCADE DEVELOPMENT
-            </span>
-            <a 
-              href="https://ko-fi.com/hoopwebb" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="w-full sm:w-auto text-center bg-orange-500 hover:bg-orange-600 text-black font-arcade font-bold px-6 py-2.5 rounded transition-transform hover:scale-105 shadow-[0_0_15px_rgba(249,115,22,0.4)]"
-            >
-              ☕ TIP JAR / KO-FI →
-            </a>
-          </div>
-        </section>
-
-        {/* Footer */}
-        <footer className="text-center pt-8 border-t border-neutral-900">
-          <p className="text-xs font-mono text-neutral-600 tracking-widest">
-            HOOPWEBB DIGITAL ENGINE • BUILT FOR HOOPHEADS
+          <p className="text-sm font-mono text-neutral-400 uppercase tracking-widest">
+            BUILT BY A BASKETBALL FAN FOR BASKETBALL FANS
           </p>
-        </footer>
+        </section>
 
+        {/* Story Body Content */}
+        <section className="bg-neutral-950/80 backdrop-blur-md border border-neutral-800 rounded-2xl p-6 sm:p-10 space-y-6 text-neutral-300 text-sm sm:text-base leading-relaxed font-sans shadow-xl">
+          <p className="text-base sm:text-lg text-white font-medium">
+            HOOPWEBB started with one person, one computer, and a pretty simple question: why isn’t there one place where basketball fans can do all the things they already love doing?
+          </p>
+
+          <p>
+            I built HOOPWEBB because I wanted it for myself.
+          </p>
+
+          <p>
+            Basketball fans shouldn’t have to open a bunch of different sites to compare players, build trades, check odds, test their knowledge, and keep up with the game. I wanted to put all of that under one roof and make it feel less like a collection of tools and more like a place you actually want to spend time.
+          </p>
+
+          <p>
+            There’s no big team behind HOOPWEBB. No massive company, no media network, and no room full of people deciding what the next feature should be. It’s one developer building, fixing, testing, and adding to it piece by piece.
+          </p>
+
+          <p className="text-orange-400 font-semibold text-base sm:text-lg border-l-2 border-orange-500 pl-4 py-1 my-2">
+            That’s what makes HOOPWEBB different.
+          </p>
+
+          <p>
+            It’s built by a basketball fan for basketball fans—with the goal of creating a place where you can mess around with the game, dive into the numbers, compete with friends, and just enjoy being a hoops nerd.
+          </p>
+
+          <p>
+            It’s a work in progress, and there’s a lot more to come. But every part of HOOPWEBB is being built with the same idea it started with: make basketball more fun to explore.
+          </p>
+        </section>
+
+        {/* Action Footer */}
+        <div className="pt-4 flex justify-center">
+          <Link
+            href="/games"
+            className="bg-orange-500 hover:bg-orange-600 text-black font-extrabold px-8 py-3.5 rounded-xl text-xs sm:text-sm tracking-wider uppercase transition-all shadow-lg shadow-orange-500/20"
+          >
+            EXPLORE THE ARCADE →
+          </Link>
+        </div>
       </div>
     </main>
   );
