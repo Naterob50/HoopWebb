@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stat Line Swivel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Teko:wght@400;500;600;700&family=Share+Tech+Mono&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0A0A0A;
+    --panel:#161616;
+    --panel-2:#0F0F0F;
+    --line:#3A3A3A;
+    --amber:#FF7A1A;
+    --amber-dim:#8C4110;
+    --wood:#FFA24D;
+    --chalk:#F5F5F5;
+    --chalk-dim:#9C9C9C;
+    --miss:#FF4A3D;
+    --win:#FF7A1A;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 50% -10%, rgba(255,122,26,0.08), transparent 60%),
+      repeating-linear-gradient(180deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px),
+      var(--ink);
+    color:var(--chalk);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    padding:28px 16px 60px;
+    display:flex;
+    justify-content:center;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;}
+  }
+  .wrap{width:100%;max-width:640px;}
+
+  /* ---------- Header ---------- */
+  header{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    border-bottom:2px solid var(--line);
+    padding-bottom:14px;
+    margin-bottom:20px;
+  }
+  .brand h1{
+    font-family:'Teko',sans-serif;
+    font-weight:700;
+    font-size:44px;
+    letter-spacing:1px;
+    line-height:0.85;
+    margin:0;
+    color:var(--chalk);
+  }
+  .brand h1 span{color:var(--amber);}
+  .brand p{
+    font-family:'Teko',sans-serif;
+    font-size:15px;
+    letter-spacing:3px;
+    text-transform:uppercase;
+    color:var(--chalk-dim);
+    margin:4px 0 0;
+  }
+  .puzzle-no{
+    font-family:'Share Tech Mono',monospace;
+    font-size:13px;
+    color:var(--amber);
+    text-align:right;
+    border:1px solid var(--amber-dim);
+    padding:6px 10px;
+    border-radius:3px;
+    white-space:nowrap;
+  }
+  .puzzle-no small{display:block;color:var(--chalk-dim);font-family:'Inter';font-size:9px;letter-spacing:1.5px;margin-bottom:2px;}
+  .edition-tag{
+    display:inline-block;
+    font-family:'Teko',sans-serif;
+    font-size:12px;
+    letter-spacing:1px;
+    color:var(--ink);
+    background:var(--amber);
+    border-radius:3px;
+    padding:1px 6px;
+    margin-left:4px;
+    vertical-align:middle;
+  }
+  .next-timer{
+    font-family:'Share Tech Mono',monospace;
+    font-size:10px;
+    color:var(--chalk-dim);
+    margin-top:5px;
+    white-space:nowrap;
+  }
+  .new-puzzle-banner{
+    display:none;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    background:var(--panel);
+    border:1px solid var(--amber-dim);
+    border-radius:6px;
+    padding:10px 14px;
+    margin-bottom:16px;
+    font-family:'Teko',sans-serif;
+    font-size:16px;
+    letter-spacing:0.5px;
+    color:var(--chalk);
+  }
+  .new-puzzle-banner.show{display:flex;animation:pop 0.3s ease;}
+  .new-puzzle-banner button{
+    background:var(--amber);
+    color:#1a0e00;
+    font-size:14px;
+    padding:5px 12px;
+    white-space:nowrap;
+  }
+
+  /* ---------- Scoreboard Panel ---------- */
+  .board{
+    background:linear-gradient(180deg, var(--panel), var(--panel-2));
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:20px 18px 22px;
+    position:relative;
+    overflow:hidden;
+    box-shadow: inset 0 0 40px rgba(0,0,0,0.4), 0 10px 30px rgba(0,0,0,0.35);
+  }
+  .board::before{
+    content:"";
+    position:absolute; inset:0;
+    background: repeating-linear-gradient(180deg, rgba(255,255,255,0.02) 0px, transparent 2px, transparent 4px);
+    pointer-events:none;
+  }
+  .board::after{
+    content:"";
+    position:absolute; top:-40%; left:-10%;
+    width:60%; height:180%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.03), transparent);
+    transform: rotate(12deg);
+    pointer-events:none;
+  }
+  .redacted-row{
+    display:flex;
+    gap:10px;
+    margin-bottom:16px;
+    flex-wrap:wrap;
+  }
+  .tag{
+    flex:1;
+    min-width:130px;
+    background:var(--ink);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:8px 10px;
+  }
+  .tag .tag-label{
+    font-family:'Teko',sans-serif;
+    font-size:12px;
+    letter-spacing:2px;
+    color:var(--chalk-dim);
+    text-transform:uppercase;
+  }
+  .redact-bar{
+    height:20px;
+    margin-top:4px;
+    border-radius:2px;
+    background: repeating-linear-gradient(45deg, #05070c, #05070c 6px, #0e1526 6px, #0e1526 12px);
+    border:1px solid #000;
+    position:relative;
+    overflow:hidden;
+    transition: background 0.4s;
+  }
+  .redact-bar.revealed{
+    background:none;
+    display:flex;
+    align-items:center;
+  }
+  .redact-bar span{
+    font-family:'Teko',sans-serif;
+    font-weight:600;
+    font-size:19px;
+    letter-spacing:0.5px;
+    color:var(--win);
+  }
+
+  .divider{
+    text-align:center;
+    font-family:'Teko',sans-serif;
+    font-size:13px;
+    letter-spacing:3px;
+    color:var(--amber-dim);
+    text-transform:uppercase;
+    margin:14px 0 16px;
+  }
+
+  .stat-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(84px,1fr));
+    gap:10px;
+  }
+  .stat-cell{
+    background:var(--ink);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:10px 6px 8px;
+    text-align:center;
+  }
+  .stat-cell .val{
+    font-family:'Share Tech Mono',monospace;
+    font-size:26px;
+    color:var(--amber);
+    text-shadow:0 0 12px rgba(255,122,26,0.35);
+    line-height:1;
+  }
+  .stat-cell .lab{
+    font-family:'Teko',sans-serif;
+    font-size:13px;
+    letter-spacing:2px;
+    color:var(--chalk-dim);
+    margin-top:5px;
+  }
+
+  /* ---------- Guess Dots ---------- */
+  .status-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin:22px 0 10px;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .dots-label{
+    font-family:'Teko',sans-serif;
+    font-size:13px;
+    letter-spacing:2px;
+    color:var(--chalk-dim);
+    text-transform:uppercase;
+  }
+  .dots{display:flex;gap:7px;}
+  .dot{
+    width:14px;height:14px;border-radius:50%;
+    border:2px solid var(--line);
+    background:transparent;
+    transition:all 0.3s;
+  }
+  .dot.used-wrong{background:var(--miss);border-color:var(--miss);}
+  .dot.used-win{background:var(--win);border-color:var(--win);}
+
+  /* ---------- Input ---------- */
+  .guess-row{
+    display:flex;
+    gap:8px;
+    margin-bottom:6px;
+  }
+  input#guessInput{
+    flex:1;
+    background:var(--panel);
+    border:1.5px solid var(--line);
+    border-radius:5px;
+    padding:12px 12px;
+    color:var(--chalk);
+    font-family:'Inter';
+    font-size:15px;
+    outline:none;
+    transition:border-color 0.2s;
+  }
+  input#guessInput:focus{border-color:var(--amber);}
+  input#guessInput:disabled{opacity:0.5;}
+  button{
+    font-family:'Teko',sans-serif;
+    font-weight:600;
+    letter-spacing:1.5px;
+    cursor:pointer;
+    border:none;
+    border-radius:5px;
+    transition:transform 0.15s, filter 0.15s;
+  }
+  button:active{transform:scale(0.96);}
+  button:disabled{opacity:0.4;cursor:not-allowed;}
+  #guessBtn{
+    background:var(--amber);
+    color:#1a1200;
+    font-size:18px;
+    padding:0 22px;
+  }
+  #guessBtn:hover:not(:disabled){filter:brightness(1.1);}
+  .shake{animation:shake 0.4s;}
+  @keyframes shake{
+    10%,90%{transform:translateX(-2px);}
+    20%,80%{transform:translateX(4px);}
+    30%,50%,70%{transform:translateX(-8px);}
+    40%,60%{transform:translateX(8px);}
+  }
+
+  .feedback{
+    min-height:20px;
+    font-family:'Teko',sans-serif;
+    font-size:16px;
+    letter-spacing:1px;
+    margin:6px 2px 4px;
+  }
+  .feedback.wrong{color:var(--miss);}
+  .feedback.win{color:var(--win);}
+
+  .history{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin:8px 0 4px;
+  }
+  .chip{
+    font-family:'Share Tech Mono',monospace;
+    font-size:12px;
+    color:var(--chalk-dim);
+    background:var(--panel);
+    border:1px solid var(--line);
+    text-decoration:line-through;
+    padding:4px 8px;
+    border-radius:3px;
+  }
+
+  /* ---------- Clue rack ---------- */
+  .clue-section{margin-top:26px;}
+  .clue-section h2{
+    font-family:'Teko',sans-serif;
+    font-size:16px;
+    letter-spacing:3px;
+    color:var(--chalk-dim);
+    text-transform:uppercase;
+    margin:0 0 10px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .clue-section h2::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background:var(--line);
+  }
+  .clue-rack{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:10px;
+  }
+  @media(min-width:480px){ .clue-rack{grid-template-columns:repeat(4,1fr);} }
+  .flip-card{
+    perspective:600px;
+    height:74px;
+  }
+  .flip-inner{
+    position:relative;
+    width:100%;height:100%;
+    text-align:center;
+    transition:transform 0.6s;
+    transform-style:preserve-3d;
+  }
+  .flip-card.revealed .flip-inner{transform:rotateY(180deg);}
+  .flip-front,.flip-back{
+    position:absolute;inset:0;
+    border-radius:6px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    backface-visibility:hidden;
+    border:1px solid var(--line);
+  }
+  .flip-front{
+    background:repeating-linear-gradient(135deg, var(--panel), var(--panel) 5px, var(--panel-2) 5px, var(--panel-2) 10px);
+    color:var(--chalk-dim);
+  }
+  .flip-front .lock{font-size:16px;opacity:0.6;}
+  .flip-front .clue-key{font-family:'Teko';font-size:12px;letter-spacing:2px;margin-top:4px;}
+  .flip-back{
+    background:var(--panel);
+    border-color:var(--amber-dim);
+    transform:rotateY(180deg);
+    padding:4px;
+  }
+  .flip-back .clue-key{
+    font-family:'Teko';font-size:11px;letter-spacing:2px;color:var(--amber-dim);text-transform:uppercase;
+  }
+  .flip-back .clue-val{
+    font-family:'Share Tech Mono';font-size:14px;color:var(--chalk);margin-top:3px;padding:0 4px;
+  }
+
+  /* ---------- Result overlay ---------- */
+  .result{
+    margin-top:22px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:20px;
+    background:var(--panel);
+    display:none;
+  }
+  .result.show{display:block;animation:pop 0.35s ease;}
+  @keyframes pop{from{opacity:0;transform:scale(0.96);}to{opacity:1;transform:scale(1);}}
+  .result .headline{
+    font-family:'Teko';
+    font-size:30px;
+    letter-spacing:1px;
+    margin:0 0 4px;
+  }
+  .result.won .headline{color:var(--win);}
+  .result.lost .headline{color:var(--miss);}
+  .result .answer{
+    font-family:'Teko';
+    font-size:22px;
+    color:var(--chalk);
+    margin:0 0 2px;
+  }
+  .result .answer .team{color:var(--wood);}
+  .result .fact{
+    color:var(--chalk-dim);
+    font-size:14px;
+    line-height:1.5;
+    margin:10px 0 16px;
+  }
+  .result-actions{display:flex;gap:10px;flex-wrap:wrap;}
+  #shareBtn{
+    background:var(--wood);color:#1a0e04;font-size:16px;padding:9px 16px;
+  }
+  #practiceBtn{
+    background:transparent;border:1.5px solid var(--line) !important;color:var(--chalk-dim);font-size:16px;padding:9px 16px;
+  }
+  #practiceBtn:hover{border-color:var(--amber) !important;color:var(--amber);}
+  #shareCardBtn{
+    background:transparent;border:1.5px solid var(--amber) !important;color:var(--amber);font-size:16px;padding:9px 16px;
+  }
+  #shareCardBtn:hover:not(:disabled){background:var(--amber);color:#1a0e00;}
+  #shareCardBtn:disabled{opacity:0.5;}
+
+  .card-preview-wrap{
+    display:none;
+    margin-top:16px;
+  }
+  .card-preview-wrap.show{display:block;animation:pop 0.3s ease;}
+  .card-preview-wrap canvas{
+    width:100%;
+    max-width:340px;
+    display:block;
+    margin:0 auto 10px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    box-shadow:0 8px 24px rgba(0,0,0,0.5);
+  }
+  .card-preview-actions{
+    display:flex;
+    gap:10px;
+    justify-content:center;
+    flex-wrap:wrap;
+  }
+  #downloadCardBtn{
+    background:var(--amber);color:#1a0e00;font-size:15px;padding:8px 16px;
+  }
+  #nativeShareBtn{
+    background:transparent;border:1.5px solid var(--line) !important;color:var(--chalk-dim);font-size:15px;padding:8px 16px;
+  }
+  #nativeShareBtn:hover{border-color:var(--amber) !important;color:var(--amber);}
+
+  footer{
+    text-align:center;
+    margin-top:26px;
+    color:var(--chalk-dim);
+    font-size:11px;
+    letter-spacing:1px;
+    font-family:'Share Tech Mono',monospace;
+    opacity:0.6;
+  }
+
+  datalist{display:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <h1>STAT LINE<br><span>SWIVEL</span></h1>
+      <p>Guess the game. One line at a time.</p>
+    </div>
+    <div class="puzzle-no">
+      <small>Daily Puzzle</small>#<span id="puzzleNum">—</span> <span id="puzzleEdition" class="edition-tag"></span>
+      <div id="nextPuzzleTimer" class="next-timer"></div>
+    </div>
+  </header>
+
+  <div class="new-puzzle-banner" id="newPuzzleBanner">
+    A new puzzle just dropped — <button id="refreshPuzzleBtn">load it</button>
+  </div>
+
+  <div class="board">
+    <div class="redacted-row">
+      <div class="tag">
+        <div class="tag-label">Player</div>
+        <div class="redact-bar" id="playerBar"></div>
+      </div>
+      <div class="tag">
+        <div class="tag-label">Team</div>
+        <div class="redact-bar" id="teamBar"></div>
+      </div>
+    </div>
+
+    <div class="divider">◆ Box Score ◆</div>
+
+    <div class="stat-grid" id="statGrid"></div>
+  </div>
+
+  <div class="status-row">
+    <div class="dots-label">Guesses Remaining</div>
+    <div class="dots" id="dots"></div>
+  </div>
+
+  <div class="guess-row">
+    <input id="guessInput" type="text" placeholder="Who put up this stat line?" list="playerList" autocomplete="off">
+    <button id="guessBtn">GUESS</button>
+  </div>
+  <datalist id="playerList"></datalist>
+
+  <div class="feedback" id="feedback"></div>
+  <div class="history" id="history"></div>
+
+  <div class="clue-section">
+    <h2>Clues</h2>
+    <div class="clue-rack" id="clueRack"></div>
+  </div>
+
+  <div class="result" id="result">
+    <p class="headline" id="resultHeadline"></p>
+    <p class="answer" id="resultAnswer"></p>
+    <p class="fact" id="resultFact"></p>
+    <div class="result-actions">
+      <button id="shareBtn">COPY RESULT</button>
+      <button id="shareCardBtn">SHARE CARD</button>
+      <button id="practiceBtn">PLAY ANOTHER (PRACTICE)</button>
+    </div>
+    <div class="card-preview-wrap" id="cardPreviewWrap">
+      <canvas id="shareCanvas" width="1080" height="1080"></canvas>
+      <div class="card-preview-actions">
+        <button id="downloadCardBtn">DOWNLOAD IMAGE</button>
+        <button id="nativeShareBtn">SHARE…</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>STAT LINE SWIVEL &mdash; A NEW BOX SCORE EVERY DAY &mdash; STATS ARE APPROXIMATE, VIBES ARE EXACT</footer>
+</div>
+
+<script>
+const DATA = [
+  {player:"Kobe Bryant", team:"Los Angeles Lakers", year:2006, opponent:"Toronto Raptors", position:"SG", minutes:42, conference:"Western",
+   aliases:["kobe","kobe bryant","black mamba"],
+   stats:[["PTS",81],["REB",6],["AST",2],["FG","28-46"],["3P","7-13"],["FT","18-20"]],
+   fact:"Second-highest single-game scoring total in NBA history, trailing only Wilt Chamberlain's 100."},
+  {player:"Wilt Chamberlain", team:"Philadelphia Warriors", year:1962, opponent:"New York Knicks", position:"C", minutes:48, conference:"Eastern",
+   aliases:["wilt","wilt chamberlain","the stilt","chamberlain"],
+   stats:[["PTS",100],["REB",25],["AST",2],["FG","36-63"],["FT","28-32"]],
+   fact:"Still the only 100-point game in NBA history, played in Hershey, Pennsylvania."},
+  {player:"David Robinson", team:"San Antonio Spurs", year:1994, opponent:"Los Angeles Clippers", position:"C", minutes:41, conference:"Western",
+   aliases:["david robinson","the admiral","robinson"],
+   stats:[["PTS",71],["REB",8],["AST",2],["FG","26-41"],["FT","17-23"]],
+   fact:"Needed a huge fourth quarter to edge out Shaquille O'Neal for that season's scoring title."},
+  {player:"Devin Booker", team:"Phoenix Suns", year:2017, opponent:"Boston Celtics", position:"SG", minutes:41, conference:"Western",
+   aliases:["devin booker","book","booker"],
+   stats:[["PTS",70],["REB",8],["AST",6],["FG","21-40"],["3P","4-9"],["FT","24-26"]],
+   fact:"At 20 years old, he became the youngest player ever to score 60-plus points in a game."},
+  {player:"Damian Lillard", team:"Portland Trail Blazers", year:2023, opponent:"Houston Rockets", position:"PG", minutes:39, conference:"Western",
+   aliases:["damian lillard","dame","dame lillard","lillard"],
+   stats:[["PTS",71],["REB",6],["AST",4],["FG","22-38"],["3P","13-24"],["FT","14-14"]],
+   fact:"His 13 made threes tied the NBA single-game record."},
+  {player:"LeBron James", team:"Cleveland Cavaliers", year:2005, opponent:"Toronto Raptors", position:"SF", minutes:46, conference:"Eastern",
+   aliases:["lebron","lebron james","king james","lebron james sr"],
+   stats:[["PTS",56],["REB",10],["AST",3],["FG","20-33"]],
+   fact:"A career high at the time, set during only his second NBA season."},
+  {player:"Michael Jordan", team:"Chicago Bulls", year:1990, opponent:"Cleveland Cavaliers", position:"SG", minutes:50, conference:"Eastern",
+   aliases:["michael jordan","mj","jordan","air jordan"],
+   stats:[["PTS",69],["REB",18],["AST",6],["FG","23-37"],["FT","21-23"]],
+   fact:"Set in an overtime win, it remains Jordan's career-high scoring output."},
+  {player:"Klay Thompson", team:"Golden State Warriors", year:2015, opponent:"Sacramento Kings", position:"SG", minutes:33, conference:"Western",
+   aliases:["klay thompson","klay","thompson"],
+   stats:[["PTS",52],["REB",8],["AST",2],["FG","20-26"],["3P","8-14"]],
+   fact:"Thirty-seven of his points came in a single quarter, an NBA record."},
+  {player:"Karl Malone", team:"Utah Jazz", year:1990, opponent:"Milwaukee Bucks", position:"PF", minutes:38, conference:"Western",
+   aliases:["karl malone","the mailman","malone"],
+   stats:[["PTS",61],["REB",18],["AST",3],["FG","21-26"]],
+   fact:"A career-high haul that still stands as a Jazz franchise scoring record."},
+  {player:"Giannis Antetokounmpo", team:"Milwaukee Bucks", year:2021, opponent:"Phoenix Suns", position:"PF", minutes:42, conference:"Eastern",
+   aliases:["giannis","giannis antetokounmpo","the greek freak","antetokounmpo"],
+   stats:[["PTS",50],["REB",14],["AST",1],["BLK",5],["FG","16-25"]],
+   fact:"Clinched Finals MVP and the franchise's first championship in fifty years."},
+  {player:"Stephen Curry", team:"Golden State Warriors", year:2016, opponent:"Oklahoma City Thunder", position:"PG", minutes:46, conference:"Western",
+   aliases:["stephen curry","steph curry","steph","curry"],
+   stats:[["PTS",46],["REB",5],["AST",4],["3P","10-17"]],
+   fact:"Capped by a logo three at the overtime buzzer to win the game outright."},
+  {player:"Allen Iverson", team:"Philadelphia 76ers", year:2001, opponent:"Los Angeles Lakers", position:"SG", minutes:48, conference:"Eastern",
+   aliases:["allen iverson","ai","the answer","iverson"],
+   stats:[["PTS",48],["REB",6],["AST",5],["STL",5]],
+   fact:"Delivered in an NBA Finals game and punctuated by a step-over that became instantly iconic."},
+  {player:"Elgin Baylor", team:"Minneapolis Lakers", year:1960, opponent:"New York Knicks", position:"SF", minutes:48, conference:"Western",
+   aliases:["elgin baylor","baylor"],
+   stats:[["PTS",71],["REB",25],["AST",8],["FG","28-48"]],
+   fact:"An NBA scoring record at the time, standing for years before Wilt Chamberlain topped it."},
+  {player:"James Harden", team:"Houston Rockets", year:2018, opponent:"Orlando Magic", position:"SG", minutes:41, conference:"Western",
+   aliases:["james harden","the beard","harden"],
+   stats:[["PTS",60],["REB",10],["AST",11],["FG","19-32"]],
+   fact:"The first 60-point triple-double in NBA history."},
+  {player:"Shaquille O'Neal", team:"Los Angeles Lakers", year:2000, opponent:"Los Angeles Clippers", position:"C", minutes:33, conference:"Western",
+   aliases:["shaquille oneal","shaq","shaquille o'neal","oneal"],
+   stats:[["PTS",61],["REB",23],["AST",0],["FG","19-32"]],
+   fact:"A career-high scoring night for Shaq, dominating despite playing only three quarters."},
+  {player:"Russell Westbrook", team:"Oklahoma City Thunder", year:2017, opponent:"Orlando Magic", position:"PG", minutes:44, conference:"Western",
+   aliases:["russell westbrook","westbrook","russ"],
+   stats:[["PTS",50],["REB",16],["AST",10],["FG","17-33"]],
+   fact:"Part of the season he became only the second player ever to average a triple-double."},
+  {player:"Tracy McGrady", team:"Orlando Magic", year:2004, opponent:"Washington Wizards", position:"SG", minutes:33, conference:"Eastern",
+   aliases:["tracy mcgrady","t-mac","mcgrady","tmac"],
+   stats:[["PTS",62],["REB",7],["AST",5],["FG","20-33"]],
+   fact:"He sat the entire fourth quarter, having already logged all 62 points in three quarters."},
+  {player:"Kevin Durant", team:"Oklahoma City Thunder", year:2016, opponent:"Golden State Warriors", position:"SF", minutes:44, conference:"Western",
+   aliases:["kevin durant","kd","durant"],
+   stats:[["PTS",54],["REB",12],["AST",3],["FG","19-33"]],
+   fact:"A statement scoring outburst in a hard-fought overtime battle between two juggernauts."},
+  {player:"Anthony Davis", team:"New Orleans Pelicans", year:2018, opponent:"Detroit Pistons", position:"PF", minutes:34, conference:"Western",
+   aliases:["anthony davis","ad","the brow"],
+   stats:[["PTS",59],["REB",20],["AST",2],["FG","23-35"]],
+   fact:"A career-high scoring and rebounding explosion, falling just short of a 60-point game."},
+  {player:"Nikola Jokić", team:"Denver Nuggets", year:2022, opponent:"Boston Celtics", position:"C", minutes:39, conference:"Western",
+   aliases:["nikola jokic","jokic","the joker","nikola jokić"],
+   stats:[["PTS",41],["REB",15],["AST",10],["FG","15-24"]],
+   fact:"One of several jaw-dropping triple-doubles during a stretch that redefined what a center could do."},
+  {player:"Wilt Chamberlain", team:"Philadelphia Warriors", year:1960, opponent:"Boston Celtics", position:"C", minutes:48, conference:"Eastern",
+   aliases:["wilt","wilt chamberlain","the stilt","chamberlain"],
+   stats:[["PTS",34],["REB",55],["AST",2],["FG","13-28"]],
+   fact:"Still the NBA single-game rebounding record, set as a rookie against Bill Russell's Celtics."},
+  {player:"Magic Johnson", team:"Los Angeles Lakers", year:1980, opponent:"Philadelphia 76ers", position:"PG", minutes:47, conference:"Western",
+   aliases:["magic johnson","magic","earvin johnson"],
+   stats:[["PTS",42],["REB",15],["AST",7],["STL",3]],
+   fact:"A rookie point guard jumping center in place of an injured Kareem Abdul-Jabbar to close out the Finals."},
+  {player:"Larry Bird", team:"Boston Celtics", year:1985, opponent:"Atlanta Hawks", position:"SF", minutes:36, conference:"Eastern",
+   aliases:["larry bird","bird","the hick from french lick"],
+   stats:[["PTS",60],["REB",14],["AST",3],["FG","22-36"]],
+   fact:"Bird reportedly told the Hawks bench where he'd score from next — and did it anyway."},
+  {player:"Luka Dončić", team:"Dallas Mavericks", year:2024, opponent:"Atlanta Hawks", position:"PG", minutes:38, conference:"Western",
+   aliases:["luka doncic","luka","luka dončić","doncic"],
+   stats:[["PTS",73],["REB",10],["AST",9],["FG","25-33"]],
+   fact:"One of the highest-scoring games of the modern era, just shy of a 70-point triple-double."},
+  {player:"Joel Embiid", team:"Philadelphia 76ers", year:2024, opponent:"San Antonio Spurs", position:"C", minutes:33, conference:"Eastern",
+   aliases:["joel embiid","embiid","the process"],
+   stats:[["PTS",70],["REB",18],["AST",5],["FG","24-41"]],
+   fact:"A franchise-record scoring night that also came within a whisper of a triple-double."},
+  {player:"Donovan Mitchell", team:"Cleveland Cavaliers", year:2023, opponent:"Chicago Bulls", position:"SG", minutes:50, conference:"Eastern",
+   aliases:["donovan mitchell","spida","mitchell"],
+   stats:[["PTS",71],["REB",11],["AST",6],["FG","23-31"]],
+   fact:"He scored the Cavaliers' final 21 points, forcing overtime and completing a furious comeback."},
+  {player:"Dwyane Wade", team:"Miami Heat", year:2009, opponent:"Charlotte Bobcats", position:"SG", minutes:44, conference:"Eastern",
+   aliases:["dwyane wade","dwade","wade","d-wade"],
+   stats:[["PTS",55],["REB",7],["AST",8],["FG","21-36"]],
+   fact:"A career-high scoring night that also flirted with a rare 55-point triple-double."},
+  {player:"Kobe Bryant", team:"Los Angeles Lakers", year:2007, opponent:"Portland Trail Blazers", position:"SG", minutes:40, conference:"Western",
+   aliases:["kobe","kobe bryant","black mamba"],
+   stats:[["PTS",65],["REB",5],["AST",5],["FG","22-46"]],
+   fact:"Part of a stretch where he scored 50-plus in four straight games."},
+  {player:"LeBron James", team:"Miami Heat", year:2014, opponent:"Charlotte Bobcats", position:"SF", minutes:33, conference:"Eastern",
+   aliases:["lebron","lebron james","king james"],
+   stats:[["PTS",61],["REB",2],["AST",3],["FG","22-33"]],
+   fact:"A career-high scoring total, done with remarkably efficient shooting."},
+  {player:"Stephen Curry", team:"Golden State Warriors", year:2021, opponent:"Atlanta Hawks", position:"PG", minutes:36, conference:"Western",
+   aliases:["stephen curry","steph curry","steph","curry"],
+   stats:[["PTS",62],["REB",8],["AST",4],["3P","8-16"]],
+   fact:"A career-high scoring outburst during his second MVP-caliber season."},
+  {player:"James Harden", team:"Houston Rockets", year:2019, opponent:"New York Knicks", position:"SG", minutes:34, conference:"Western",
+   aliases:["james harden","the beard","harden"],
+   stats:[["PTS",61],["REB",5],["AST",5],["FG","17-33"]],
+   fact:"One of many 50-point nights during a historic iso-scoring season."},
+  {player:"Kyrie Irving", team:"Cleveland Cavaliers", year:2015, opponent:"Portland Trail Blazers", position:"PG", minutes:48, conference:"Eastern",
+   aliases:["kyrie irving","kyrie","irving"],
+   stats:[["PTS",57],["REB",3],["AST",4],["FG","19-27"]],
+   fact:"A career-high scoring night that needed overtime to be settled."},
+  {player:"Damian Lillard", team:"Portland Trail Blazers", year:2020, opponent:"Dallas Mavericks", position:"PG", minutes:42, conference:"Western",
+   aliases:["damian lillard","dame","dame lillard","lillard"],
+   stats:[["PTS",61],["REB",8],["AST",7],["3P","10-16"]],
+   fact:"Capped inside the NBA's restart bubble with a deep game-winning three."},
+  {player:"Trae Young", team:"Atlanta Hawks", year:2019, opponent:"Chicago Bulls", position:"PG", minutes:39, conference:"Eastern",
+   aliases:["trae young","trae","ice trae"],
+   stats:[["PTS",49],["REB",3],["AST",16],["FG","18-31"]],
+   fact:"A scoring-and-playmaking combo few players in NBA history have ever matched in one game."},
+  {player:"Ja Morant", team:"Memphis Grizzlies", year:2022, opponent:"San Antonio Spurs", position:"PG", minutes:37, conference:"Western",
+   aliases:["ja morant","ja","morant"],
+   stats:[["PTS",52],["REB",6],["AST",6],["FG","20-30"]],
+   fact:"A career-high explosion punctuated by one of his signature highlight dunks."},
+  {player:"Karl-Anthony Towns", team:"Minnesota Timberwolves", year:2022, opponent:"San Antonio Spurs", position:"C", minutes:34, conference:"Western",
+   aliases:["karl-anthony towns","kat","towns"],
+   stats:[["PTS",60],["REB",8],["AST",4],["3P","5-9"]],
+   fact:"The first 60-point game in franchise history."},
+  {player:"DeMar DeRozan", team:"Chicago Bulls", year:2022, opponent:"Milwaukee Bucks", position:"SF", minutes:44, conference:"Eastern",
+   aliases:["demar derozan","derozan"],
+   stats:[["PTS",52],["REB",7],["AST",5],["FG","17-25"]],
+   fact:"One of several clutch, high-volume scoring nights during a stretch of late-game heroics."},
+  {player:"Jayson Tatum", team:"Boston Celtics", year:2023, opponent:"Philadelphia 76ers", position:"SF", minutes:42, conference:"Eastern",
+   aliases:["jayson tatum","tatum"],
+   stats:[["PTS",51],["REB",13],["AST",4],["FG","15-25"]],
+   fact:"Delivered in a winner-take-all Game 7 to send his team to the Conference Finals."},
+  {player:"Kawhi Leonard", team:"Los Angeles Clippers", year:2021, opponent:"Dallas Mavericks", position:"SF", minutes:39, conference:"Western",
+   aliases:["kawhi leonard","kawhi","the klaw"],
+   stats:[["PTS",45],["REB",11],["AST",3],["FG","17-22"]],
+   fact:"An efficient closeout performance in a decisive Game 7 on the road."},
+  {player:"Kevin Durant", team:"Phoenix Suns", year:2023, opponent:"Los Angeles Clippers", position:"PF", minutes:42, conference:"Western",
+   aliases:["kevin durant","kd","durant"],
+   stats:[["PTS",55],["REB",6],["AST",3],["FG","17-24"]],
+   fact:"A dominant playoff scoring night in his first postseason series with a new team."},
+  {player:"Anthony Edwards", team:"Minnesota Timberwolves", year:2024, opponent:"Phoenix Suns", position:"SG", minutes:39, conference:"Western",
+   aliases:["anthony edwards","ant","ant-man","edwards"],
+   stats:[["PTS",44],["REB",6],["AST",4],["FG","16-24"]],
+   fact:"A breakout playoff performance that announced him as the league's next great scorer."},
+  {player:"LeBron James", team:"Cleveland Cavaliers", year:2018, opponent:"Boston Celtics", position:"SF", minutes:48, conference:"Eastern",
+   aliases:["lebron","lebron james","king james"],
+   stats:[["PTS",35],["REB",15],["AST",9],["FG","13-23"]],
+   fact:"A do-everything Game 7 performance that extended his unbeaten record in the round."},
+  {player:"Allen Iverson", team:"Philadelphia 76ers", year:2005, opponent:"Orlando Magic", position:"SG", minutes:50, conference:"Eastern",
+   aliases:["allen iverson","ai","the answer","iverson"],
+   stats:[["PTS",60],["REB",4],["AST",4],["FG","20-33"]],
+   fact:"A career-high scoring total in an overtime road win."},
+  {player:"Carmelo Anthony", team:"New York Knicks", year:2014, opponent:"Charlotte Bobcats", position:"SF", minutes:46, conference:"Eastern",
+   aliases:["carmelo anthony","melo","carmelo"],
+   stats:[["PTS",62],["REB",13],["AST",3],["FG","23-35"]],
+   fact:"Still the Madison Square Garden single-game scoring record."},
+  {player:"Kevin Love", team:"Minnesota Timberwolves", year:2010, opponent:"New York Knicks", position:"PF", minutes:39, conference:"Western",
+   aliases:["kevin love","love"],
+   stats:[["PTS",31],["REB",31],["AST",1],["FG","12-16"]],
+   fact:"The first 30-point, 30-rebound game the league had seen in nearly three decades."},
+  {player:"Klay Thompson", team:"Golden State Warriors", year:2016, opponent:"Indiana Pacers", position:"SG", minutes:29, conference:"Western",
+   aliases:["klay thompson","klay","thompson"],
+   stats:[["PTS",60],["REB",4],["AST",2],["FG","21-33"]],
+   fact:"Scored all 60 points while touching the ball for a reported total of eleven dribbles."},
+  {player:"Damian Lillard", team:"Portland Trail Blazers", year:2019, opponent:"Oklahoma City Thunder", position:"PG", minutes:44, conference:"Western",
+   aliases:["damian lillard","dame","dame lillard","lillard"],
+   stats:[["PTS",50],["REB",6],["AST",4],["3P","9-14"]],
+   fact:"Ended with a series-clinching buzzer-beater three that sent the Thunder home."},
+  {player:"David Thompson", team:"Denver Nuggets", year:1978, opponent:"Detroit Pistons", position:"SG", minutes:43, conference:"Western",
+   aliases:["david thompson","skywalker","thompson"],
+   stats:[["PTS",73],["REB",5],["AST",4],["FG","28-38"]],
+   fact:"Scored on the final day of the season chasing the scoring title — only for a rival to top him hours later."},
+  {player:"George Gervin", team:"San Antonio Spurs", year:1978, opponent:"New Orleans Jazz", position:"SG", minutes:33, conference:"Western",
+   aliases:["george gervin","the iceman","gervin"],
+   stats:[["PTS",63],["REB",5],["AST",2],["FG","23-49"]],
+   fact:"Poured in points at a furious pace to snatch the scoring title away the same day David Thompson dropped 73."},
+  {player:"Michael Jordan", team:"Chicago Bulls", year:1986, opponent:"Boston Celtics", position:"SG", minutes:53, conference:"Eastern",
+   aliases:["michael jordan","mj","jordan","air jordan"],
+   stats:[["PTS",63],["REB",5],["AST",6],["FG","22-41"]],
+   fact:"A double-overtime playoff loss that Larry Bird still called the best performance he'd ever seen."},
+  {player:"Pete Maravich", team:"New Orleans Jazz", year:1977, opponent:"New York Knicks", position:"PG", minutes:43, conference:"Western",
+   aliases:["pete maravich","pistol pete","maravich"],
+   stats:[["PTS",68],["REB",6],["AST",3],["FG","26-43"]],
+   fact:"Still the New Orleans/Utah Jazz franchise single-game scoring record."},
+  {player:"Bill Russell", team:"Boston Celtics", year:1960, opponent:"Syracuse Nationals", position:"C", minutes:48, conference:"Eastern",
+   aliases:["bill russell","russell"],
+   stats:[["PTS",22],["REB",51],["AST",3],["FG","9-24"]],
+   fact:"Still the NBA single-game rebounding record — one of only two players ever to top 50 boards."},
+  {player:"Jerry Lucas", team:"Cincinnati Royals", year:1965, opponent:"Philadelphia 76ers", position:"PF", minutes:48, conference:"Eastern",
+   aliases:["jerry lucas","lucas"],
+   stats:[["PTS",28],["REB",40],["AST",2],["FG","12-22"]],
+   fact:"One of the few 40-rebound games in league history, without fouling out."},
+  {player:"Charles Oakley", team:"Chicago Bulls", year:1988, opponent:"Cleveland Cavaliers", position:"PF", minutes:44, conference:"Eastern",
+   aliases:["charles oakley","oakley"],
+   stats:[["PTS",8],["REB",35],["AST",1],["FG","3-8"]],
+   fact:"Still the most rebounds in a game by any player since the 1976 NBA-ABA merger not named Moses Malone."},
+  {player:"Moses Malone", team:"Houston Rockets", year:1979, opponent:"New Orleans Jazz", position:"C", minutes:44, conference:"Western",
+   aliases:["moses malone","the chairman of the boards","malone"],
+   stats:[["PTS",33],["REB",37]],
+   fact:"Still the most rebounds grabbed by any player since the 1976 NBA-ABA merger."},
+  {player:"Dennis Rodman", team:"Detroit Pistons", year:1992, opponent:"Indiana Pacers", position:"PF", minutes:44, conference:"Eastern",
+   aliases:["dennis rodman","the worm","rodman"],
+   stats:[["PTS",6],["REB",34]],
+   fact:"Grabbed 18 offensive rebounds alone — nearly matching the Pacers' entire team rebound total in an overtime win."},
+  {player:"Andre Drummond", team:"Detroit Pistons", year:2019, opponent:"Boston Celtics", position:"C", minutes:44, conference:"Eastern",
+   aliases:["andre drummond","drummond"],
+   stats:[["PTS",21],["REB",29],["AST",1],["FG","9-15"]],
+   fact:"A modern-era rebounding outburst from a player who led the league on the boards multiple seasons."},
+  {player:"Scott Skiles", team:"Orlando Magic", year:1990, opponent:"Denver Nuggets", position:"PG", minutes:41, conference:"Eastern",
+   aliases:["scott skiles","skiles"],
+   stats:[["PTS",22],["REB",4],["AST",30],["FG","8-15"]],
+   fact:"Still the NBA single-game assist record, more than three decades later."},
+  {player:"Rajon Rondo", team:"Boston Celtics", year:2010, opponent:"New York Knicks", position:"PG", minutes:41, conference:"Eastern",
+   aliases:["rajon rondo","rondo"],
+   stats:[["PTS",3],["REB",5],["AST",20],["FG","1-6"]],
+   fact:"Twenty assists and zero turnovers — pure playmaking with almost no scoring at all."},
+  {player:"Nikola Jokić", team:"Denver Nuggets", year:2023, opponent:"Washington Wizards", position:"C", minutes:34, conference:"Western",
+   aliases:["nikola jokic","jokic","the joker","nikola jokić"],
+   stats:[["PTS",22],["REB",9],["AST",20],["FG","7-15"]],
+   fact:"A rare 20-assist game from a center, further proof of his one-of-a-kind passing."},
+  {player:"John Stockton", team:"Utah Jazz", year:1989, opponent:"San Antonio Spurs", position:"PG", minutes:40, conference:"Western",
+   aliases:["john stockton","stockton"],
+   stats:[["PTS",10],["REB",3],["AST",24],["FG","4-9"]],
+   fact:"A career-best assist total from the NBA's all-time leader in that category."},
+  {player:"Wilt Chamberlain", team:"Philadelphia 76ers", year:1967, opponent:"Baltimore Bullets", position:"C", minutes:48, conference:"Eastern",
+   aliases:["wilt","wilt chamberlain","the stilt","chamberlain"],
+   stats:[["PTS",42],["REB",30],["AST",10],["FG","18-18"]],
+   fact:"Still the NBA record for most field goals made without a miss in a game — part of a triple-double."},
+  {player:"Bam Adebayo", team:"Miami Heat", year:2026, opponent:"Washington Wizards", position:"C", minutes:42, conference:"Eastern",
+   aliases:["bam adebayo","bam","adebayo"],
+   stats:[["PTS",83],["REB",9],["AST",3],["FG","20-43"],["3P","7-22"],["FT","36-43"]],
+   fact:"Second only to Wilt Chamberlain's 100, and set an NBA record for free throws made and attempted in the process."},
+  {player:"Wilt Chamberlain", team:"Philadelphia Warriors", year:1961, opponent:"Los Angeles Lakers", position:"C", minutes:63, conference:"Eastern",
+   aliases:["wilt","wilt chamberlain","the stilt","chamberlain"],
+   stats:[["PTS",78],["FG","31-62"],["FT","16-31"]],
+   fact:"Still the most points ever scored in a losing effort, in a marathon triple-overtime game."},
+  {player:"Wilt Chamberlain", team:"Philadelphia Warriors", year:1962, opponent:"Chicago Packers", position:"C", minutes:48, conference:"Eastern",
+   aliases:["wilt","wilt chamberlain","the stilt","chamberlain"],
+   stats:[["PTS",73],["FG","29-48"],["FT","15-25"]],
+   fact:"A then-record for points in a regulation game, set during his legendary 1961-62 season."},
+  {player:"Wilt Chamberlain", team:"San Francisco Warriors", year:1963, opponent:"New York Knicks", position:"C", minutes:48, conference:"Western",
+   aliases:["wilt","wilt chamberlain","the stilt","chamberlain"],
+   stats:[["PTS",73],["FG","29-43"],["FT","15-19"]],
+   fact:"Still the most points ever scored by a player in a road game."},
+  {player:"Wilt Chamberlain", team:"San Francisco Warriors", year:1963, opponent:"Los Angeles Lakers", position:"C", minutes:48, conference:"Western",
+   aliases:["wilt","wilt chamberlain","the stilt","chamberlain"],
+   stats:[["PTS",72],["FG","29-48"],["FT","14-18"]],
+   fact:"One of well over a dozen 70-point nights during his historic scoring peak."},
+  {player:"Wilt Chamberlain", team:"San Francisco Warriors", year:1963, opponent:"Syracuse Nationals", position:"C", minutes:48, conference:"Western",
+   aliases:["wilt","wilt chamberlain","the stilt","chamberlain"],
+   stats:[["PTS",70],["FG","27-38"],["FT","16-22"]],
+   fact:"Another entry in the most dominant individual scoring stretch the league has ever seen."},
+  {player:"Wilt Chamberlain", team:"Philadelphia 76ers", year:1967, opponent:"Chicago Bulls", position:"C", minutes:44, conference:"Eastern",
+   aliases:["wilt","wilt chamberlain","the stilt","chamberlain"],
+   stats:[["PTS",68],["FG","30-40"],["FT","8-22"]],
+   fact:"Scored deep into the 60s even years after his 100-point game, on his way to a title that season."},
+  {player:"Wilt Chamberlain", team:"Philadelphia Warriors", year:1962, opponent:"New York Knicks", position:"C", minutes:48, conference:"Eastern",
+   aliases:["wilt","wilt chamberlain","the stilt","chamberlain"],
+   stats:[["PTS",67],["FG","27-37"],["FT","13-17"]],
+   fact:"One of several 65-plus games he strung together against the Knicks that season."},
+  {player:"Wilt Chamberlain", team:"Philadelphia Warriors", year:1962, opponent:"St. Louis Hawks", position:"C", minutes:48, conference:"Eastern",
+   aliases:["wilt","wilt chamberlain","the stilt","chamberlain"],
+   stats:[["PTS",67],["FG","26-44"],["FT","15-20"]],
+   fact:"Part of a run in which he topped 65 points on more nights than most players reach 40 in a career."},
+  {player:"Wilt Chamberlain", team:"San Francisco Warriors", year:1963, opponent:"Los Angeles Lakers", position:"C", minutes:48, conference:"Western",
+   aliases:["wilt","wilt chamberlain","the stilt","chamberlain"],
+   stats:[["PTS",67],["FG","28-47"],["FT","11-17"]],
+   fact:"Yet another 60-plus outburst against the Lakers, a frequent target of his biggest scoring nights."},
+  {player:"Wilt Chamberlain", team:"Los Angeles Lakers", year:1969, opponent:"Phoenix Suns", position:"C", minutes:48, conference:"Western",
+   aliases:["wilt","wilt chamberlain","the stilt","chamberlain"],
+   stats:[["PTS",66],["FG","29-35"],["FT","8-18"]],
+   fact:"The last time in his career he scored 60 or more points in a game."},
+  {player:"Wilt Chamberlain", team:"Philadelphia Warriors", year:1962, opponent:"Cincinnati Royals", position:"C", minutes:48, conference:"Eastern",
+   aliases:["wilt","wilt chamberlain","the stilt","chamberlain"],
+   stats:[["PTS",65],["FG","24-40"],["FT","17-30"]],
+   fact:"Scored 65-plus points on an almost routine basis during his 50.4-points-per-game season."},
+  {player:"Wilt Chamberlain", team:"Philadelphia Warriors", year:1962, opponent:"St. Louis Hawks", position:"C", minutes:48, conference:"Eastern",
+   aliases:["wilt","wilt chamberlain","the stilt","chamberlain"],
+   stats:[["PTS",65],["FG","25-43"],["FT","15-20"]],
+   fact:"A second 65-point night against the same opponent within the same historic season."},
+  {player:"Wilt Chamberlain", team:"Philadelphia 76ers", year:1966, opponent:"Los Angeles Lakers", position:"C", minutes:44, conference:"Eastern",
+   aliases:["wilt","wilt chamberlain","the stilt","chamberlain"],
+   stats:[["PTS",65],["FG","28-43"],["FT","9-20"]],
+   fact:"Proof that his historic scoring output didn't stop after he left the Warriors."},
+  {player:"Elgin Baylor", team:"Minneapolis Lakers", year:1959, opponent:"Boston Celtics", position:"SF", minutes:48, conference:"Western",
+   aliases:["elgin baylor","baylor"],
+   stats:[["PTS",64],["FG","25-47"],["FT","14-19"]],
+   fact:"A then-record for points in a game, set the year before he'd break his own mark again."},
+  {player:"Rick Barry", team:"Golden State Warriors", year:1974, opponent:"Portland Trail Blazers", position:"SF", minutes:43, conference:"Western",
+   aliases:["rick barry","barry"],
+   stats:[["PTS",64],["REB",10],["AST",9],["FG","30-45"]],
+   fact:"Came within one assist of the first 60-point triple-double in NBA history, decades before it finally happened."},
+  {player:"Michael Jordan", team:"Chicago Bulls", year:1993, opponent:"Orlando Magic", position:"SG", minutes:47, conference:"Eastern",
+   aliases:["michael jordan","mj","jordan","air jordan"],
+   stats:[["PTS",64],["REB",6],["AST",1],["FG","27-49"]],
+   fact:"A huge scoring night that still ended in an overtime loss to the Magic."},
+  {player:"Damian Lillard", team:"Milwaukee Bucks", year:2023, opponent:"Indiana Pacers", position:"PG", minutes:37, conference:"Eastern",
+   aliases:["damian lillard","dame","dame lillard","lillard"],
+   stats:[["PTS",64],["REB",4],["AST",3],["3P","0-3"]],
+   fact:"His first 60-point game after being traded to a new franchise, on almost no three-point makes."},
+  {player:"Hakeem Olajuwon", team:"Houston Rockets", year:1990, opponent:"Milwaukee Bucks", position:"C", minutes:40, conference:"Western",
+   aliases:["hakeem olajuwon","hakeem","the dream","olajuwon"],
+   stats:[["PTS",18],["REB",16],["AST",10],["BLK",11]],
+   fact:"One of only four quadruple-doubles in NBA history."},
+  {player:"Patrick Ewing", team:"New York Knicks", year:1990, opponent:"Milwaukee Bucks", position:"C", minutes:41, conference:"Eastern",
+   aliases:["patrick ewing","ewing"],
+   stats:[["PTS",51],["REB",10],["AST",1],["FG","20-25"]],
+   fact:"A career-high scoring night built on remarkably efficient shooting."},
+  {player:"Charles Barkley", team:"Houston Rockets", year:1997, opponent:"Los Angeles Clippers", position:"PF", minutes:38, conference:"Western",
+   aliases:["charles barkley","barkley","sir charles"],
+   stats:[["PTS",56],["REB",13],["AST",3],["FG","19-31"]],
+   fact:"A late-career explosion that stands as his career high, well past his MVP peak."},
+  {player:"Scottie Pippen", team:"Chicago Bulls", year:1990, opponent:"Denver Nuggets", position:"SF", minutes:36, conference:"Eastern",
+   aliases:["scottie pippen","pippen"],
+   stats:[["PTS",47],["REB",6],["AST",4],["FG","16-24"]],
+   fact:"A career-high scoring night in a season the Bulls were building toward their first title."},
+  {player:"Dominique Wilkins", team:"Atlanta Hawks", year:1986, opponent:"Chicago Bulls", position:"SF", minutes:41, conference:"Eastern",
+   aliases:["dominique wilkins","the human highlight film","wilkins"],
+   stats:[["PTS",57],["REB",10],["AST",3],["FG","23-39"]],
+   fact:"A signature scoring outburst from one of the era's most explosive finishers."},
+  {player:"Reggie Miller", team:"Indiana Pacers", year:1992, opponent:"Charlotte Hornets", position:"SG", minutes:41, conference:"Eastern",
+   aliases:["reggie miller","miller"],
+   stats:[["PTS",57],["REB",5],["AST",3],["3P","5-9"]],
+   fact:"A career-high scoring night that remains a franchise record decades later."},
+  {player:"Vince Carter", team:"Toronto Raptors", year:2000, opponent:"Phoenix Suns", position:"SG", minutes:41, conference:"Eastern",
+   aliases:["vince carter","vc","half man half amazing","carter"],
+   stats:[["PTS",51],["REB",4],["AST",5],["3P","7-11"]],
+   fact:"A career-high scoring night from a player better known for highlight-reel dunks than pure volume."},
+  {player:"Tim Duncan", team:"San Antonio Spurs", year:2003, opponent:"New Jersey Nets", position:"PF", minutes:44, conference:"Western",
+   aliases:["tim duncan","td","the big fundamental","duncan"],
+   stats:[["PTS",21],["REB",20],["AST",10],["BLK",8]],
+   fact:"One rebound shy of a Finals-clinching quadruple-double, good enough for Finals MVP."},
+  {player:"Kevin Garnett", team:"Minnesota Timberwolves", year:2003, opponent:"Dallas Mavericks", position:"PF", minutes:41, conference:"Western",
+   aliases:["kevin garnett","kg","the big ticket","garnett"],
+   stats:[["PTS",53],["REB",15],["AST",3],["FG","19-26"]],
+   fact:"A career-high scoring night during his lone MVP season."},
+  {player:"Dirk Nowitzki", team:"Dallas Mavericks", year:2007, opponent:"Houston Rockets", position:"PF", minutes:39, conference:"Western",
+   aliases:["dirk nowitzki","dirk","the german wunderkind","nowitzki"],
+   stats:[["PTS",53],["REB",11],["AST",2],["FG","19-25"]],
+   fact:"A career-high scoring night during the regular season he'd go on to win MVP."},
+  {player:"Isaiah Thomas", team:"Boston Celtics", year:2017, opponent:"Washington Wizards", position:"PG", minutes:53, conference:"Eastern",
+   aliases:["isaiah thomas","it","thomas"],
+   stats:[["PTS",53],["REB",6],["AST",7],["3P","7-14"]],
+   fact:"Played the day after his sister's death and delivered a career playoff performance."},
+  {player:"Kobe Bryant", team:"Los Angeles Lakers", year:2005, opponent:"Dallas Mavericks", position:"SG", minutes:33, conference:"Western",
+   aliases:["kobe","kobe bryant","black mamba"],
+   stats:[["PTS",62],["REB",5],["AST",4],["FG","18-31"]],
+   fact:"He sat out the entire fourth quarter, having already outscored the entire Mavericks team through three."},
+  {player:"LeBron James", team:"Cleveland Cavaliers", year:2007, opponent:"Detroit Pistons", position:"SF", minutes:50, conference:"Eastern",
+   aliases:["lebron","lebron james","king james"],
+   stats:[["PTS",48],["REB",9],["AST",7],["FG","18-33"]],
+   fact:"He scored his team's final 25 points in regulation and overtime to close out the series."},
+  {player:"James Worthy", team:"Los Angeles Lakers", year:1988, opponent:"Detroit Pistons", position:"SF", minutes:44, conference:"Western",
+   aliases:["james worthy","big game james","worthy"],
+   stats:[["PTS",36],["REB",16],["AST",10],["FG","16-24"]],
+   fact:"A Finals Game 7 triple-double that earned him Finals MVP honors."},
+  {player:"Walt Frazier", team:"New York Knicks", year:1970, opponent:"Los Angeles Lakers", position:"PG", minutes:44, conference:"Eastern",
+   aliases:["walt frazier","clyde","frazier"],
+   stats:[["PTS",36],["REB",7],["AST",19],["FG","12-17"]],
+   fact:"Immortalized simply as '36 and 19' — a Finals Game 7 masterpiece."},
+  {player:"Jerry West", team:"Los Angeles Lakers", year:1965, opponent:"Boston Celtics", position:"PG", minutes:48, conference:"Western",
+   aliases:["jerry west","the logo","mr clutch","west"],
+   stats:[["PTS",53],["REB",6],["AST",6],["FG","20-32"]],
+   fact:"A dominant playoff scoring performance from the player whose silhouette became the NBA's logo."},
+  {player:"Wilt Chamberlain", team:"San Francisco Warriors", year:1963, opponent:"Los Angeles Lakers", position:"C", minutes:48, conference:"Western",
+   aliases:["wilt","wilt chamberlain","the stilt","chamberlain"],
+   stats:[["PTS",45],["REB",22],["AST",2],["FG","15-30"]],
+   fact:"Just another dominant night during a decade in which he led the league in scoring seven straight years."},
+  {player:"Grant Hill", team:"Detroit Pistons", year:1995, opponent:"Chicago Bulls", position:"SF", minutes:44, conference:"Eastern",
+   aliases:["grant hill","hill"],
+   stats:[["PTS",29],["REB",10],["AST",10],["STL",3]],
+   fact:"A rookie-season triple-double against Michael Jordan's Bulls."},
+  {player:"Chris Paul", team:"New Orleans Hornets", year:2008, opponent:"Oklahoma City Thunder", position:"PG", minutes:41, conference:"Western",
+   aliases:["chris paul","cp3","paul"],
+   stats:[["PTS",34],["REB",6],["AST",16],["STL",5]],
+   fact:"One of the great all-around stat lines of his prime, mixing elite scoring with elite playmaking."},
+  {player:"Steve Nash", team:"Phoenix Suns", year:2007, opponent:"New York Knicks", position:"PG", minutes:36, conference:"Western",
+   aliases:["steve nash","nash"],
+   stats:[["PTS",23],["REB",6],["AST",16],["FG","8-11"]],
+   fact:"A vintage floor-general performance during his back-to-back MVP era."}
+];
+
+const MAX_GUESSES = 5;
+const CLUE_ORDER = ["position","opponent","year","minutes"];
+const CLUE_LABELS = {minutes:"Minutes", year:"Year", opponent:"Opponent", position:"Position"};
+const CLUE_ICONS = {minutes:"⏱", year:"📅", opponent:"🆚", position:"📍"};
+
+let state = {
+  entry:null,
+  puzzleNum:0,
+  wrongGuesses:0,
+  guessedList:[],
+  over:false,
+  won:false,
+  practice:false
+};
+
+function normalize(s){
+  return s.toLowerCase().trim()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .replace(/[^a-z0-9 ]/g,"").replace(/\s+/g," ");
+}
+
+// Puzzle launch date — puzzle numbering starts counting from here.
+const GAME_EPOCH_UTC = Date.UTC(2026, 0, 1, 0, 0, 0);
+// Two fixed release times per day, in UTC, so every player worldwide gets
+// the exact same puzzle at the exact same moment regardless of local time zone.
+const SLOT_HOURS_UTC = [0, 12];
+
+function currentSlot(){
+  const now = Date.now();
+  const msPerSlot = (24/SLOT_HOURS_UTC.length) * 60 * 60 * 1000;
+  const slotIndex = Math.floor((now - GAME_EPOCH_UTC) / msPerSlot);
+  const slotOfDay = ((slotIndex % SLOT_HOURS_UTC.length) + SLOT_HOURS_UTC.length) % SLOT_HOURS_UTC.length;
+  const nextChangeAt = GAME_EPOCH_UTC + (slotIndex + 1) * msPerSlot;
+  return {
+    slotIndex,                       // ever-increasing, identical for every visitor at the same moment
+    label: slotOfDay === 0 ? "AM" : "PM",
+    nextChangeAt
+  };
+}
+
+function puzzleIndexForSlot(slotIndex){
+  // keep it non-negative regardless of slotIndex sign
+  return ((slotIndex % DATA.length) + DATA.length) % DATA.length;
+}
+
+function formatCountdown(ms){
+  if(ms < 0) ms = 0;
+  const totalSec = Math.floor(ms/1000);
+  const h = String(Math.floor(totalSec/3600)).padStart(2,"0");
+  const m = String(Math.floor((totalSec%3600)/60)).padStart(2,"0");
+  const s = String(totalSec%60).padStart(2,"0");
+  return `${h}:${m}:${s}`;
+}
+
+let countdownTimer = null;
+let activeSlotIndex = null;
+
+function startCountdown(){
+  if(countdownTimer) clearInterval(countdownTimer);
+  const tick = ()=>{
+    const slot = currentSlot();
+    const el = document.getElementById("nextPuzzleTimer");
+    if(el) el.textContent = "Next puzzle in " + formatCountdown(slot.nextChangeAt - Date.now());
+
+    // if the slot has rolled over since we loaded, surface a refresh prompt
+    // rather than yanking the board out from under an in-progress guess.
+    if(activeSlotIndex !== null && slot.slotIndex !== activeSlotIndex && !state.practice){
+      const banner = document.getElementById("newPuzzleBanner");
+      if(banner) banner.className = "new-puzzle-banner show";
+    }
+  };
+  tick();
+  countdownTimer = setInterval(tick, 1000);
+}
+
+function populateDatalist(){
+  const dl = document.getElementById("playerList");
+  dl.innerHTML = "";
+  DATA.forEach(e=>{
+    const opt = document.createElement("option");
+    opt.value = e.player;
+    dl.appendChild(opt);
+  });
+}
+
+function buildStatGrid(entry){
+  const grid = document.getElementById("statGrid");
+  grid.innerHTML = "";
+  entry.stats.forEach(([label,val])=>{
+    const cell = document.createElement("div");
+    cell.className = "stat-cell";
+    cell.innerHTML = `<div class="val">${val}</div><div class="lab">${label}</div>`;
+    grid.appendChild(cell);
+  });
+}
+
+function buildClueRack(){
+  const rack = document.getElementById("clueRack");
+  rack.innerHTML = "";
+  CLUE_ORDER.forEach(key=>{
+    const card = document.createElement("div");
+    card.className = "flip-card";
+    card.id = "clue-"+key;
+    card.innerHTML = `
+      <div class="flip-inner">
+        <div class="flip-front">
+          <div class="lock">${CLUE_ICONS[key]}</div>
+          <div class="clue-key">${CLUE_LABELS[key].toUpperCase()}</div>
+        </div>
+        <div class="flip-back">
+          <div class="clue-key">${CLUE_LABELS[key]}</div>
+          <div class="clue-val" id="clue-val-${key}"></div>
+        </div>
+      </div>`;
+    rack.appendChild(card);
+  });
+}
+
+function buildDots(){
+  const dots = document.getElementById("dots");
+  dots.innerHTML = "";
+  for(let i=0;i<MAX_GUESSES;i++){
+    const d = document.createElement("div");
+    d.className = "dot";
+    d.id = "dot-"+i;
+    dots.appendChild(d);
+  }
+}
+
+function formatClueValue(entry,key){
+  switch(key){
+    case "minutes": return entry.minutes + " MIN";
+    case "year": return entry.year;
+    case "opponent": return "vs " + entry.opponent;
+    case "position": return entry.position;
+  }
+}
+
+function startPuzzle(entry, num, practice, edition){
+  state = {entry, puzzleNum:num, wrongGuesses:0, guessedList:[], over:false, won:false, practice};
+  document.getElementById("puzzleNum").textContent = practice ? "PRACTICE" : num;
+  document.getElementById("puzzleEdition").textContent = (!practice && edition) ? edition : "";
+  document.getElementById("puzzleEdition").style.display = (!practice && edition) ? "inline-block" : "none";
+  document.getElementById("newPuzzleBanner").className = "new-puzzle-banner";
+  buildStatGrid(entry);
+  buildClueRack();
+  buildDots();
+
+  const playerBar = document.getElementById("playerBar");
+  const teamBar = document.getElementById("teamBar");
+  playerBar.className = "redact-bar";
+  playerBar.innerHTML = "";
+  teamBar.className = "redact-bar";
+  teamBar.innerHTML = "";
+
+  document.getElementById("feedback").textContent = "";
+  document.getElementById("feedback").className = "feedback";
+  document.getElementById("history").innerHTML = "";
+  document.getElementById("result").className = "result";
+  document.getElementById("cardPreviewWrap").className = "card-preview-wrap";
+  document.getElementById("guessInput").value = "";
+  document.getElementById("guessInput").disabled = false;
+  document.getElementById("guessBtn").disabled = false;
+  document.getElementById("guessInput").focus();
+}
+
+function revealClue(key){
+  const val = formatClueValue(state.entry, key);
+  document.getElementById("clue-val-"+key).textContent = val;
+  document.getElementById("clue-"+key).classList.add("revealed");
+}
+
+function markDot(idx, cls){
+  const d = document.getElementById("dot-"+idx);
+  if(d) d.classList.add(cls);
+}
+
+function addHistoryChip(text){
+  const chip = document.createElement("div");
+  chip.className = "chip";
+  chip.textContent = text;
+  document.getElementById("history").appendChild(chip);
+}
+
+function endGame(won){
+  state.over = true;
+  state.won = won;
+  document.getElementById("guessInput").disabled = true;
+  document.getElementById("guessBtn").disabled = true;
+
+  // reveal all remaining clues + name/team
+  CLUE_ORDER.forEach(revealClue);
+  const playerBar = document.getElementById("playerBar");
+  const teamBar = document.getElementById("teamBar");
+  playerBar.classList.add("revealed");
+  playerBar.innerHTML = `<span>${state.entry.player}</span>`;
+  teamBar.classList.add("revealed");
+  teamBar.innerHTML = `<span>${state.entry.team}</span>`;
+
+  const result = document.getElementById("result");
+  result.className = "result show " + (won ? "won":"lost");
+  document.getElementById("resultHeadline").textContent = won ? "NAILED IT" : "STUMPED";
+  document.getElementById("resultAnswer").innerHTML =
+    `${state.entry.player} &mdash; <span class="team">${state.entry.team}, ${state.entry.year}</span>`;
+  document.getElementById("resultFact").textContent = state.entry.fact;
+}
+
+function submitGuess(){
+  if(state.over) return;
+  const raw = document.getElementById("guessInput").value;
+  if(!raw.trim()) return;
+  const norm = normalize(raw);
+  const correct = state.entry.aliases.some(a => normalize(a) === norm);
+
+  const feedback = document.getElementById("feedback");
+
+  if(correct){
+    markDot(state.wrongGuesses, "used-win");
+    feedback.textContent = "Correct — that's the guy.";
+    feedback.className = "feedback win";
+    endGame(true);
+    return;
+  }
+
+  // wrong guess
+  markDot(state.wrongGuesses, "used-wrong");
+  addHistoryChip(raw.trim());
+  state.guessedList.push(raw.trim());
+  state.wrongGuesses++;
+
+  const input = document.getElementById("guessInput");
+  input.classList.remove("shake"); void input.offsetWidth; input.classList.add("shake");
+
+  if(state.wrongGuesses <= CLUE_ORDER.length){
+    revealClue(CLUE_ORDER[state.wrongGuesses-1]);
+    feedback.textContent = `Not quite. Clue unlocked: ${CLUE_LABELS[CLUE_ORDER[state.wrongGuesses-1]]}.`;
+  } else {
+    feedback.textContent = "Not quite.";
+  }
+  feedback.className = "feedback wrong";
+
+  if(state.wrongGuesses >= MAX_GUESSES){
+    endGame(false);
+  }
+  input.value = "";
+  input.focus();
+}
+
+function buildShareText(){
+  const squares = [];
+  for(let i=0;i<state.wrongGuesses;i++) squares.push("🟥");
+  if(state.won) squares.push("🟩");
+  const label = state.practice ? "Practice" : ("#"+state.puzzleNum);
+  const score = state.won ? `${state.wrongGuesses+1}/5` : "X/5";
+  return {
+    label, score, squares,
+    text: `Stat Line Swivel ${label} — ${score}\n${squares.join("")}`
+  };
+}
+
+function shareResult(){
+  const {text} = buildShareText();
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(()=>{
+      const btn = document.getElementById("shareBtn");
+      const old = btn.textContent;
+      btn.textContent = "COPIED!";
+      setTimeout(()=>btn.textContent = old, 1500);
+    }).catch(()=>{ alert(text); });
+  } else {
+    alert(text);
+  }
+}
+
+function roundRectPath(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+
+function wrapText(ctx,text,x,y,maxWidth,lineHeight,maxLines){
+  const words = text.split(" ");
+  let line = "";
+  let lines = [];
+  words.forEach(word=>{
+    const test = line ? line+" "+word : word;
+    if(ctx.measureText(test).width > maxWidth && line){
+      lines.push(line);
+      line = word;
+    } else {
+      line = test;
+    }
+  });
+  if(line) lines.push(line);
+  if(maxLines && lines.length > maxLines){
+    lines = lines.slice(0,maxLines);
+    lines[maxLines-1] = lines[maxLines-1].replace(/\s*\S*$/, "") + "…";
+  }
+  lines.forEach((l,i)=> ctx.fillText(l, x, y + i*lineHeight));
+  return y + lines.length*lineHeight;
+}
+
+async function drawShareCard(){
+  const canvas = document.getElementById("shareCanvas");
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width, H = canvas.height;
+
+  if(document.fonts && document.fonts.ready){
+    try{
+      await Promise.all([
+        document.fonts.load("700 90px Teko"),
+        document.fonts.load("600 40px Teko"),
+        document.fonts.load("400 34px 'Share Tech Mono'"),
+        document.fonts.load("400 30px Inter")
+      ]);
+      await document.fonts.ready;
+    }catch(e){/* fall back to default fonts */}
+  }
+
+  const {label, score, squares} = buildShareText();
+  const entry = state.entry;
+
+  // background
+  ctx.fillStyle = "#0A0A0A";
+  ctx.fillRect(0,0,W,H);
+  const glow = ctx.createRadialGradient(W/2,-80,80,W/2,-80,780);
+  glow.addColorStop(0,"rgba(255,122,26,0.18)");
+  glow.addColorStop(1,"rgba(255,122,26,0)");
+  ctx.fillStyle = glow;
+  ctx.fillRect(0,0,W,H);
+
+  // outer frame
+  ctx.strokeStyle = "#3A3A3A";
+  ctx.lineWidth = 3;
+  roundRectPath(ctx,24,24,W-48,H-48,28);
+  ctx.stroke();
+
+  const cx = W/2;
+  let y = 118;
+
+  // eyebrow label
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#FF7A1A";
+  ctx.font = "600 30px Teko, sans-serif";
+  ctx.fillText((state.practice ? "PRACTICE ROUND" : "DAILY PUZZLE " + label).toUpperCase(), cx, y);
+
+  // title
+  y += 78;
+  ctx.font = "700 92px Teko, sans-serif";
+  ctx.fillStyle = "#F5F5F5";
+  ctx.fillText("STAT LINE", cx, y);
+  y += 84;
+  ctx.fillStyle = "#FF7A1A";
+  ctx.fillText("SWIVEL", cx, y);
+
+  // divider
+  y += 46;
+  ctx.strokeStyle = "#3A3A3A";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(cx-260,y);
+  ctx.lineTo(cx+260,y);
+  ctx.stroke();
+
+  // score headline
+  y += 90;
+  ctx.font = "700 76px Teko, sans-serif";
+  ctx.fillStyle = state.won ? "#FF7A1A" : "#FF4A3D";
+  ctx.fillText(state.won ? "SOLVED " + score : "STUMPED " + score, cx, y);
+
+  // guess squares
+  y += 60;
+  const sq = 74, gap = 18, total = 5;
+  const startX = cx - (total*sq + (total-1)*gap)/2;
+  for(let i=0;i<total;i++){
+    const x = startX + i*(sq+gap);
+    const isWrong = i < state.wrongGuesses;
+    const isWin = state.won && i === state.wrongGuesses;
+    ctx.lineWidth = 3;
+    if(isWrong){
+      ctx.fillStyle = "#2A1512";
+      roundRectPath(ctx,x,y,sq,sq,12);
+      ctx.fill();
+      ctx.strokeStyle = "#FF4A3D";
+      roundRectPath(ctx,x,y,sq,sq,12);
+      ctx.stroke();
+      ctx.strokeStyle = "#FF4A3D";
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.moveTo(x+20,y+20); ctx.lineTo(x+sq-20,y+sq-20);
+      ctx.moveTo(x+sq-20,y+20); ctx.lineTo(x+20,y+sq-20);
+      ctx.stroke();
+    } else if(isWin){
+      ctx.fillStyle = "#FF7A1A";
+      roundRectPath(ctx,x,y,sq,sq,12);
+      ctx.fill();
+      ctx.strokeStyle = "#FFA24D";
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.moveTo(x+18,y+sq/2);
+      ctx.lineTo(x+sq/2-4,y+sq-22);
+      ctx.lineTo(x+sq-18,y+20);
+      ctx.stroke();
+    } else {
+      ctx.strokeStyle = "#3A3A3A";
+      roundRectPath(ctx,x,y,sq,sq,12);
+      ctx.stroke();
+    }
+  }
+
+  // mini box score chips
+  y += sq + 64;
+  const chips = entry.stats.slice(0,4);
+  const chipW = 220, chipGap = 16;
+  const chipsStartX = cx - (chips.length*chipW + (chips.length-1)*chipGap)/2;
+  chips.forEach(([lab,val],i)=>{
+    const x = chipsStartX + i*(chipW+chipGap);
+    ctx.fillStyle = "#161616";
+    roundRectPath(ctx,x,y,chipW,120,10);
+    ctx.fill();
+    ctx.strokeStyle = "#3A3A3A";
+    roundRectPath(ctx,x,y,chipW,120,10);
+    ctx.stroke();
+    ctx.fillStyle = "#FF7A1A";
+    ctx.font = "400 46px 'Share Tech Mono', monospace";
+    ctx.fillText(String(val), x+chipW/2, y+62);
+    ctx.fillStyle = "#9C9C9C";
+    ctx.font = "600 22px Teko, sans-serif";
+    ctx.fillText(lab, x+chipW/2, y+96);
+  });
+
+  // answer reveal
+  y += 120 + 40;
+  ctx.fillStyle = "#F5F5F5";
+  ctx.font = "600 46px Teko, sans-serif";
+  y = wrapText(ctx, `${entry.player} — ${entry.team}, ${entry.year}`, cx, y, W-160, 50, 2);
+
+  // footer divider
+  ctx.strokeStyle = "#3A3A3A";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(cx-200,H-104);
+  ctx.lineTo(cx+200,H-104);
+  ctx.stroke();
+
+  // footer
+  ctx.fillStyle = "#9C9C9C";
+  ctx.font = "400 24px 'Share Tech Mono', monospace";
+  ctx.fillText("STAT LINE SWIVEL · A NEW BOX SCORE EVERY DAY", cx, H-64);
+}
+
+async function openShareCard(){
+  const btn = document.getElementById("shareCardBtn");
+  btn.disabled = true;
+  const oldLabel = btn.textContent;
+  btn.textContent = "BUILDING…";
+  try{
+    await drawShareCard();
+    document.getElementById("cardPreviewWrap").className = "card-preview-wrap show";
+    document.getElementById("cardPreviewWrap").scrollIntoView({behavior:"smooth", block:"nearest"});
+  } finally {
+    btn.disabled = false;
+    btn.textContent = oldLabel;
+  }
+}
+
+function downloadShareCard(){
+  const canvas = document.getElementById("shareCanvas");
+  const label = state.practice ? "practice" : ("puzzle-" + state.puzzleNum);
+  const link = document.createElement("a");
+  link.download = `stat-line-swivel-${label}.png`;
+  link.href = canvas.toDataURL("image/png");
+  link.click();
+}
+
+async function nativeShareCard(){
+  const canvas = document.getElementById("shareCanvas");
+  const {text} = buildShareText();
+  canvas.toBlob(async (blob)=>{
+    if(!blob) return;
+    const file = new File([blob], "stat-line-swivel.png", {type:"image/png"});
+    if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+      try{
+        await navigator.share({files:[file], title:"Stat Line Swivel", text});
+      }catch(e){ /* user cancelled share sheet, no action needed */ }
+    } else {
+      downloadShareCard();
+    }
+  }, "image/png");
+}
+
+function launchPuzzleForCurrentSlot(){
+  const slot = currentSlot();
+  const idx = puzzleIndexForSlot(slot.slotIndex);
+  activeSlotIndex = slot.slotIndex;
+  startPuzzle(DATA[idx], puzzleNumberFor(slot.slotIndex), false, slot.label);
+}
+
+function puzzleNumberFor(slotIndex){
+  // Friendly, small, always-positive puzzle numbers starting at #1 on launch day.
+  return slotIndex + 1;
+}
+
+function launchPractice(){
+  let idx;
+  do{ idx = Math.floor(Math.random()*DATA.length); }
+  while(DATA.length>1 && state.entry === DATA[idx]);
+  startPuzzle(DATA[idx], 0, true);
+}
+
+document.getElementById("guessBtn").addEventListener("click", submitGuess);
+document.getElementById("guessInput").addEventListener("keydown", e=>{
+  if(e.key === "Enter") submitGuess();
+});
+document.getElementById("shareBtn").addEventListener("click", shareResult);
+document.getElementById("shareCardBtn").addEventListener("click", openShareCard);
+document.getElementById("downloadCardBtn").addEventListener("click", downloadShareCard);
+document.getElementById("nativeShareBtn").addEventListener("click", nativeShareCard);
+document.getElementById("practiceBtn").addEventListener("click", launchPractice);
+document.getElementById("refreshPuzzleBtn").addEventListener("click", launchPuzzleForCurrentSlot);
+
+populateDatalist();
+launchPuzzleForCurrentSlot();
+startCountdown();
+</script>
+</body>
+</html>

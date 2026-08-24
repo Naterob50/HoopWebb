@@ -79,7 +79,7 @@ export default function Home() {
           {/* Stats Bar */}
           <div className="grid grid-cols-3 max-w-md mx-auto pt-6 sm:pt-8 border-t border-neutral-900 text-center px-2">
             <div>
-              <div className="text-2xl sm:text-3xl font-extrabold text-orange-500">5</div>
+              <div className="text-2xl sm:text-3xl font-extrabold text-orange-500">6</div>
               <div className="text-[9px] sm:text-[10px] font-mono text-neutral-500 tracking-wider mt-1">TITLES LIVE</div>
             </div>
             <div className="border-x border-neutral-900">
@@ -95,6 +95,14 @@ export default function Home() {
 
         {/* Featured Games Grid */}
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 pt-2">
+          <GameCard
+            href="/games/stat-line-swivel"
+            title="Stat Line Swivel"
+            category="DAILY BOX SCORE"
+            description="Guess the mystery player behind iconic NBA stat lines. Reveal clues as you make your guesses."
+            status="NEW"
+          />
+
           <GameCard
             href="/games/draft-duel"
             title="Draft Duel"

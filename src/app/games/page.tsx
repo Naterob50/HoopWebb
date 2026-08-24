@@ -4,6 +4,13 @@ export const revalidate = 0;
 
 const ALL_GAMES = [
   {
+    slug: "stat-line-swivel",
+    title: "Stat Line Swivel",
+    category: "DAILY BOX SCORE",
+    description: "Guess the mystery player behind iconic NBA stat lines. Reveal clues as you make your guesses.",
+    status: "NEW",
+  },
+  {
     slug: "draft-duel",
     title: "Draft Duel",
     category: "NBA TRIVIA",
