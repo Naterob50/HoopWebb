@@ -58,10 +58,26 @@ export default function AboutPage() {
           <p>
             It’s a work in progress, and there’s a lot more to come. But every part of HOOPWEBB is being built with the same idea it started with: make basketball more fun to explore.
           </p>
+
+          {/* Ko-fi Support Box */}
+          <div className="pt-6 border-t border-neutral-800 mt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <h3 className="text-white font-bold text-sm uppercase">Enjoying HOOPWEBB?</h3>
+              <p className="text-xs text-neutral-400 font-sans">Support server costs and new feature development on Ko-fi.</p>
+            </div>
+            <a
+              href="https://ko-fi.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-sky-500 hover:bg-sky-600 text-white font-bold px-5 py-2.5 rounded-lg text-xs tracking-wider uppercase transition-colors shrink-0 flex items-center gap-2"
+            >
+              ☕ SUPPORT ON KO-FI
+            </a>
+          </div>
         </section>
 
         {/* Action Footer */}
-        <div className="pt-4 flex justify-center">
+        <div className="pt-4 flex justify-center gap-4">
           <Link
             href="/games"
             className="bg-orange-500 hover:bg-orange-600 text-black font-extrabold px-8 py-3.5 rounded-xl text-xs sm:text-sm tracking-wider uppercase transition-all shadow-lg shadow-orange-500/20"
