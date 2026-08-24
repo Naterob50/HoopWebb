@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export const revalidate = 0;
 
-const FEATURED_GAMES = [
+const GAMES = [
   {
     slug: "shot-clock-survivor",
     title: "Shot Clock Survivor",
@@ -43,62 +43,62 @@ const FEATURED_GAMES = [
 export default function HomePage() {
   return (
     <main className="min-h-screen bg-black text-white relative court-grid p-4 sm:p-6 md:p-12">
-      <div className="max-w-6xl mx-auto space-y-10 sm:space-y-16">
-        {/* Header */}
-        <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-neutral-800 pb-6 gap-4">
-          <div>
-            <h1 className="text-4xl sm:text-6xl font-black text-orange-500 tracking-wider uppercase">
-              HOOPWEBB
-            </h1>
-            <p className="text-xs sm:text-sm font-mono text-neutral-400 mt-1">
-              GAMES / TOOLS / RESOURCES
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="flex h-2.5 w-2.5 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
-            </span>
-            <span className="text-xs font-mono text-neutral-300 tracking-wide">
-              7 GAMES LIVE
-            </span>
-          </div>
-        </header>
+      <div className="max-w-6xl mx-auto space-y-12 sm:space-y-16">
+        {/* Main Hero Header */}
+        <section className="text-center pt-8 pb-4 space-y-6">
+          <h1 className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tight uppercase">
+            HOOPWEBB <span className="text-orange-500">ARCADE</span>
+          </h1>
 
-        {/* Hero / Featured Game */}
-        <section className="bg-neutral-950 border border-orange-500/30 rounded-2xl p-6 sm:p-10 relative overflow-hidden shadow-[0_0_40px_rgba(249,115,22,0.1)]">
-          <div className="relative z-10 max-w-2xl">
-            <span className="inline-block bg-orange-500/10 border border-orange-500/30 text-orange-500 text-[10px] font-mono font-bold px-2.5 py-1 rounded-full uppercase tracking-widest mb-4">
-              FEATURED RELEASE
-            </span>
-            <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight mb-4">
-              SHOT CLOCK SURVIVOR
-            </h2>
-            <p className="text-sm sm:text-base text-neutral-400 leading-relaxed mb-6 font-sans">
-              Test your NBA trivia knowledge against a shrinking shot clock. Answer fast to earn speed bonuses across 430+ questions, survive levels, and keep your 3 lives intact.
-            </p>
-            <div className="flex flex-wrap items-center gap-4">
-              <Link
-                href="/games/shot-clock-survivor"
-                className="bg-orange-500 hover:bg-orange-600 text-black font-extrabold px-6 py-3 rounded-lg text-sm tracking-wider transition-all duration-200 shadow-lg shadow-orange-500/20"
-              >
-                PLAY NOW →
-              </Link>
-              <Link
-                href="/games"
-                className="bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-300 font-bold px-6 py-3 rounded-lg text-sm tracking-wider transition-colors"
-              >
-                VIEW ALL 7 GAMES
-              </Link>
+          <p className="max-w-2xl mx-auto text-neutral-400 text-sm sm:text-base leading-relaxed font-sans">
+            The free, open basketball gaming hub. Games, interactive experiences, and custom fan builds—no paywalls, no fluff, strictly basketball.
+          </p>
+
+          <div className="flex items-center justify-center gap-4 pt-2">
+            <Link
+              href="/games"
+              className="bg-orange-500 hover:bg-orange-600 text-black font-extrabold px-6 py-3 rounded-lg text-xs sm:text-sm tracking-wider uppercase transition-all shadow-lg shadow-orange-500/20"
+            >
+              BROWSE ALL GAMES →
+            </Link>
+            <Link
+              href="/about"
+              className="bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 font-bold px-6 py-3 rounded-lg text-xs sm:text-sm tracking-wider uppercase transition-colors"
+            >
+              OUR STORY
+            </Link>
+          </div>
+
+          {/* Stats Bar */}
+          <div className="pt-8 flex items-center justify-center gap-8 sm:gap-16">
+            <div className="text-center">
+              <span className="block text-2xl sm:text-3xl font-black text-orange-500">7</span>
+              <span className="text-[10px] sm:text-xs font-mono text-neutral-400 uppercase tracking-widest">
+                TITLES LIVE
+              </span>
+            </div>
+            <div className="h-8 w-px bg-neutral-800" />
+            <div className="text-center">
+              <span className="block text-2xl sm:text-3xl font-black text-white">100%</span>
+              <span className="text-[10px] sm:text-xs font-mono text-neutral-400 uppercase tracking-widest">
+                FREE ACCESS
+              </span>
+            </div>
+            <div className="h-8 w-px bg-neutral-800" />
+            <div className="text-center">
+              <span className="block text-2xl sm:text-3xl font-black text-orange-500">24/7</span>
+              <span className="text-[10px] sm:text-xs font-mono text-neutral-400 uppercase tracking-widest">
+                OPEN HUB
+              </span>
             </div>
           </div>
         </section>
 
-        {/* Top 5 Games Grid */}
+        {/* 5 Arcade Cards Grid */}
         <section className="space-y-6">
           <div className="flex justify-between items-center border-b border-neutral-800 pb-3">
             <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white uppercase">
-              ARCADE HIGHLIGHTS
+              FEATURED ARCADE
             </h2>
             <Link href="/games" className="text-xs font-mono text-orange-500 hover:underline">
               BROWSE ALL 7 →
@@ -106,7 +106,7 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {FEATURED_GAMES.map((game) => (
+            {GAMES.map((game) => (
               <Link
                 key={game.slug}
                 href={`/games/${game.slug}`}
@@ -129,7 +129,7 @@ export default function HomePage() {
                     {game.description}
                   </p>
                 </div>
-                <div className="w-full bg-neutral-900 group-hover:bg-orange-500 text-neutral-300 group-hover:text-black py-2.5 rounded-lg text-center font-bold text-xs tracking-wider transition-colors mt-auto">
+                <div className="w-full bg-neutral-900 group-hover:bg-orange-500 text-neutral-300 group-hover:text-black py-2.5 rounded-lg text-center font-bold text-xs tracking-wider transition-colors mt-auto uppercase">
                   PLAY NOW →
                 </div>
               </Link>
