@@ -44,8 +44,24 @@ export default function HomePage() {
   return (
     <main className="min-h-screen bg-black text-white relative court-grid p-4 sm:p-6 md:p-12">
       <div className="max-w-6xl mx-auto space-y-12 sm:space-y-16">
+        {/* Top Bar Navigation */}
+        <nav className="flex justify-between items-center border-b border-neutral-800 pb-4">
+          <div className="text-xs font-mono text-neutral-400">
+            HOOPWEBB HUB
+          </div>
+          <div className="flex items-center gap-4 text-xs font-mono">
+            <a href="#submit-game" className="text-orange-500 hover:text-orange-400 font-bold uppercase tracking-wider">
+              + SUBMIT A GAME
+            </a>
+            <span className="text-neutral-700">|</span>
+            <Link href="/about" className="text-neutral-400 hover:text-white uppercase tracking-wider">
+              OUR STORY
+            </Link>
+          </div>
+        </nav>
+
         {/* Main Hero Header */}
-        <section className="text-center pt-8 pb-4 space-y-6">
+        <section className="text-center pt-4 pb-4 space-y-6">
           <h1 className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tight uppercase">
             HOOPWEBB <span className="text-orange-500">ARCADE</span>
           </h1>
@@ -68,12 +84,12 @@ export default function HomePage() {
             >
               ODDS BOARD
             </Link>
-            <Link
-              href="/about"
-              className="bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 font-bold px-6 py-3 rounded-lg text-xs sm:text-sm tracking-wider uppercase transition-colors"
+            <a
+              href="#submit-game"
+              className="bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-200 hover:text-white font-bold px-6 py-3 rounded-lg text-xs sm:text-sm tracking-wider uppercase transition-colors"
             >
-              OUR STORY
-            </Link>
+              SUBMIT A GAME
+            </a>
           </div>
 
           {/* Stats Bar */}
@@ -141,6 +157,69 @@ export default function HomePage() {
                 </div>
               </Link>
             ))}
+          </div>
+        </section>
+
+        {/* Embedded Game Submission Form */}
+        <section id="submit-game" className="pt-8 scroll-mt-6">
+          <div className="bg-neutral-950/90 border border-neutral-800 rounded-2xl p-6 sm:p-10 shadow-2xl relative overflow-hidden">
+            <div className="max-w-2xl mb-8">
+              <span className="inline-block bg-orange-500/10 border border-orange-500/30 text-orange-500 text-[10px] font-mono font-bold px-2.5 py-1 rounded-full uppercase tracking-widest mb-3">
+                COMMUNITY SUBMISSIONS
+              </span>
+              <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-white mb-2">
+                SUBMIT YOUR BUILD
+              </h2>
+              <p className="text-xs sm:text-sm text-neutral-400 font-sans leading-relaxed">
+                Built a basketball game, interactive stats tool, or puzzle? Send over your link to get featured live on the HOOPWEBB arcade.
+              </p>
+            </div>
+
+            <form className="space-y-4 max-w-2xl" onSubmit={(e) => e.preventDefault()}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-mono text-neutral-400 uppercase">Creator / Handle</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. @hoopsdev"
+                    className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-4 py-3 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-orange-500 transition-colors"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-mono text-neutral-400 uppercase">Game Title</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Clutch Shot Trivia"
+                    className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-4 py-3 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-orange-500 transition-colors"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-mono text-neutral-400 uppercase">Project / Live URL</label>
+                <input
+                  type="url"
+                  placeholder="https://yourgame.com"
+                  className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-4 py-3 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-orange-500 transition-colors"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-mono text-neutral-400 uppercase">Short Description</label>
+                <textarea
+                  rows={3}
+                  placeholder="Tell us what makes your game or tool unique..."
+                  className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-4 py-3 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-orange-500 transition-colors resize-none"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full sm:w-auto bg-orange-500 hover:bg-orange-600 text-black font-extrabold px-8 py-3.5 rounded-lg text-xs sm:text-sm tracking-wider uppercase transition-all shadow-lg shadow-orange-500/20"
+              >
+                SUBMIT FOR REVIEW →
+              </button>
+            </form>
           </div>
         </section>
       </div>
