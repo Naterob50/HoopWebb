@@ -43,6 +43,35 @@ const GAMES = [
 
 export default function HomePage() {
   const [submissionType, setSubmissionType] = useState("idea");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    const formData = new FormData(e.currentTarget);
+    formData.append("access_key", "b0e74954-f666-41b3-88eb-1b98b455e7f3");
+    formData.append("subject", `New ${submissionType.toUpperCase()} Submission on HOOPWEBB`);
+
+    try {
+      const res = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setSubmitted(true);
+      } else {
+        alert("Something went wrong. Please try again.");
+      }
+    } catch (err) {
+      alert("Error submitting form. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <main className="min-h-screen bg-black text-white relative court-grid p-4 sm:p-6 md:p-12">
@@ -163,7 +192,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Updated Community Feedback & Ideas Form */}
+        {/* Community Feedback & Ideas Form */}
         <section id="feedback" className="pt-8 scroll-mt-6">
           <div className="bg-neutral-950/90 border border-neutral-800 rounded-2xl p-6 sm:p-10 shadow-2xl relative overflow-hidden">
             <div className="max-w-2xl mb-8">
@@ -178,113 +207,144 @@ export default function HomePage() {
               </p>
             </div>
 
-            <form className="space-y-4 max-w-2xl" onSubmit={(e) => e.preventDefault()}>
-              {/* Submission Type Selector */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-mono text-neutral-400 uppercase">Topic Type</label>
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setSubmissionType("idea")}
-                    className={`py-2.5 px-3 rounded-lg text-xs font-bold uppercase tracking-wider border transition-colors ${
-                      submissionType === "idea"
-                        ? "bg-orange-500 text-black border-orange-500"
-                        : "bg-neutral-900 text-neutral-400 border-neutral-800 hover:text-white"
-                    }`}
-                  >
-                    💡 Game Idea
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSubmissionType("bug")}
-                    className={`py-2.5 px-3 rounded-lg text-xs font-bold uppercase tracking-wider border transition-colors ${
-                      submissionType === "bug"
-                        ? "bg-orange-500 text-black border-orange-500"
-                        : "bg-neutral-900 text-neutral-400 border-neutral-800 hover:text-white"
-                    }`}
-                  >
-                    🐛 Report Bug
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSubmissionType("feedback")}
-                    className={`py-2.5 px-3 rounded-lg text-xs font-bold uppercase tracking-wider border transition-colors ${
-                      submissionType === "feedback"
-                        ? "bg-orange-500 text-black border-orange-500"
-                        : "bg-neutral-900 text-neutral-400 border-neutral-800 hover:text-white"
-                    }`}
-                  >
-                    💬 Feedback
-                  </button>
-                </div>
+            {submitted ? (
+              <div className="bg-orange-500/10 border border-orange-500/40 rounded-xl p-8 text-center space-y-3 max-w-2xl">
+                <span className="text-3xl">🏀</span>
+                <h3 className="text-xl font-bold text-white uppercase">Submission Received!</h3>
+                <p className="text-xs sm:text-sm text-neutral-300">
+                  Thanks for building with us. We'll review your entry right away.
+                </p>
+                <button
+                  onClick={() => setSubmitted(false)}
+                  className="mt-4 text-xs font-mono text-orange-400 hover:underline uppercase"
+                >
+                  Send Another Submission
+                </button>
               </div>
+            ) : (
+              <form className="space-y-4 max-w-2xl" onSubmit={handleSubmit}>
+                <input type="hidden" name="type" value={submissionType} />
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Topic Type Selector */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-mono text-neutral-400 uppercase">Topic Type</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setSubmissionType("idea")}
+                      className={`py-2.5 px-3 rounded-lg text-xs font-bold uppercase tracking-wider border transition-colors ${
+                        submissionType === "idea"
+                          ? "bg-orange-500 text-black border-orange-500"
+                          : "bg-neutral-900 text-neutral-400 border-neutral-800 hover:text-white"
+                      }`}
+                    >
+                      💡 Game Idea
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSubmissionType("bug")}
+                      className={`py-2.5 px-3 rounded-lg text-xs font-bold uppercase tracking-wider border transition-colors ${
+                        submissionType === "bug"
+                          ? "bg-orange-500 text-black border-orange-500"
+                          : "bg-neutral-900 text-neutral-400 border-neutral-800 hover:text-white"
+                      }`}
+                    >
+                      🐛 Report Bug
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSubmissionType("feedback")}
+                      className={`py-2.5 px-3 rounded-lg text-xs font-bold uppercase tracking-wider border transition-colors ${
+                        submissionType === "feedback"
+                          ? "bg-orange-500 text-black border-orange-500"
+                          : "bg-neutral-900 text-neutral-400 border-neutral-800 hover:text-white"
+                      }`}
+                    >
+                      💬 Feedback
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-mono text-neutral-400 uppercase">
+                      Your Handle / Name {submissionType === "idea" && "(For Credit)"}
+                    </label>
+                    <input
+                      type="text"
+                      name="user_handle"
+                      placeholder={submissionType === "idea" ? "e.g. @hoopsfan99 or Alex" : "Optional"}
+                      className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-4 py-3 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-orange-500 transition-colors"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-mono text-neutral-400 uppercase">Contact Email (Optional)</label>
+                    <input
+                      type="email"
+                      name="email"
+                      placeholder="name@example.com"
+                      className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-4 py-3 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-orange-500 transition-colors"
+                    />
+                  </div>
+                </div>
+
                 <div className="space-y-1.5">
                   <label className="text-xs font-mono text-neutral-400 uppercase">
-                    Your Handle / Name {submissionType === "idea" && "(For Credit)"}
+                    {submissionType === "idea" && "Game Title or Concept Name"}
+                    {submissionType === "bug" && "Which Game or Page Has the Bug?"}
+                    {submissionType === "feedback" && "Subject / Topic"}
                   </label>
                   <input
                     type="text"
-                    placeholder={submissionType === "idea" ? "e.g. @hoopsfan99 or Alex" : "Optional"}
+                    name="title_subject"
+                    required
+                    placeholder={
+                      submissionType === "idea"
+                        ? "e.g. 90s Franchise Salary Cap Simulator"
+                        : submissionType === "bug"
+                        ? "e.g. Stat Line Swivel timer freezes on iOS"
+                        : "e.g. Navigation feedback"
+                    }
                     className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-4 py-3 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-orange-500 transition-colors"
                   />
                 </div>
+
                 <div className="space-y-1.5">
-                  <label className="text-xs font-mono text-neutral-400 uppercase">Contact Email (Optional)</label>
-                  <input
-                    type="email"
-                    placeholder="name@example.com"
-                    className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-4 py-3 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-orange-500 transition-colors"
+                  <label className="text-xs font-mono text-neutral-400 uppercase">
+                    {submissionType === "idea" && "How Does the Game Work?"}
+                    {submissionType === "bug" && "What Happened & How to Recreate It"}
+                    {submissionType === "feedback" && "Your Feedback"}
+                  </label>
+                  <textarea
+                    name="details"
+                    required
+                    rows={4}
+                    placeholder={
+                      submissionType === "idea"
+                        ? "Explain rules, scoring, or how basketball fans will interact with it..."
+                        : submissionType === "bug"
+                        ? "Describe what broke, what device/browser you used, or steps to trigger the bug..."
+                        : "Tell us what you like or what could be better..."
+                    }
+                    className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-4 py-3 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-orange-500 transition-colors resize-none"
                   />
                 </div>
-              </div>
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-mono text-neutral-400 uppercase">
-                  {submissionType === "idea" && "Game Title or Concept Name"}
-                  {submissionType === "bug" && "Which Game or Page Has the Bug?"}
-                  {submissionType === "feedback" && "Subject / Topic"}
-                </label>
-                <input
-                  type="text"
-                  placeholder={
-                    submissionType === "idea"
-                      ? "e.g. 90s Franchise Salary Cap Simulator"
-                      : submissionType === "bug"
-                      ? "e.g. Stat Line Swivel timer freezes on iOS"
-                      : "e.g. Navigation feedback"
-                  }
-                  className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-4 py-3 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-orange-500 transition-colors"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-mono text-neutral-400 uppercase">
-                  {submissionType === "idea" && "How Does the Game Work?"}
-                  {submissionType === "bug" && "What Happened & How to Recreate It"}
-                  {submissionType === "feedback" && "Your Feedback"}
-                </label>
-                <textarea
-                  rows={4}
-                  placeholder={
-                    submissionType === "idea"
-                      ? "Explain rules, scoring, or how basketball fans will interact with it..."
-                      : submissionType === "bug"
-                      ? "Describe what broke, what device/browser you used, or steps to trigger the bug..."
-                      : "Tell us what you like or what could be better..."
-                  }
-                  className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-4 py-3 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-orange-500 transition-colors resize-none"
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="w-full sm:w-auto bg-orange-500 hover:bg-orange-600 text-black font-extrabold px-8 py-3.5 rounded-lg text-xs sm:text-sm tracking-wider uppercase transition-all shadow-lg shadow-orange-500/20"
-              >
-                {submissionType === "idea" ? "SUBMIT GAME IDEA →" : submissionType === "bug" ? "SUBMIT BUG REPORT →" : "SEND FEEDBACK →"}
-              </button>
-            </form>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full sm:w-auto bg-orange-500 hover:bg-orange-600 text-black font-extrabold px-8 py-3.5 rounded-lg text-xs sm:text-sm tracking-wider uppercase transition-all shadow-lg shadow-orange-500/20 disabled:opacity-50"
+                >
+                  {isSubmitting
+                    ? "SUBMITTING..."
+                    : submissionType === "idea"
+                    ? "SUBMIT GAME IDEA →"
+                    : submissionType === "bug"
+                    ? "SUBMIT BUG REPORT →"
+                    : "SEND FEEDBACK →"}
+                </button>
+              </form>
+            )}
           </div>
         </section>
       </div>
