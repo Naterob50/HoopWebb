@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 
 const GAMES = [
@@ -41,6 +42,8 @@ const GAMES = [
 ];
 
 export default function HomePage() {
+  const [submissionType, setSubmissionType] = useState("idea");
+
   return (
     <main className="min-h-screen bg-black text-white relative court-grid p-4 sm:p-6 md:p-12">
       <div className="max-w-6xl mx-auto space-y-12 sm:space-y-16">
@@ -50,8 +53,8 @@ export default function HomePage() {
             HOOPWEBB HUB
           </div>
           <div className="flex items-center gap-4 text-xs font-mono">
-            <a href="#submit-game" className="text-orange-500 hover:text-orange-400 font-bold uppercase tracking-wider">
-              + SUBMIT A GAME
+            <a href="#feedback" className="text-orange-500 hover:text-orange-400 font-bold uppercase tracking-wider">
+              + SUBMIT FEEDBACK / IDEAS
             </a>
             <span className="text-neutral-700">|</span>
             <Link href="/about" className="text-neutral-400 hover:text-white uppercase tracking-wider">
@@ -85,10 +88,10 @@ export default function HomePage() {
               ODDS BOARD
             </Link>
             <a
-              href="#submit-game"
+              href="#feedback"
               className="bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-200 hover:text-white font-bold px-6 py-3 rounded-lg text-xs sm:text-sm tracking-wider uppercase transition-colors"
             >
-              SUBMIT A GAME
+              SUBMIT FEEDBACK
             </a>
           </div>
 
@@ -117,7 +120,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* 5 Arcade Cards Grid */}
+        {/* Arcade Cards Grid */}
         <section className="space-y-6">
           <div className="flex justify-between items-center border-b border-neutral-800 pb-3">
             <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white uppercase">
@@ -160,55 +163,117 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Embedded Game Submission Form */}
-        <section id="submit-game" className="pt-8 scroll-mt-6">
+        {/* Updated Community Feedback & Ideas Form */}
+        <section id="feedback" className="pt-8 scroll-mt-6">
           <div className="bg-neutral-950/90 border border-neutral-800 rounded-2xl p-6 sm:p-10 shadow-2xl relative overflow-hidden">
             <div className="max-w-2xl mb-8">
               <span className="inline-block bg-orange-500/10 border border-orange-500/30 text-orange-500 text-[10px] font-mono font-bold px-2.5 py-1 rounded-full uppercase tracking-widest mb-3">
-                COMMUNITY SUBMISSIONS
+                COMMUNITY HUB
               </span>
               <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-white mb-2">
-                SUBMIT YOUR BUILD
+                IDEAS, BUGS & FEEDBACK
               </h2>
               <p className="text-xs sm:text-sm text-neutral-400 font-sans leading-relaxed">
-                Built a basketball game, interactive stats tool, or puzzle? Send over your link to get featured live on the HOOPWEBB arcade.
+                Have a concept for a new mini-game, ran into a bug, or have ideas to improve HOOPWEBB? Drop it below. <strong className="text-orange-400 font-medium">If we build your game idea, we will credit you directly on the launch page!</strong>
               </p>
             </div>
 
             <form className="space-y-4 max-w-2xl" onSubmit={(e) => e.preventDefault()}>
+              {/* Submission Type Selector */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-mono text-neutral-400 uppercase">Topic Type</label>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setSubmissionType("idea")}
+                    className={`py-2.5 px-3 rounded-lg text-xs font-bold uppercase tracking-wider border transition-colors ${
+                      submissionType === "idea"
+                        ? "bg-orange-500 text-black border-orange-500"
+                        : "bg-neutral-900 text-neutral-400 border-neutral-800 hover:text-white"
+                    }`}
+                  >
+                    💡 Game Idea
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSubmissionType("bug")}
+                    className={`py-2.5 px-3 rounded-lg text-xs font-bold uppercase tracking-wider border transition-colors ${
+                      submissionType === "bug"
+                        ? "bg-orange-500 text-black border-orange-500"
+                        : "bg-neutral-900 text-neutral-400 border-neutral-800 hover:text-white"
+                    }`}
+                  >
+                    🐛 Report Bug
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSubmissionType("feedback")}
+                    className={`py-2.5 px-3 rounded-lg text-xs font-bold uppercase tracking-wider border transition-colors ${
+                      submissionType === "feedback"
+                        ? "bg-orange-500 text-black border-orange-500"
+                        : "bg-neutral-900 text-neutral-400 border-neutral-800 hover:text-white"
+                    }`}
+                  >
+                    💬 Feedback
+                  </button>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-mono text-neutral-400 uppercase">Creator / Handle</label>
+                  <label className="text-xs font-mono text-neutral-400 uppercase">
+                    Your Handle / Name {submissionType === "idea" && "(For Credit)"}
+                  </label>
                   <input
                     type="text"
-                    placeholder="e.g. @hoopsdev"
+                    placeholder={submissionType === "idea" ? "e.g. @hoopsfan99 or Alex" : "Optional"}
                     className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-4 py-3 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-orange-500 transition-colors"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-mono text-neutral-400 uppercase">Game Title</label>
+                  <label className="text-xs font-mono text-neutral-400 uppercase">Contact Email (Optional)</label>
                   <input
-                    type="text"
-                    placeholder="e.g. Clutch Shot Trivia"
+                    type="email"
+                    placeholder="name@example.com"
                     className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-4 py-3 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-orange-500 transition-colors"
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-mono text-neutral-400 uppercase">Project / Live URL</label>
+                <label className="text-xs font-mono text-neutral-400 uppercase">
+                  {submissionType === "idea" && "Game Title or Concept Name"}
+                  {submissionType === "bug" && "Which Game or Page Has the Bug?"}
+                  {submissionType === "feedback" && "Subject / Topic"}
+                </label>
                 <input
-                  type="url"
-                  placeholder="https://yourgame.com"
+                  type="text"
+                  placeholder={
+                    submissionType === "idea"
+                      ? "e.g. 90s Franchise Salary Cap Simulator"
+                      : submissionType === "bug"
+                      ? "e.g. Stat Line Swivel timer freezes on iOS"
+                      : "e.g. Navigation feedback"
+                  }
                   className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-4 py-3 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-orange-500 transition-colors"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-mono text-neutral-400 uppercase">Short Description</label>
+                <label className="text-xs font-mono text-neutral-400 uppercase">
+                  {submissionType === "idea" && "How Does the Game Work?"}
+                  {submissionType === "bug" && "What Happened & How to Recreate It"}
+                  {submissionType === "feedback" && "Your Feedback"}
+                </label>
                 <textarea
-                  rows={3}
-                  placeholder="Tell us what makes your game or tool unique..."
+                  rows={4}
+                  placeholder={
+                    submissionType === "idea"
+                      ? "Explain rules, scoring, or how basketball fans will interact with it..."
+                      : submissionType === "bug"
+                      ? "Describe what broke, what device/browser you used, or steps to trigger the bug..."
+                      : "Tell us what you like or what could be better..."
+                  }
                   className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-4 py-3 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-orange-500 transition-colors resize-none"
                 />
               </div>
@@ -217,7 +282,7 @@ export default function HomePage() {
                 type="submit"
                 className="w-full sm:w-auto bg-orange-500 hover:bg-orange-600 text-black font-extrabold px-8 py-3.5 rounded-lg text-xs sm:text-sm tracking-wider uppercase transition-all shadow-lg shadow-orange-500/20"
               >
-                SUBMIT FOR REVIEW →
+                {submissionType === "idea" ? "SUBMIT GAME IDEA →" : submissionType === "bug" ? "SUBMIT BUG REPORT →" : "SEND FEEDBACK →"}
               </button>
             </form>
           </div>
